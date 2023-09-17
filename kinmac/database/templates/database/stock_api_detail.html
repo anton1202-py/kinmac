@@ -1,0 +1,108 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Статистика остатков API{% endblock %}
+
+{% block content%}
+    <div class="features">
+        <div class="alert alert-warninng">
+            <div class='chart'>
+                <canvas id="acquisitions" width="600" height="100"></canvas>
+                <script>
+                    (async function() {
+                      new Chart(
+                        document.getElementById('acquisitions'),
+                        {
+                          type: 'line',
+                          data: {
+                            labels: [{% for article in articles %} '{{ article.pub_date }}', {% endfor %}],
+                            datasets: [
+                              {
+                                label: 'Количество остатков по складам{{ articles.0.supplier_article }}',
+                                data: [{% for article in articles %} {{ article.quantity_full }}, {% endfor %}],
+                                borderColor: '#7380ec',
+                              }
+                            ]
+                          },
+                          options: {
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        // This more specific font property overrides the global property
+                                        font: {
+                                            size: 14,
+                                            family: "'Open Sans', 'Arial', 'sans-serif'"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        }
+                      );
+                    })();
+                </script>
+            </div>
+        </div>    
+        <div class="alert alert-warninng">
+            <table>
+                <tr>
+                    <th>Дата</th>
+                    <th>lastChangeDate</th>
+                    <th>warehouseName</th>
+                    <th>supplierArticle</th>
+                    <th>nmId</th>
+                    <th>barcode</th>
+                    <th>quantity</th>
+                    <th>inWayToClient</th>
+                    <th>inWayFromClient</th>
+                    <th>quantityFull</th>
+                    <th>category</th>
+                    <th>subject</th>
+                    <th>brand</th>
+                    <th>techSize</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>isSupply</th>
+                    <th>isRealization</th>
+                    <th>SCCode</th>
+                </tr>
+                {% for article in articles %}
+                    <tr>
+                    <td>{{ article.pub_date }}</td>
+                    <td>{{ article.last_change_date }}</td>
+                    <td>{{ article.warehouse_name }}</td>
+                    <td>{{ article.supplier_article }}</td>
+                    <td>{{ article.nm_id }}</td>
+                    <td>{{ article.barcode }}</td>
+                    <td>{{ article.quantity }}</td>
+                    <td>{{ article.in_way_to_client }}</td>
+                    <td>{{ article.in_way_from_client }}</td>
+                    <td>{{ article.quantity_full }}</td>
+                    <td>{{ article.category }}</td>
+                    <td>{{ article.subject }}</td>
+                    <td>{{ article.brand }}</td>
+                    <td>{{ article.tech_size }}</td>
+                    <td>{{ article.price }}</td>
+                    <td>{{ article.discount }}</td>
+                    <td>{{ article.is_supply }}</td>
+                    <td>{{ article.is_realization }}</td>
+                    <td>{{ article.sccode }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <div class="reduct-buttons">
+                {#<a href="{% url 'stock_delete' article.id %}">#}
+                 {#   <button class="custom-button-delete">#}
+                   {#     Удалить#}
+                   {# </button>#}
+               {# </a>#}
+                {#<a href="{% url 'stock_update' article.id %}">#}
+                 {#   <button class="custom-button-change">#}
+                   {#     Редактировать#}
+                   {# </button>#}
+               {# </a>#}
+            </div>
+        </div>
+    </div> 
+        
+{% endblock %}

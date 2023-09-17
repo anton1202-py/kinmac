@@ -1,0 +1,99 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Статистика остатков Сайт{% endblock %}
+
+{% block content%}
+    <div class="features">
+        <div class="alert alert-warninng">
+            <div class='chart'>
+                <canvas id="acquisitions" width="600" height="100"></canvas>
+                <script>
+                    (async function() {
+                      new Chart(
+                        document.getElementById('acquisitions'),
+                        {
+                          type: 'line',
+                          data: {
+                            labels: [{% for article in articles %}{% if article.warehouse == 'Итого по складам' %} '{{ article.pub_date }}', {% endif %}{% endfor %}],
+                            datasets: [
+                              {
+                                label: 'Итого по складам {{ articles.0.seller_article }}',
+                                data: [{% for article in articles %}{% if article.warehouse == 'Итого по складам' %} {{ article.quantity }},{% endif %} {% endfor %}],
+                                
+                                borderColor: '#7380ec',
+                              }
+                            ]
+                          },
+                          options: {
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        // This more specific font property overrides the global property
+                                        font: {
+                                            size: 14,
+                                            family: "'Open Sans', 'Arial', 'sans-serif'"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        }
+                      );
+                    })();
+                </script>
+            </div>
+        </div>
+        <div class="alert alert-warninng">
+            <table>
+                <tr>
+                    <th>Дата</th>
+                    <th>Артикул продавца</th>
+                    <th>Номенклатура WB</th>
+                    <th>Название склада</th>
+                    <th>Количество</th>
+                    <th>priceU</th>
+                    <th>basicSale</th>
+                    <th>basicPriceU</th>
+                    <th>Скидка</th>
+                    <th>salePriceU</th>
+                    <th>Название</th>
+                    <th>promotions</th>
+                    <th>Рейтинг</th>
+                    <th>Кол-во отзывов</th>
+                </tr>
+                {% for article in articles %}
+                    <tr>
+                    <td>{{ article.pub_date }}</td>
+                    <td>{{ article.seller_article }}</td>
+                    <td>{{ article.nomenclatura_wb }}</td>
+                    <td>{{ article.warehouse }}</td>
+                    <td>{{ article.quantity }}</td>
+                    <td>{{ article.price_u }}</td>
+                    <td>{{ article.basic_sale }}</td>
+                    <td>{{ article.basic_price_u }}</td>
+                    <td>{{ article.sale }}</td>
+                    <td>{{ article.sale_price_u }}</td>
+                    <td>{{ article.name }}</td>
+                    <td>{{ article.promotions }}</td>
+                    <td>{{ article.review_rating }}</td>
+                    <td>{{ article.feedbacks }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <div class="reduct-buttons">
+                {#<a href="{% url 'stock_delete' article.id %}">#}
+                 {#   <button class="custom-button-delete">#}
+                   {#     Удалить#}
+                   {# </button>#}
+               {# </a>#}
+                {#<a href="{% url 'stock_update' article.id %}">#}
+                 {#   <button class="custom-button-change">#}
+                   {#     Редактировать#}
+                   {# </button>#}
+               {# </a>#}
+            </div>
+        </div>
+    </div> 
+        
+{% endblock %}

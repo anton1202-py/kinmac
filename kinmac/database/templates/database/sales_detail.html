@@ -1,0 +1,212 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Работа с базой данных{% endblock %}
+
+{% block content%}
+    <div class="features">
+        <div class="alert alert-warninng">
+            <div class="charts">
+                <div class='chart'>
+                    <canvas id="acquisitions" width="580" height="300"></canvas>
+                    <script>
+                        function getGradient(ctx, chartArea) {
+                            let gradient = ctx.createLinearGradient(
+                              0,
+                              chartArea.bottom,
+                              0,
+                              chartArea.top
+                            );
+                            gradient.addColorStop(0.9, "rgba(115, 128, 236, 0.6)");
+                            gradient.addColorStop(0, "rgba(191, 198, 255, 0.6)");
+                            return gradient;
+                                        }
+                        function getGradient2(ctx, chartArea) {
+                            let gradient = ctx.createLinearGradient(
+                              0,
+                              chartArea.bottom,
+                              0,
+                              chartArea.top
+                            );
+                            gradient.addColorStop(0.9, "rgba(255, 119, 130, 0.6)");
+                            gradient.addColorStop(0, "rgba(255, 179, 185, 0.6)");
+                            return gradient;
+                                        }
+                        (async function() {
+                          new Chart(
+                            document.getElementById('acquisitions'),
+                            {
+                              type: 'line',
+                              data: {
+                                labels: [{% for article in articles %} '{{ article.pub_date }}', {% endfor %}],
+                                datasets: [
+                                  {
+                                    label: 'Количество продаж {{ articles.0.supplier_article }}',
+                                    data: [{% for article in articles %} {{ article.amount }}, {% endfor %}],
+                                    lineTension: 0.3,
+                                    fill: true,
+                                    backgroundColor: function (context) {
+                                        const chart = context.chart;
+                                        const { ctx, chartArea } = chart;
+                                    
+                                       // This case happens on initial chart load
+                                       if (!chartArea) return;
+                                       return getGradient2(ctx, chartArea);
+                                    }
+                                  },
+                                  {
+                                    label: 'Количество на складе {{ articles.0.supplier_article }}',
+                                    data: [{% for wbstock in wbstocks %} {{ wbstock.amount }}, {% endfor %}],
+                                    lineTension: 0.3,
+                                    fill: true,
+                                    backgroundColor: function (context) {
+                                        const chart = context.chart;
+                                        const { ctx, chartArea } = chart;
+                                    
+                                       // This case happens on initial chart load
+                                       if (!chartArea) return;
+                                       return getGradient(ctx, chartArea);
+                                    }
+                                  }
+                                ]
+                              },
+                              options: {
+                                plugins: {
+                                    legend: {
+                                        labels: {
+                                            // This more specific font property overrides the global property
+                                            font: {
+                                                size: 14,
+                                                family: "'Open Sans', 'Arial', 'sans-serif'"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            }
+                          );
+                        })();
+                    </script>
+                </div>
+                <div class='chart'>
+                    <canvas id="acquisitions2" width="500" height="300"></canvas>
+                    <script>
+                        (async function() {
+                          new Chart(
+                            document.getElementById('acquisitions2'),
+                            {
+                              type: 'line',
+                              data: {
+                                labels: [{% for article in articles %} '{{ article.pub_date }}', {% endfor %}],
+                                datasets: [
+                                  {
+                                    label: 'Сумма продаж {{ articles.0.supplier_article }}',
+                                    data: [{% for article in articles %} {{ article.price_with_disc }}, {% endfor %}],
+                                    lineTension: 0.3,
+                                    fill: true,
+                                    backgroundColor: function (context) {
+                                        const chart = context.chart;
+                                        const { ctx, chartArea } = chart;
+                                    
+                                       // This case happens on initial chart load
+                                       if (!chartArea) return;
+                                       return getGradient(ctx, chartArea);
+                                    }
+                                  }
+                                ]
+                              },
+                              options: {
+                                plugins: {
+                                    legend: {
+                                        labels: {
+                                            // This more specific font property overrides the global property
+                                            font: {
+                                                size: 14,
+                                                family: "'Open Sans', 'Arial', 'sans-serif'"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            }
+                          );
+                        })();
+                    </script>
+                </div>
+            </div>
+        </div>
+        {% for wbstock in wbstocks %}
+        {% if articles.0.article_marketplace ==  wbstock.seller_article_wb and wbstock.code_stock_id == 3 %} 
+        <p>{{ wbstock.amount }}</p> 
+        {% endif %}
+        {% endfor %}  
+        <div class="alert alert-warninng">
+            <table>
+                <tr>
+                  <th>Дата</th>
+                  <th>lastChangeDate</th>
+                  <th>supplierArticle</th>
+                  <th>techSize</th>
+                  <th>barcode</th>
+                  <th>totalPrice</th>
+                  <th>discountPercent</th>
+                  <th>isSupply</th>
+                  <th>isRealization</th>
+                  <th>promoCodeDiscount</th>
+                  <th>countryName</th>
+                  <th>oblastOkrugName</th>
+                  <th>regionName</th>
+                  <th>incomeID</th>
+                  <th>saleID</th>
+                  <th>odid</th>
+                  <th>spp</th>
+                  <th>forPay</th>
+                  <th>finishedPrice</th>
+                  <th>priceWithDisc</th>
+                  <th>nmId</th>
+                  <th>subject</th>
+                  <th>category</th>
+                  <th>brand</th>
+                  <th>IsStorno</th>
+                  <th>gNumber</th>
+                  <th>sticker</th>
+                  <th>srid</th>
+                </tr>
+                {% for article in articles %}
+                    <tr>
+                      <td>{{ article.pub_date }}</td>
+                      <td>{{ article.last_change_date }}</td>
+                      <td>{{ article.supplier_article }}</td>
+                      <td>{{ article.tech_size }}</td>
+                      <td>{{ article.barcode }}</td>
+                      <td>{{ article.total_price }}</td>
+                      <td>{{ article.discount_percent }}</td>
+                      <td>{{ article.is_supply }}</td>
+                      <td>{{ article.is_realization }}</td>
+                      <td>{{ article.promo_code_discount }}</td>
+                      <td>{{ article.warehouse_name }}</td>
+                      <td>{{ article.country_name }}</td>
+                      <td>{{ article.oblast_okrug_name }}</td>
+                      <td>{{ article.region_name }}</td>
+                      <td>{{ article.income_id }}</td>
+                      <td>{{ article.sale_id }}</td>
+                      <td>{{ article.odid }}</td>
+                      <td>{{ article.spp }}</td>
+                      <td>{{ article.for_pay }}</td>
+                      <td>{{ article.finished_price }}</td>
+                      <td>{{ article.price_with_disc }}</td>
+                      <td>{{ article.nm_id }}</td>
+                      <td>{{ article.subject }}</td>
+                      <td>{{ article.category }}</td>
+                      <td>{{ article.brand }}</td>
+                      <td>{{ article.is_storno }}</td>
+                      <td>{{ article.g_number }}</td>
+                      <td>{{ article.sticker }}</td>
+                      <td>{{ article.srid }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div> 
+        
+{% endblock %}

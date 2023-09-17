@@ -1,0 +1,95 @@
+ {% extends 'main/index.html' %}
+
+
+{% block title %}Статистика остатков API{% endblock %}
+
+{% block content %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
+
+        // выбираем на странице все элементы типа textarea и input
+        document.querySelectorAll('textarea, input').forEach(function(e) {
+            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
+            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
+            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
+            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
+            e.addEventListener('input', function() {
+                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
+                window.sessionStorage.setItem(e.name, e.value);
+            })
+        })
+    
+    }); 
+</script>
+    <div class="features">
+        <div class="top-befor-header">
+            <h1>Статистика остатков API</h1>
+        </div>
+        <div class='filter-data'>
+            <form action="" class="filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <p>От</p>
+                    <input type="date" name="datestart" class="choose-date" required="" id="datestart">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>До</p>
+                    <input type="date" name="datefinish" class="choose-date" required="" id="datefinish">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>Артикул для фильтра</p>
+                    <input type="text"  name="article_filter" class="choose-date" id="article_filter">
+                </div><br>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
+            <table>
+                <tr>
+                    <th>Дата</th>
+                    <th>lastChangeDate</th>
+                    <th>warehouseName</th>
+                    <th>supplierArticle</th>
+                    <th>nmId</th>
+                    <th>barcode</th>
+                    <th>quantity</th>
+                    <th>inWayToClient</th>
+                    <th>inWayFromClient</th>
+                    <th>quantityFull</th>
+                    <th>category</th>
+                    <th>subject</th>
+                    <th>brand</th>
+                    <th>techSize</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>isSupply</th>
+                    <th>isRealization</th>
+                    <th>SCCode</th>
+                </tr>
+                {% for el in data %}   
+                <tr>
+                    <td>{{ el.pub_date }}</td>
+                    <td>{{ el.last_change_date }}</td>
+                    <td>{{ el.warehouse_name }}</td>
+                    <td>{{ el.supplier_article }}</td>
+                    <td><a href="{% url 'stock_api_detail' el.nm_id %}">{{ el.nm_id }}</a></td>
+                    <td>{{ el.barcode }}</td>
+                    <td>{{ el.quantity }}</td>
+                    <td>{{ el.in_way_to_client }}</td>
+                    <td>{{ el.in_way_from_client }}</td>
+                    <td>{{ el.quantity_full }}</td>
+                    <td>{{ el.category }}</td>
+                    <td>{{ el.subject }}</td>
+                    <td>{{ el.brand }}</td>
+                    <td>{{ el.tech_size }}</td>
+                    <td>{{ el.price }}</td>
+                    <td>{{ el.discount }}</td>
+                    <td>{{ el.is_supply }}</td>
+                    <td>{{ el.is_realization }}</td>
+                    <td>{{ el.sccode }}</td>
+                {% endfor %}
+            </table>
+	</div>           
+{% endblock %}

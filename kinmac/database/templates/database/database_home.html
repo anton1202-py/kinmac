@@ -1,0 +1,75 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Работа с базой данных{% endblock %}
+
+
+{% block content%}
+    <div class="features">
+        <div class="top-befor-header">
+            <h1>Обновление базы данных Артикулов</h1>
+            <div class="add-data">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <p>Загрузить артикулы в Базу Данных</p>
+                    <div class="alert-warning">
+                        <div class="label-button">
+                            <label for="myarticles" class="custom-button-choose">Выберете Excel файл</label>
+                            <input type="file" id="myarticles" name="myarticles" class="input-file">
+                        </div>
+                        <div class="label-button">
+                            <button type="submit" class="custom-button-delete-add">
+                                Загрузить
+                            </button> 
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {#<div class="alert alert-warninng">#}
+            {#    {% if request.user.is_authenticated %}#}
+            {#        <a href="{% url 'create' %}">#}
+            {#            <button class="custom-button">#}
+            {#                Добавить запись в базу#}
+            {#            </button>#}
+            {#        </a>#}
+            {#    {% endif %}#}
+            {#</div>#}
+        </div>
+            <table>
+                <tr>
+                    <th>Артикул</th>
+                    <th>Бренд</th>
+                    <th>Баркод</th>
+                    <th>Номенклатура WB</th>
+                    <th>Номенклатура OZON</th>
+                    <th>Предмет</th>
+                    <th>Размер</th>
+                    <th>Модель</th>
+                    <th>Цвет</th>
+                    <th>Себестоимость</th>
+                    <th>Средняя себестоимость</th>
+                </tr>
+                {% for el in data %}   
+                <tr>
+                    {% if request.user.is_authenticated %}
+                        <td><a href="{% url 'database_detail' el.id %}">{{ el.common_article }}</a></td>
+                    {% else %}
+                        <td>{{ el.common_article }}</td>
+                    {% endif %}
+                    <td>{{ el.brend }}</td>
+                    <td>{{ el.barcode }}</td>
+                    <td>{{ el.nomenclatura_wb }}</td>
+                    <td>{{ el.nomenclatura_ozon }}</td>
+                    <td>{{ el.predmet }}</td>
+                    <td>{{ el.size }}</td>
+                    <td>{{ el.model }}</td>
+                    <td>{{ el.color }}</td>
+                    <td>{{ el.prime_cost }}</td>
+                    <td>{{ el.average_cost }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+    </div>    
+        
+{% endblock %}

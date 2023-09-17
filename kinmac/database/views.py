@@ -1,0 +1,367 @@
+from datetime import date, datetime, timedelta
+
+import pandas as pd
+import xlwt
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.db.models import Q, Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+
+from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
+                    SelectDateStocksForm, SelectArticlesForm)
+from .models import (Articles, CodingMarketplaces, Sales,
+                     StocksApi, StocksSite)
+
+DICT_FOR_STOCKS_WB = {
+    "Товары в пути до клиента": 1,
+    "Товары в пути от клиента": 2,
+    "Итого по складам": 3,
+    "Подольск": 4,
+    "Подольск 3": 5,
+    "Коледино": 6,
+    "Казань": 7,
+    "Электросталь": 8,
+    "Краснодар": 9,
+    "Екатеринбург": 10,
+    "Санкт-Петербург": 11,
+    "Новосибирск": 12,
+    "Хабаровск": 13,
+    "Тула": 14,
+    "Астана": 15,
+    "Чехов": 16,
+    "Белая Дача": 17,
+    "Невинномысск": 18,
+    "Домодедово": 19,
+    "Вёшки": 20,
+    "Минск": 21,
+    "Пушкино": 22,
+    "Внуково КБТ": 23,
+    "Обухово": 24,
+    "Остальные": 25,
+    "Атакент": 26,
+    "Белые Столбы": 27,
+    "Иваново": 28
+}
+
+START_LIST = [
+    "Бренд",
+    "Предмет",
+    "Артикул продавца",
+    "Артикул WB",
+    "Объем, л",
+    "Баркод",
+    "Размер вещи",
+    "В пути до клиента",
+    "В пути от клиента",
+    "Итого по складам",
+    "Подольск",
+    "Подольск 3",
+    "Коледино",
+    "Казань",
+    "Электросталь",
+    "Краснодар",
+    "Екатеринбург",
+    "Санкт-Петербург",
+    "Новосибирск",
+    "Хабаровск",
+    "Тула",
+    "Астана",
+    "Атакент",
+    "Чехов",
+    "Белая Дача",
+    "Невинномысск",
+    "Домодедово",
+    "Белые Столбы",
+    "Вёшки",
+    "Минск",
+    "Пушкино",
+    "Иваново",
+    "Внуково КБТ",
+    "Обухово",
+    "Остальные"
+]
+
+
+def database_home(request):
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    if request.user.is_staff == True:
+        data = Articles.objects.all()
+        context = {
+            'data': data,
+        }
+
+        if request.method == 'POST' and request.FILES['myarticles']:
+            myfile = request.FILES['myarticles']
+            empexceldata = pd.read_excel(myfile)
+            load_excel_data_wb_stock = pd.DataFrame(
+                empexceldata, columns=['Баркод', 'Номенк WB', 'Номенк OZON', 'Арт',
+                                       'Бренд', 'Предмет', 'SIZE', 'MODEL', 'COLOR',
+                                       'CC', 'Сред СС'])
+            barcode_list = load_excel_data_wb_stock['Баркод'].to_list()
+            nomenclatura_wb_list = load_excel_data_wb_stock['Номенк WB'].to_list()
+            nomenclatura_ozon_list = load_excel_data_wb_stock['Номенк OZON'].to_list()
+            common_article_list = load_excel_data_wb_stock['Арт'].to_list()
+            brend_list = load_excel_data_wb_stock['Бренд'].to_list()
+            predmet_list = load_excel_data_wb_stock['Предмет'].to_list()
+            size_list = load_excel_data_wb_stock['SIZE'].to_list()
+            model_list = load_excel_data_wb_stock['MODEL'].to_list()
+            color_list = load_excel_data_wb_stock['COLOR'].to_list()
+            prime_cost_list = load_excel_data_wb_stock['CC'].to_list()
+            average_cost_list = load_excel_data_wb_stock['Сред СС'].to_list()
+            dbframe = empexceldata
+
+            for i in range(len(common_article_list)):
+                print(nomenclatura_ozon_list[i])
+                if Articles.objects.filter(Q(common_article=common_article_list[i])):
+                    Articles.objects.filter(common_article=common_article_list[i]).update(
+                    barcode=barcode_list[i],
+                    nomenclatura_wb=nomenclatura_wb_list[i],
+                    nomenclatura_ozon=nomenclatura_ozon_list[i],
+                    brend=brend_list[i],
+                    predmet=predmet_list[i],
+                    size=size_list[i],
+                    model=model_list[i],
+                    color=color_list[i],
+                    prime_cost=prime_cost_list[i],
+                    average_cost=average_cost_list[i],
+                    )
+                else:
+                    obj = Articles(
+                    common_article=common_article_list[i],
+                    barcode=barcode_list[i],
+                    nomenclatura_wb=nomenclatura_wb_list[i],
+                    nomenclatura_ozon=nomenclatura_ozon_list[i],
+                    brend=brend_list[i],
+                    predmet=predmet_list[i],
+                    size=size_list[i],
+                    model=model_list[i],
+                    color=color_list[i],
+                    prime_cost=prime_cost_list[i],
+                    average_cost=average_cost_list[i],
+                    )
+                    obj.save()
+        return render(request, 'database/database_home.html', context)
+    else:
+        return redirect('database_home')
+
+
+def database_stock_api(request):
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    control_date_stock = date.today() - timedelta(days=1)
+    articles = Articles.objects.all()
+    data = StocksApi.objects.filter(Q(pub_date__range=[
+        control_date_stock,
+        control_date_stock]))
+    form = SelectDateForm(request.POST or None)
+    datestart = control_date_stock
+    datefinish = control_date_stock
+    
+    if form.is_valid():
+        datestart = form.cleaned_data.get("datestart")
+        datefinish = form.cleaned_data.get("datefinish")
+        article_filter = form.cleaned_data.get("article_filter")
+        if article_filter == '':
+            data = StocksApi.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]))
+        else:
+            data = StocksApi.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]),
+                Q(article_marketplace=article_filter))
+    context = {
+        'form': form,
+        'data': data,
+        'datestart': str(datestart),
+        'articles': articles.all().values(),
+    }
+    return render(request, 'database/stock_api.html', context)
+
+
+def stock_site(request):
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    control_date_stock = date.today()# - timedelta(days=1)
+    data = StocksSite.objects.filter(Q(pub_date__range=[
+        control_date_stock,
+        control_date_stock]))
+    form = SelectDateStocksForm(request.POST or None)
+    datestart = control_date_stock
+    datefinish = control_date_stock
+    
+    if form.is_valid():
+        datestart = form.cleaned_data.get("datestart")
+        datefinish = form.cleaned_data.get("datefinish")
+        article_filter = form.cleaned_data.get("article_filter")
+        stock_filter = form.cleaned_data.get("stock_filter")
+        if article_filter == '' and stock_filter == '':
+            data = StocksSite.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]))
+        elif article_filter != '' and stock_filter == '':
+            data = StocksSite.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]),
+                Q(seller_article_wb=article_filter))
+        elif article_filter == '' and stock_filter != '':
+            data = StocksSite.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]),
+                Q(stock_name=stock_filter))
+        else:
+            data = StocksSite.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]),
+                Q(seller_article_wb=article_filter),
+                Q(stock_name=stock_filter))
+    context = {
+        'form': form,
+        'data': data,
+        'datestart': str(datestart),
+    }
+    return render(request, 'database/stock_site.html', context)
+
+
+def database_sales(request):
+    """Отображение страницы База данных продаж"""
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    control_date_stock = date.today() - timedelta(days=1)
+    seller_articles = Articles.objects.all()
+    data = Sales.objects.all()
+
+    form = SelectDateForm(request.POST or None)
+    datestart = control_date_stock
+    datefinish = control_date_stock
+
+    if form.is_valid():
+        datestart = form.cleaned_data.get("datestart")
+        datefinish = form.cleaned_data.get("datefinish")
+        article_filter = form.cleaned_data.get("article_filter")
+        if article_filter == '':
+            data = Sales.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]))
+        else:
+            data = Sales.objects.filter(
+                Q(pub_date__range=[datestart, datefinish]),
+                Q(supplierArticle=article_filter))
+    context = {
+        'form': form,
+        'data': data,
+        'form_date': str(control_date_stock),
+        'lenght': len(seller_articles.all().values()),
+        'seller_articles': seller_articles.all().values(),
+    }
+    return render(request, 'database/database_sales.html', context)
+
+
+class DatabaseDetailView(DetailView):
+    model = Articles
+    template_name = 'database/detail_view.html'
+    context_object_name = 'article'
+
+
+class DatabaseStockApiDetailView(ListView):
+    model = StocksApi
+    template_name = 'database/stock_api_detail.html'
+    context_object_name = 'articles'
+
+    def get_queryset(self):
+        return StocksApi.objects.filter(
+            nm_id=self.kwargs['nm_id'])
+
+
+class DatabaseStockSiteDetailView(ListView):
+    model = StocksSite
+    template_name = 'database/stock_site_detail.html'
+    context_object_name = 'articles'
+
+    def get_queryset(self):
+        return StocksSite.objects.filter(
+            seller_article=self.kwargs['seller_article'])
+
+
+class DatabaseSalesDetailView(ListView):
+    model = Sales
+    template_name = 'database/sales_detail.html'
+    context_object_name = 'articles'
+
+    def get_context_data(self, **kwargs):
+        context = super(DatabaseSalesDetailView, self).get_context_data(**kwargs)
+        context.update({
+            'wbstocks': StocksApi.objects.filter(
+            barcode=self.kwargs['barcode']).values()
+        })
+        return context
+
+    def get_queryset(self):
+        #print(Sales.objects.filter(
+        #    article_marketplace=self.kwargs['article_marketplace']).values())
+        return Sales.objects.filter(
+            barcode=self.kwargs['barcode'])
+
+
+class DatabaseUpdateView(UpdateView):
+    model = Articles
+    template_name = 'database/create.html'
+    form_class = ArticlesForm
+
+
+class DatabaseDeleteView(DeleteView):
+    model = Articles
+    template_name = 'database/database_delete.html'
+    success_url = '/stock/'
+
+
+class DatabaseStockApiDeleteView(DeleteView):
+    model = StocksApi
+    template_name = 'database/stock_delete.html'
+    success_url = '/stock/'
+
+
+class DatabaseSalesDeleteView(DeleteView):
+    model = Sales
+    template_name = 'database/sales_delete.html'
+    success_url = '/sales/'
+
+
+@login_required
+def create(request):
+    error = ''
+    if request.method == 'POST':
+        form = ArticlesForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('database_home')
+        else:
+            error = 'Форма была не верной'
+    form = ArticlesForm()
+    data = {
+        'form': form,
+        'error': error
+    }
+    return render(request, 'database/create.html', data)
+
+
+class LoginUser(LoginView):
+    form_class = LoginUserForm
+    template_name = 'database/login.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return dict(list(context.items()))
+
+    def get_success_url(self):
+        return reverse_lazy('database_home')
+
+
+def logout_user(request):
+    logout(request)
+    return redirect('login')

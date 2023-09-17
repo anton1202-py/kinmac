@@ -1,0 +1,30 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Добавление записи в базу данных{% endblock %}
+
+{% block content%}
+    <div class="features">
+        <h1>Добавление записи в базу</h1>
+        <div class="table">
+            <form method="post">
+                {% csrf_token %} <br>
+                {{ form.common_article }} <br>
+                {{ form.brend }} <br>
+                {{ form.barcode }} <br>
+                {{ form.nomenclatura_wb }} <br>
+                {{ form.nomenclatura_ozon }} <br>
+                {{ form.predmet }} <br>
+                {{ form.size }} <br>
+                {{ form.model }} <br>
+                {{ form.color }} <br>
+                {{ form.prime_cost }} <br>
+                {{ form.average_cost }} <br>
+                <span>{{ error }}</span>
+                <button class="custom-button" type="submit">Добавить данные</button>
+            </form>
+        </div>
+        
+    </div>    
+        
+{% endblock %} 

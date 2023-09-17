@@ -1,0 +1,90 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}Статистика остатков Сайт{% endblock %}
+
+{% block content %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
+
+        // выбираем на странице все элементы типа textarea и input
+        document.querySelectorAll('textarea, input').forEach(function(e) {
+            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
+            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
+            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
+            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
+            e.addEventListener('input', function() {
+                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
+                window.sessionStorage.setItem(e.name, e.value);
+            })
+        })
+    
+    }); 
+</script>
+    <div class="features">
+        <div class="top-befor-header">
+            <h1>Статистика остатков Сайт</h1>
+        </div>
+        <div class='filter-data'>
+            <form action="" class="filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <p>От</p>
+                    <input type="date" name="datestart" class="choose-date" required="" id="datestart">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>До</p>
+                    <input type="date" name="datefinish" class="choose-date" required="" id="datefinish">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>Фильтр по Артикулу</p>
+                    <input type="text"  name="article_filter" class="choose-date" id="article_filter">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>Фильтр по складу</p>
+                    <input type="text"  name="stock_filter" class="choose-date" id="stock_filter">
+                </div><br>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
+            <table>
+                <tr>
+                    <th>Дата</th>
+                    <th>Артикул продавца</th>
+                    <th>Номенклатура WB</th>
+                    <th>Название склада</th>
+                    <th>Количество</th>
+                    <th>priceU</th>
+                    <th>basicSale</th>
+                    <th>basicPriceU</th>
+                    <th>Скидка</th>
+                    <th>salePriceU</th>
+                    <th>Название</th>
+                    <th>promotions</th>
+                    <th>Рейтинг</th>
+                    <th>Кол-во отзывов</th>
+                </tr>
+                {% for el in data %}   
+                <tr>
+                    <td>{{ el.pub_date }}</td>
+                    <td><a href="{% url 'stock_site_detail' el.seller_article %}">{{ el.seller_article }}</a></td>
+                    <td>{{ el.nomenclatura_wb }}</td>
+                    <td>{{ el.warehouse }}</td>
+                    <td>{{ el.quantity }}</td>
+                    <td>{{ el.price_u }}</td>
+                    <td>{{ el.basic_sale }}</td>
+                    <td>{{ el.basic_price_u }}</td>
+                    <td>{{ el.sale }}</td>
+                    <td>{{ el.sale_price_u }}</td>
+                    <td>{{ el.name }}</td>
+                    <td>{{ el.promotions }}</td>
+                    <td>{{ el.review_rating }}</td>
+                    <td>{{ el.feedbacks }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+	</div>           
+{% endblock %}
