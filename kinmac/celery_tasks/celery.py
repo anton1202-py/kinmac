@@ -14,21 +14,21 @@ app.conf.beat_schedule = {
     },
     "add_data_sales": {
         "task": "celery_tasks.tasks.add_data_sales",
-        "schedule": crontab(hour=6, minute=30)
+        "schedule": crontab(hour=6, minute=13)
     },
-    "add_stock_data_site": {
+    "add_stock_data_site1": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=1, minute=0)
     },
-    "add_stock_data_site": {
+    "add_stock_data_site2": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=7, minute=0)
     },
-    "add_stock_data_site": {
+    "add_stock_data_site3": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=13, minute=0)
     },
-    "add_stock_data_site": {
+    "add_stock_data_site4": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=19, minute=0)
     },
