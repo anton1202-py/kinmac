@@ -23,7 +23,6 @@ def add_data_stock_api():
     APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
     response_stock = requests.get(url_stock, headers=APIKEY)
     data_stock = json.loads(response_stock.text)
-
     common_data_stock = []
 
     for i in range(len(data_stock)):
