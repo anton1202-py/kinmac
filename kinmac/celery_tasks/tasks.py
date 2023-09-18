@@ -31,6 +31,7 @@ def add_data_stock_api():
         check_data_stock.append(control_date_stock)
 
         for key, value in data_stock[i].items():
+
             check_data_stock.append(value)
         common_data_stock.append(check_data_stock)
 
@@ -405,3 +406,5 @@ def add_stock_data_site():
             cursor.close()
             connection.close()
             print("Соединение с PostgreSQL закрыто")
+
+add_data_sales()
