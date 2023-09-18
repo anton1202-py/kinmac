@@ -1,96 +1,17 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 import pandas as pd
-import xlwt
-from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.db.models import Q, Sum
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Q
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
-                    SelectDateStocksForm, SelectArticlesForm)
-from .models import (Articles, CodingMarketplaces, Sales,
-                     StocksApi, StocksSite)
-
-DICT_FOR_STOCKS_WB = {
-    "Товары в пути до клиента": 1,
-    "Товары в пути от клиента": 2,
-    "Итого по складам": 3,
-    "Подольск": 4,
-    "Подольск 3": 5,
-    "Коледино": 6,
-    "Казань": 7,
-    "Электросталь": 8,
-    "Краснодар": 9,
-    "Екатеринбург": 10,
-    "Санкт-Петербург": 11,
-    "Новосибирск": 12,
-    "Хабаровск": 13,
-    "Тула": 14,
-    "Астана": 15,
-    "Чехов": 16,
-    "Белая Дача": 17,
-    "Невинномысск": 18,
-    "Домодедово": 19,
-    "Вёшки": 20,
-    "Минск": 21,
-    "Пушкино": 22,
-    "Внуково КБТ": 23,
-    "Обухово": 24,
-    "Остальные": 25,
-    "Атакент": 26,
-    "Белые Столбы": 27,
-    "Иваново": 28
-}
-
-START_LIST = [
-    "Бренд",
-    "Предмет",
-    "Артикул продавца",
-    "Артикул WB",
-    "Объем, л",
-    "Баркод",
-    "Размер вещи",
-    "В пути до клиента",
-    "В пути от клиента",
-    "Итого по складам",
-    "Подольск",
-    "Подольск 3",
-    "Коледино",
-    "Казань",
-    "Электросталь",
-    "Краснодар",
-    "Екатеринбург",
-    "Санкт-Петербург",
-    "Новосибирск",
-    "Хабаровск",
-    "Тула",
-    "Астана",
-    "Атакент",
-    "Чехов",
-    "Белая Дача",
-    "Невинномысск",
-    "Домодедово",
-    "Белые Столбы",
-    "Вёшки",
-    "Минск",
-    "Пушкино",
-    "Иваново",
-    "Внуково КБТ",
-    "Обухово",
-    "Остальные"
-]
+                    SelectDateStocksForm)
+from .models import Articles, Sales, StocksApi, StocksSite
 
 
 def database_home(request):
