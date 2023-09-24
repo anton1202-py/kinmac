@@ -13,33 +13,6 @@ from .forms import PaymentsForm
 from .models import Payments
 
 
-'''
-def payment_create(request):
-    if str(request.user) == 'AnonymousUser':
-        return redirect('login')
-    
-    form = PaymentsForm(request.POST or None)
-    
-    if form.is_valid():
-        datestart = form.cleaned_data.get("datestart")
-        datefinish = form.cleaned_data.get("datefinish")
-        article_filter = form.cleaned_data.get("article_filter")
-        if article_filter == '':
-            data = StocksApi.objects.filter(
-                Q(pub_date__range=[datestart, datefinish]))
-        else:
-            data = StocksApi.objects.filter(
-                Q(pub_date__range=[datestart, datefinish]),
-                Q(article_marketplace=article_filter))
-    context = {
-        'form': form,
-        'data': data,
-        'datestart': str(datestart),
-        'articles': articles.all().values(),
-    }
-    return render(request, 'database/stock_api.html', context)
-'''
-
 def payment_create(request):
     error = ''
     if request.method == 'POST':
