@@ -73,6 +73,18 @@
                     <h3>Продажи</h3>
                 </a>
 
+                {% url 'payment_create' as url_payment_create %}
+                <a href="{{ url_payment_create }}" {% if request.path == url_payment_create %}class="active"{% endif %}>
+                    <span class="material-symbols-sharp">add_circle</span>
+                    <h3>Добавить заявку</h3>
+                </a>
+
+                {% url 'payment_statistic' as url_payment_statistic %}
+                <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
+                    <span class="material-symbols-sharp">monitoring</span>
+                    <h3>Статистика заявок</h3>
+                </a>
+
             {% endif %}
         </div>
     </aside>

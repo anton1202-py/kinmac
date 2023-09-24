@@ -1,0 +1,274 @@
+from django.db import models
+
+class Projects(models.Model):
+    name = models.CharField(
+        verbose_name='Название проекта',
+        max_length=50,
+    )
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Проект'
+        verbose_name_plural = 'Проекты'
+
+
+class Categories(models.Model):
+    name = models.CharField(
+        verbose_name='Название категории',
+        max_length=50,
+    )
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+
+class PaymentMethod(models.Model):
+    method_name = models.CharField(
+        verbose_name='Метод оплаты',
+        max_length=50,
+    )
+
+    def __str__(self):
+        return self.method_name
+    
+    class Meta:
+        verbose_name = 'Способ оплаты'
+        verbose_name_plural = 'Способы оплаты'
+
+
+class Payers(models.Model):
+    name = models.CharField(
+        verbose_name='Платильщик',
+        max_length=150,
+    )
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Оплачивающий'
+        verbose_name_plural = 'Оплачивающий'
+
+
+class PayerOrganization(models.Model):
+    name = models.CharField(
+        verbose_name='Платящая организация',
+        max_length=150,
+    )
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Оплачивающая компания'
+        verbose_name_plural = 'Оплачивающая компания'
+
+
+class Contractors(models.Model):
+    name = models.CharField(
+        verbose_name='Название организации',
+        max_length=150,
+    )
+    bill_number = models.CharField(
+        verbose_name='Номер счета',
+        max_length=20,
+    )
+    bik_of_bank = models.CharField(
+        verbose_name='БИК банка',
+        max_length=20,
+    )
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Контрагент'
+        verbose_name_plural = 'Контрагенты'
+
+
+class Payments(models.Model):
+    pub_date = models.DateTimeField(
+        verbose_name='Дата создания заявки',
+        blank=True,
+        null=True,
+    )
+    creator = models.CharField(
+        verbose_name='Создатель заявки',
+        max_length=80,
+        blank=True,
+        null=True,
+    )
+    project = models.ForeignKey(
+        Projects,
+        verbose_name='Название проекта',
+        on_delete=models.PROTECT,
+    )
+    category = models.ForeignKey(
+        Categories,
+        verbose_name='Название категории',
+        on_delete=models.PROTECT,
+    )
+    payment_method = models.ForeignKey(
+        PaymentMethod,
+        verbose_name='Способ оплаты',
+        on_delete=models.PROTECT,
+    )
+    payment_sum = models.FloatField(
+        verbose_name='Сумма платежа',
+    )
+    comment = models.TextField(
+        verbose_name='Комментарий к платежу',
+        blank=True,
+        null=True,
+    )
+    send_payment_file = models.BooleanField(
+        verbose_name='Присылать платежку после оплаты',
+    )
+    file_of_payment = models.FileField(
+        verbose_name='Файл платёжки',
+        upload_to="uploads_of_payment_/%Y/%m/%d/",
+        blank=True,
+        null=True,
+    )
+    urgent_payment = models.BooleanField(
+        verbose_name='Срочный платеж',
+    )
+    status_of_payment = models.CharField(
+        verbose_name='Статус заявки',
+        max_length=80,
+        blank=True,
+        null=True,
+    )
+    date_of_payment = models.DateTimeField(
+        verbose_name='Дата и время оплаты',
+        blank=True,
+        null=True,
+    )
+    accountant = models.CharField(
+        verbose_name='Произвел оплату',
+        max_length=80,
+        blank=True,
+        null=True,
+    )
+
+class PayWithCheckingAccount(models.Model):
+    # Это организация  плательщик? Бухгалтер? Инициатор заявки? Или кто?
+    payment_id = models.ForeignKey(
+        Payments,
+        verbose_name='Номер оплаты',
+        on_delete=models.PROTECT,
+    )
+    payer = models.ForeignKey(
+        Payers,
+        verbose_name='Плательщик',
+        on_delete=models.PROTECT,
+    )
+    payer_organization = models.ForeignKey(
+        PayerOrganization,
+        verbose_name='Организация плательщик',
+        on_delete=models.PROTECT,
+    )
+    contractor_name = models.CharField(
+        verbose_name='Название организации получателя',
+        max_length=100,
+    )
+    contractor_bill_number = models.CharField(
+        verbose_name='Номер счета организации получателя',
+        max_length=20,
+    )
+    contractor_bik_of_bank = models.CharField(
+        verbose_name='БИК банка организации получателя',
+        max_length=20,
+    )
+    file_of_bill = models.FileField(
+        verbose_name='Файл счета',
+        upload_to="uploads_of_bill_/%Y/%m/%d/",
+        blank=True,
+        null=True,
+    )
+
+
+class PayWithCard(models.Model):
+    payment_id = models.ForeignKey(
+        Payments,
+        verbose_name='Номер оплаты',
+        on_delete=models.PROTECT,
+    )
+    payer = models.ForeignKey(
+        Payers,
+        verbose_name='Плательщик',
+        on_delete=models.PROTECT,
+    )
+    payer_organization = models.ForeignKey(
+        PayerOrganization,
+        verbose_name='Организация плательщик',
+        on_delete=models.PROTECT,
+    )
+    link_to_payment = models.CharField(
+        verbose_name='Ссылка на платёж',
+        max_length=200,
+        blank=True,
+        null=True,
+    )
+    comment = models.TextField(
+        verbose_name='Комментарий к платежу',
+        blank=True,
+        null=True,
+    )
+
+
+class TransforToCard(models.Model):
+    payment_id = models.ForeignKey(
+        Payments,
+        verbose_name='Номер оплаты',
+        on_delete=models.PROTECT,
+    )
+    card_number = models.CharField(
+        verbose_name='Номер карты',
+        max_length=30,
+        blank=True,
+        null=True,
+    )
+    phone_number = models.CharField(
+        verbose_name='Номер телефона',
+        max_length=30,
+        blank=True,
+        null=True,
+    )
+    payment_receiver = models.CharField(
+        verbose_name='Получатель платежа',
+        max_length=150,
+        blank=True,
+        null=True,
+    )
+    bank_for_payment = models.CharField(
+        verbose_name='Банк для платежа',
+        max_length=30,
+        blank=True,
+        null=True,
+    )
+
+
+class CashPayment(models.Model):
+    payment_id = models.ForeignKey(
+        Payments,
+        verbose_name='Номер оплаты',
+        on_delete=models.PROTECT,
+    )
+    payment_receiver = models.CharField(
+        verbose_name='Получатель платежа',
+        max_length=150,
+        blank=True,
+        null=True,
+    )
+    comment_cashpayment = models.TextField(
+        verbose_name='Комментарий к платежу',
+        blank=True,
+        null=True,
+    )

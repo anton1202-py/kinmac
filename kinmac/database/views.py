@@ -44,7 +44,6 @@ def database_home(request):
             dbframe = empexceldata
 
             for i in range(len(common_article_list)):
-                print(nomenclatura_ozon_list[i])
                 if Articles.objects.filter(Q(common_article=common_article_list[i])):
                     Articles.objects.filter(common_article=common_article_list[i]).update(
                     barcode=barcode_list[i],

@@ -1,0 +1,40 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Добавить заявку{% endblock %}
+
+{% block content%}
+    <div class="features">
+        <h1>Добавить заявку</h1>
+        <div class="table">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %} 
+                <p>{{form.project.label}}</p>
+                <select class="form-control">
+                {% for sel in form.project %}
+                    <option class="form-control">{{ sel }}</option>
+                {% endfor %}
+                </select>
+
+                {#<p class="form-control">{{ form.project }}</p> <br>#}
+                <p>{{form.category.label}}</p><p class="form-control">{{ form.category }}</p> <br>
+                <p>{{form.payment_method.label}}</p><p class="form-control">{{ form.payment_method }}</p><br>
+                {#<p>{{form.payer.label}}</p><p class="form-control">{{ form.payer }}</p><br>#}
+                {#<p>{{form.payer_organization.label}}</p><p class="form-control">{{ form.payer_organization }}</p><br>#}
+                {#<p>{{form.contractor_name.label}}</p>{{ form.contractor_name }} <br>#}
+                {#<p>{{form.contractor_bill_number.label}}</p>{{ form.contractor_bill_number }} <br>#}
+                {#<p>{{form.contractor_bik_of_bank.label}}</p>{{ form.contractor_bik_of_bank }} <br>#}
+                {#<p>{{form.file_of_bill.label}}</p>{{ form.file_of_bill }} <br>#}
+                {#<p>{{form.payment_sum.label}}</p>{{ form.payment_sum }} <br>#}
+                {#<p>{{form.comment.label}}</p>{{ form.comment }} <br>#}
+                {#<p>{{ form.send_payment_file }} {{form.send_payment_file.label}}</p><br>#}
+                {#<p>{{form.file_of_payment.label}}</p>{{ form.file_of_payment }} <br>#}
+                {#<p>{{ form.urgent_payment }} {{form.urgent_payment.label}}</p><br>#}
+                <span>{{ error }}</span>
+                <button class="custom-button" type="submit">Сохранить</button>
+            </form>
+        </div>
+        
+    </div>    
+        
+{% endblock %} 
