@@ -17,64 +17,60 @@ from .models import Articles, Sales, StocksApi, StocksSite
 def database_home(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    if request.user.is_staff == True:
-        data = Articles.objects.all()
-        context = {
-            'data': data,
-        }
-
-        if request.method == 'POST' and request.FILES['myarticles']:
-            myfile = request.FILES['myarticles']
-            empexceldata = pd.read_excel(myfile)
-            load_excel_data_wb_stock = pd.DataFrame(
-                empexceldata, columns=['Баркод', 'Номенк WB', 'Номенк OZON', 'Арт',
-                                       'Бренд', 'Предмет', 'SIZE', 'MODEL', 'COLOR',
-                                       'CC', 'Сред СС'])
-            barcode_list = load_excel_data_wb_stock['Баркод'].to_list()
-            nomenclatura_wb_list = load_excel_data_wb_stock['Номенк WB'].to_list()
-            nomenclatura_ozon_list = load_excel_data_wb_stock['Номенк OZON'].to_list()
-            common_article_list = load_excel_data_wb_stock['Арт'].to_list()
-            brend_list = load_excel_data_wb_stock['Бренд'].to_list()
-            predmet_list = load_excel_data_wb_stock['Предмет'].to_list()
-            size_list = load_excel_data_wb_stock['SIZE'].to_list()
-            model_list = load_excel_data_wb_stock['MODEL'].to_list()
-            color_list = load_excel_data_wb_stock['COLOR'].to_list()
-            prime_cost_list = load_excel_data_wb_stock['CC'].to_list()
-            average_cost_list = load_excel_data_wb_stock['Сред СС'].to_list()
-            dbframe = empexceldata
-
-            for i in range(len(common_article_list)):
-                if Articles.objects.filter(Q(common_article=common_article_list[i])):
-                    Articles.objects.filter(common_article=common_article_list[i]).update(
-                    barcode=barcode_list[i],
-                    nomenclatura_wb=nomenclatura_wb_list[i],
-                    nomenclatura_ozon=nomenclatura_ozon_list[i],
-                    brend=brend_list[i],
-                    predmet=predmet_list[i],
-                    size=size_list[i],
-                    model=model_list[i],
-                    color=color_list[i],
-                    prime_cost=prime_cost_list[i],
-                    average_cost=average_cost_list[i],
-                    )
-                else:
-                    obj = Articles(
-                    common_article=common_article_list[i],
-                    barcode=barcode_list[i],
-                    nomenclatura_wb=nomenclatura_wb_list[i],
-                    nomenclatura_ozon=nomenclatura_ozon_list[i],
-                    brend=brend_list[i],
-                    predmet=predmet_list[i],
-                    size=size_list[i],
-                    model=model_list[i],
-                    color=color_list[i],
-                    prime_cost=prime_cost_list[i],
-                    average_cost=average_cost_list[i],
-                    )
-                    obj.save()
-        return render(request, 'database/database_home.html', context)
-    else:
-        return redirect('database_home')
+    
+    data = Articles.objects.all()
+    context = {
+        'data': data,
+    }
+    if request.method == 'POST' and request.FILES['myarticles']:
+        myfile = request.FILES['myarticles']
+        empexceldata = pd.read_excel(myfile)
+        load_excel_data_wb_stock = pd.DataFrame(
+            empexceldata, columns=['Баркод', 'Номенк WB', 'Номенк OZON', 'Арт',
+                                   'Бренд', 'Предмет', 'SIZE', 'MODEL', 'COLOR',
+                                   'CC', 'Сред СС'])
+        barcode_list = load_excel_data_wb_stock['Баркод'].to_list()
+        nomenclatura_wb_list = load_excel_data_wb_stock['Номенк WB'].to_list()
+        nomenclatura_ozon_list = load_excel_data_wb_stock['Номенк OZON'].to_list()
+        common_article_list = load_excel_data_wb_stock['Арт'].to_list()
+        brend_list = load_excel_data_wb_stock['Бренд'].to_list()
+        predmet_list = load_excel_data_wb_stock['Предмет'].to_list()
+        size_list = load_excel_data_wb_stock['SIZE'].to_list()
+        model_list = load_excel_data_wb_stock['MODEL'].to_list()
+        color_list = load_excel_data_wb_stock['COLOR'].to_list()
+        prime_cost_list = load_excel_data_wb_stock['CC'].to_list()
+        average_cost_list = load_excel_data_wb_stock['Сред СС'].to_list()
+        dbframe = empexceldata
+        for i in range(len(common_article_list)):
+            if Articles.objects.filter(Q(common_article=common_article_list[i])):
+                Articles.objects.filter(common_article=common_article_list[i]).update(
+                barcode=barcode_list[i],
+                nomenclatura_wb=nomenclatura_wb_list[i],
+                nomenclatura_ozon=nomenclatura_ozon_list[i],
+                brend=brend_list[i],
+                predmet=predmet_list[i],
+                size=size_list[i],
+                model=model_list[i],
+                color=color_list[i],
+                prime_cost=prime_cost_list[i],
+                average_cost=average_cost_list[i],
+                )
+            else:
+                obj = Articles(
+                common_article=common_article_list[i],
+                barcode=barcode_list[i],
+                nomenclatura_wb=nomenclatura_wb_list[i],
+                nomenclatura_ozon=nomenclatura_ozon_list[i],
+                brend=brend_list[i],
+                predmet=predmet_list[i],
+                size=size_list[i],
+                model=model_list[i],
+                color=color_list[i],
+                prime_cost=prime_cost_list[i],
+                average_cost=average_cost_list[i],
+                )
+                obj.save()
+    return render(request, 'database/database_home.html', context)
 
 
 def database_stock_api(request):

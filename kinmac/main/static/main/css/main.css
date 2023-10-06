@@ -4,7 +4,7 @@
 :root{
     --color-primary: #7380ec;
     --color-danger: #ff7782;
-    --color-success: #41f1b6;
+    --color-success: #0ca572;
     --color-warning: #ffbb55;
     --color-white: #fff;
     --color-info-dark: #7d8da1;
@@ -302,6 +302,25 @@ ul.mainmenu li a:hover {
     border: none;
     color: var(--color-white);
     background: var(--color-info-dark);
+    font-weight: 600;
+    transition: all 500ms ease;
+}
+
+.custom-button-success {
+    padding: 15px;
+    margin: 0;
+    border-radius: 8px;
+    border: none;
+    color: var(--color-white);
+    background: var(--color-success);
+    font-weight: 600;
+}
+
+.custom-button-success:hover {
+    padding: 15px;
+    border: none;
+    color: var(--color-white);
+    background: var(--color-dark);
     font-weight: 600;
     transition: all 500ms ease;
 }
@@ -610,3 +629,31 @@ table tr td:last-child {
 	border-radius: 0 8px 8px 0;
 }
 
+/* ========= PAYMENT DETAIL =========*/
+
+.creator-buttons {
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+.reduct-buttons form {
+    margin: 0;
+    padding: 0;
+}
+
+.reduct-buttons form .custom-button {
+    margin-left: 2rem;
+}
+
+.reduct-buttons form .custom-button-success {
+    margin-left: 2rem;
+}
+
+.form-buttons {
+    gap: 5rem;
+}
+
+.reduct-buttons {
+    float: left;
+}

@@ -1,4 +1,7 @@
 from django.db import models
+from datetime import datetime
+from django.contrib.auth.models import User
+
 
 class Projects(models.Model):
     name = models.CharField(
@@ -95,8 +98,7 @@ class Contractors(models.Model):
 class Payments(models.Model):
     pub_date = models.DateTimeField(
         verbose_name='Дата создания заявки',
-        blank=True,
-        null=True,
+        default=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     )
     creator = models.CharField(
         verbose_name='Создатель заявки',
@@ -189,9 +191,11 @@ class PayWithCheckingAccount(models.Model):
     file_of_bill = models.FileField(
         verbose_name='Файл счета',
         upload_to="uploads_of_bill_/%Y/%m/%d/",
-        blank=True,
-        null=True,
     )
+
+    class Meta:
+        verbose_name = 'Оплата по счету'
+        verbose_name_plural = 'Оплата по счету'
 
 
 class PayWithCard(models.Model):
@@ -205,7 +209,7 @@ class PayWithCard(models.Model):
         verbose_name='Плательщик',
         on_delete=models.PROTECT,
     )
-    payer_organization = models.ForeignKey(
+    with_card_payer_organization = models.ForeignKey(
         PayerOrganization,
         verbose_name='Организация плательщик',
         on_delete=models.PROTECT,
@@ -216,14 +220,9 @@ class PayWithCard(models.Model):
         blank=True,
         null=True,
     )
-    comment = models.TextField(
-        verbose_name='Комментарий к платежу',
-        blank=True,
-        null=True,
-    )
 
 
-class TransforToCard(models.Model):
+class TransferToCard(models.Model):
     payment_id = models.ForeignKey(
         Payments,
         verbose_name='Номер оплаты',
@@ -238,8 +237,6 @@ class TransforToCard(models.Model):
     phone_number = models.CharField(
         verbose_name='Номер телефона',
         max_length=30,
-        blank=True,
-        null=True,
     )
     payment_receiver = models.CharField(
         verbose_name='Получатель платежа',
@@ -250,8 +247,6 @@ class TransforToCard(models.Model):
     bank_for_payment = models.CharField(
         verbose_name='Банк для платежа',
         max_length=30,
-        blank=True,
-        null=True,
     )
 
 
@@ -261,14 +256,45 @@ class CashPayment(models.Model):
         verbose_name='Номер оплаты',
         on_delete=models.PROTECT,
     )
-    payment_receiver = models.CharField(
+    cash_payment_payment_receiver = models.CharField(
         verbose_name='Получатель платежа',
         max_length=150,
         blank=True,
         null=True,
     )
-    comment_cashpayment = models.TextField(
-        verbose_name='Комментарий к платежу',
-        blank=True,
-        null=True,
+
+
+class ApprovedFunction(models.Model):
+    username = models.ForeignKey(
+        User,
+        verbose_name='Имя пользователя',
+        on_delete=models.PROTECT,
     )
+    first_name = models.CharField(
+        verbose_name='Имя сотрудника',
+        max_length=100,
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия сотрудника',
+        max_length=100,
+    )
+    job_title = models.ForeignKey(
+        Payers,
+        verbose_name='Должность',
+        on_delete=models.PROTECT,
+    )
+    #project = models.ForeignKey(
+    #    Projects,
+    #    verbose_name='Проекты',
+    #    on_delete=models.PROTECT,
+    #)
+    rating_for_approval = models.PositiveSmallIntegerField(
+        verbose_name='Рейтинг для согласования',
+    )
+
+    def __str__(self):
+        return f'{self.job_title}, {self.last_name} {self.first_name}, {self.rating_for_approval}'
+
+    class Meta:
+        verbose_name = 'Рейтинг для согласования'
+        verbose_name_plural = 'Рейтинг для согласования'

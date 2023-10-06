@@ -5,19 +5,19 @@ from django.forms import (CheckboxInput, ChoiceField, FileInput, ModelForm,
 
 from .models import (CashPayment, Categories, PayerOrganization, Payers,
                      PaymentMethod, Payments, PayWithCard,
-                     PayWithCheckingAccount, Projects, TransforToCard)
+                     PayWithCheckingAccount, Projects, TransferToCard)
 
 
 class PaymentsForm(ModelForm):
     class Meta:
         model = Payments
-        fields = ['project', 'category', 'payment_method', 'payment_sum',
+        fields = ['creator', 'project', 'category', 'payment_method', 'payment_sum',
                   'comment', 'send_payment_file', 'file_of_payment',
                   'urgent_payment']
-        #project = forms.ChoiceField(choices=Projects.objects.all())
-        #category = forms.ChoiceField(choices=Categories.objects.all())
-        #payment_method = forms.ChoiceField(choices=PaymentMethod.objects.all())
-        
+        project = forms.ChoiceField(choices=Projects.objects.all())
+        category = forms.ChoiceField(choices=Categories.objects.all())
+        payment_method = forms.ChoiceField(choices=PaymentMethod.objects.all())
+    
         send_payment_file = forms.CheckboxSelectMultiple()
         urgent_payment = forms.CheckboxSelectMultiple()
         widgets = {            
@@ -37,7 +37,7 @@ class PaymentsForm(ModelForm):
         super(PaymentsForm, self).__init__(*args, **kwargs)
         self.fields['project'].empty_label = None
         self.fields['category'].empty_label = None
-        self.fields['payment_method'].empty_label = None
+        self.fields['payment_method'].empty_label = 'Выбрать'
 
 
 class PayWithCheckingAccountForm(ModelForm):
@@ -46,8 +46,15 @@ class PayWithCheckingAccountForm(ModelForm):
         fields = ['payer', 'payer_organization', 'contractor_name',
                   'contractor_bill_number', 'contractor_bik_of_bank',
                   'file_of_bill']
-        #payer = forms.ChoiceField(choices=Payers.objects.all())
-        #payer_organization = forms.ChoiceField(choices=PayerOrganization.objects.all())
+        fields_required = ['payer', 'payer_organization', 'contractor_name',
+                  'contractor_bill_number', 'contractor_bik_of_bank']
+
+        payer = forms.ChoiceField(
+            choices=Payers.objects.all(),
+        )
+        payer_organization = forms.ChoiceField(
+            choices=PayerOrganization.objects.all(),
+        )
         send_payment_file = forms.CheckboxSelectMultiple()
         widgets = {            
             'contractor_name': TextInput(attrs={
@@ -78,17 +85,12 @@ class PayWithCheckingAccountForm(ModelForm):
 class PayWithCardForm(ModelForm):
     class Meta:
         model = PayWithCard
-        fields = ['payer', 'payer_organization', 'link_to_payment',
-                  'comment']
-        #payer = forms.ChoiceField(choices=Payers.objects.all())
-        #payer_organization = forms.ChoiceField(choices=PayerOrganization.objects.all())
+        fields = ['payer', 'with_card_payer_organization', 'link_to_payment']
+        payer = forms.ChoiceField(choices=Payers.objects.all())
+        with_card_payer_organization = forms.ChoiceField(choices=PayerOrganization.objects.all())
         widgets = {            
             'link_to_payment': TextInput(attrs={
                 'class': 'form-control',
-            }),
-            'comment': TextInput(attrs={
-                'class': 'form-control',
-
             }),
         }
     
@@ -96,14 +98,15 @@ class PayWithCardForm(ModelForm):
         self.request = kwargs.pop('request', None)
         super(PayWithCardForm, self).__init__(*args, **kwargs)
         self.fields['payer'].empty_label = None
-        self.fields['payer_organization'].empty_label = None
+        self.fields['with_card_payer_organization'].empty_label = None
 
 
-class TransforToCardForm(ModelForm):
+class TransferToCardForm(ModelForm):
     class Meta:
-        model = TransforToCard
+        model = TransferToCard
         fields = ['card_number', 'phone_number', 'payment_receiver',
                   'bank_for_payment']
+        fields_required = ['phone_number', 'bank_for_payment', 'bank_for_payment']
         widgets = {            
             'card_number': TextInput(attrs={
                 'class': 'form-control',
@@ -123,12 +126,9 @@ class TransforToCardForm(ModelForm):
 class CashPaymentForm(ModelForm):
     class Meta:
         model = CashPayment
-        fields = ['payment_receiver', 'comment_cashpayment']
+        fields = ['cash_payment_payment_receiver']
         widgets = {            
-            'payment_receiver': TextInput(attrs={
-                'class': 'form-control',
-            }),
-            'comment_cashpayment': TextInput(attrs={
+            'cash_payment_payment_receiver': TextInput(attrs={
                 'class': 'form-control',
             }),
         }

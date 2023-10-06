@@ -12,9 +12,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@48,400,0,0">
     <!-- Chartjs CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-    <script src="/static/main/js/main.js"></script>
+    <script src="/static/main/js/main.js" defer></script>
     <!-- Chartjs CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
     {% block mainmenu %}
@@ -46,46 +47,62 @@
                 <h2>KINMAC<h2>
             </div>
         </a>
-        
+
         <div class="sidebar">
-            {% if request.user.is_staff %}
-                {% url 'database_home' as url %}
-                <a href="{{ url }}" {% if request.path == url %}class="active"{% endif %}>
-                    <span class="material-symbols-sharp">receipt_long</span>
-                    <h3>База данных Артикулов</h3>
-                </a>
-            
-                {% url 'stock_api' as url_stock %}
-                <a href="{{ url_stock }}" {% if request.path == url_stock %}class="active"{% endif %}>
-                    <span class="material-symbols-sharp">inventory</span>
-                    <h3>Остатки API</h3>
-                </a>
-            
-	            {% url 'stock_site' as url_stock %}
-                <a href="{{ url_stock }}" {% if request.path == url_stock %}class="active"{% endif %}>
-                    <span class="material-symbols-sharp">inventory_2</span>
-                    <h3>Остатки Сайт</h3>
-                </a>
-        
-                {% url 'sales' as url_sales %}
-                <a href="{{ url_sales }}" {% if request.path == url_sales %}class="active"{% endif %}>
-                    <span class="material-symbols-sharp">trending_up</span>
-                    <h3>Продажи</h3>
-                </a>
+        {% url 'database_home' as url %}
+        <a href="{{ url }}" {% if request.path == url %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">receipt_long</span>
+            <h3>База данных Артикулов</h3>
+        </a>
+    
+        {% url 'stock_api' as url_stock %}
+        <a href="{{ url_stock }}" {% if request.path == url_stock %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">inventory</span>
+            <h3>Остатки API</h3>
+        </a>
+    
+	    {% url 'stock_site' as url_stock %}
+        <a href="{{ url_stock }}" {% if request.path == url_stock %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">inventory_2</span>
+            <h3>Остатки Сайт</h3>
+        </a>
 
-                {% url 'payment_create' as url_payment_create %}
-                <a href="{{ url_payment_create }}" {% if request.path == url_payment_create %}class="active"{% endif %}>
-                    <span class="material-symbols-sharp">add_circle</span>
-                    <h3>Добавить заявку</h3>
-                </a>
+        {% url 'sales' as url_sales %}
+        <a href="{{ url_sales }}" {% if request.path == url_sales %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">trending_up</span>
+            <h3>Продажи</h3>
+        </a>
 
-                {% url 'payment_statistic' as url_payment_statistic %}
-                <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
-                    <span class="material-symbols-sharp">monitoring</span>
-                    <h3>Статистика заявок</h3>
-                </a>
+        {% url 'payment_create' as url_payment_create %}
+        <a href="{{ url_payment_create }}" {% if request.path == url_payment_create %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">add_circle</span>
+            <h3>Добавить заявку</h3>
+        </a>
 
-            {% endif %}
+        {% url 'payment_statistic_pay_account' as url_payment_statistic %}
+        <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">monitoring</span>
+            <h3>Статистика оплат по счету</h3>
+        </a>
+
+        {% url 'payment_statistic_pay_card' as url_payment_statistic %}
+        <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">credit_card</span>
+            <h3>Статистика оплат по карте</h3>
+        </a>
+
+        {% url 'payment_statistic_transfer_card' as url_payment_statistic %}
+        <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">payments</span>
+            <h3>Статистика переводов по карте</h3>
+        </a>
+
+        {% url 'payment_statistic_pay_cash' as url_payment_statistic %}
+        <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">attach_money</span>
+            <h3>Статистика оплат наличными</h3>
+        </a>
+
         </div>
     </aside>
     <main>
