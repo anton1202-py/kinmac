@@ -80,12 +80,10 @@
                         <button class="custom-button-success" type="submit" name="approve_payment">Согласовать</button>
                         <button class="custom-button" type="submit" name="pay_payment">Оплатить</button>
                     </form>
-                    <form method="get" class="form-buttons" name="get_payments_detail_form" enctype="multipart/form-data">
-                        <p style="display: none;" name="name_comment_reject_payment" id="comment_reject_payment">Комментарий</p>
-                        <textarea name="comment" id="comment_reject_payment_text" cols="40" rows="3"></textarea>
-                        <button class="custom-button-delete" id="reject_payment_id" name="reject_payment">Отклонить</button>
-                    </form>
+                    <button id="show-form">Show form</button>
+                    <div id="form-container"></div>
                 </div>
+                
             </div>
         {% endif %}
         {% if payments.creator != user.username and user.groups.first.name == 'accountant' %}

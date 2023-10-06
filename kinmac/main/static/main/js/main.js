@@ -8,10 +8,38 @@ console.log( ids )
 Array.prototype.forEach.call( ids, function( el, i ) {
     console.log( el.name ); // log the ID
 });
-const select1 = document.forms.payments.elements[3]
+
 
 var comment1 = document.getElementById('but')
 console.log(comment1)
+
+
+const showFormButton = document.getElementById('show-form');
+const formContainer = document.getElementById('form-container');
+
+showFormButton.addEventListener('click', () => {
+  fetch('/payment/194/detail?comment=&reject_payment=')
+    .then(response => response.json())
+    .then(data => {
+      const form = document.createElement('form');
+      form.setAttribute('method', 'POST');
+      form.setAttribute('action', '/submit-form');
+
+      const input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('name', 'input-field');
+      input.setAttribute('placeholder', data.placeholder);
+
+      const submitButton = document.createElement('button');
+      submitButton.setAttribute('type', 'submit');
+      submitButton.textContent = 'Submit';
+
+      form.appendChild(input);
+      form.appendChild(submitButton);
+      formContainer.appendChild(form);
+    });
+});
+
 
 document.getElementsByName('comment').style.display = "none"
 document.getElementById('reject_payment_id').onclick=function(){
@@ -22,7 +50,7 @@ document.getElementById('reject_payment_id').onclick=function(){
 
 var node = document.getElementById('pay_with_card')
 htmlContent = node.innerHTML
-
+const select1 = document.forms.payments.elements[3]
 select1.onchange = function(){
     let options = select1.options
     let index = select1.selectedIndex
