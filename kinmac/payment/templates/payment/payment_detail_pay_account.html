@@ -28,6 +28,7 @@
                 <th>Статус заявки</th>
                 <th>Дата и время оплаты</th>
                 <th>Произвел оплату</th>
+                <th>Причина отклонения</th>
             </tr>
             <tr>                        
                 <td>{{ payments.id }}</td>
@@ -52,6 +53,7 @@
                 <td>{{ payments.status_of_payment }}</td>
                 <td>{{ payments.date_of_payment }}</td>
                 <td>{{ payments.accountant }}</td>
+                <td>{{ payments.rejection_reason }}</td>
             </tr>
         </table>
         {% if payments.creator == user.username %}
@@ -76,29 +78,35 @@
                 <div class="reduct-buttons">
                     <form method="post" class="form-buttons" name="payments_detail_form" enctype="multipart/form-data">
                         {% csrf_token %}
-
-                        <button class="custom-button-success" type="submit" name="approve_payment">Согласовать</button>
-                        <button class="custom-button" type="submit" name="pay_payment">Оплатить</button>
+                        <button class="custom-button-success" type="submit" name="approve_payment" id="approve_payment_button_id">Согласовать</button>
+                        <button class="custom-button" type="submit" name="pay_payment" id="pay_payment_button_id">Оплатить</button>
                     </form>
-                    <button id="show-form">Show form</button>
-                    <div id="form-container"></div>
+                    <button id="popup-button" class="custom-button-delete" name="reject_payment_button">Отклонить</button>
                 </div>
-                
             </div>
         {% endif %}
         {% if payments.creator != user.username and user.groups.first.name == 'accountant' %}
             <div class="creator-buttons">
-                
                 <div class="reduct-buttons">
-                    
                     <form method="post" class="form-buttons" name="payments_detail_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
                         <button class="custom-button-delete" type="submit" name="reject_payment">Отклонить</button>
                         <button class="custom-button" type="submit" name="pay_payment">Оплатить</button>
                     </form>
                 </div>
             </div>
         {% endif %}
-    </div>    
+
+        <div id="popup-container" style="display:none;">        
+          <form method="post" class="reject_payment_class" name="form_reject_payment_name" enctype="multipart/form-data">
+            {% csrf_token %} 
+            <span class="material-symbols-sharp" onclick="closePopup()" id="popup-icon_close">close</span>
+            <br>
+            <label for="popup-input">Введите причины, по которой отклонили заявку:</label>
+            <textarea class="form-control" type="text" id="popup-input" name="popup-input-name"></textarea>
+            <button class="custom-button" type="submit" id="reject_payment_id" name="reject_payment">Сохранить</button>
+          </form>
+        </div>
+    </div> 
+
 {% endblock %} 

@@ -28,6 +28,8 @@
                 <th>Статус заявки</th>
                 <th>Дата и время оплаты</th>
                 <th>Произвел оплату</th>
+                <th>Причина отклонения</th>
+
                 
             </tr>
             
@@ -60,6 +62,7 @@
                         <td>{{ el.status_of_payment }}</td>
                         <td>{{ el.date_of_payment }}</td>
                         <td>{{ el.accountant }}</td>
+                        <td>{{ el.rejection_reason }}</td>
                         {% endif %}
                     </tr>
                 {% endfor %}

@@ -158,6 +158,12 @@ class Payments(models.Model):
         blank=True,
         null=True,
     )
+    rejection_reason = models.CharField(
+        verbose_name='Причина отказа заявки',
+        max_length=300,
+        blank=True,
+        null=True,
+    )
 
 class PayWithCheckingAccount(models.Model):
     # Это организация  плательщик? Бухгалтер? Инициатор заявки? Или кто?

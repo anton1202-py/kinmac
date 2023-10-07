@@ -213,7 +213,6 @@ class PaymentDetailView(DetailView):
         saved_payment=Payments.objects.get(id=self.object.pk)
         user = User.objects.get(username=request.user.username)
         groups = user.groups.all()
-        print('группа', groups[0])
         if request.method == 'POST':
             if 'pay_payment' in request.POST:
                 saved_payment.status_of_payment =f'Оплачено {request.user.username}'
@@ -229,8 +228,10 @@ class PaymentDetailView(DetailView):
                 saved_payment.status_of_payment = approval_person(request.user.username)
                 saved_payment.save(update_fields=['status_of_payment'])
             elif 'reject_payment' in request.POST:
+                print(request.POST['popup-input-name'])
+                saved_payment.rejection_reason = request.POST['popup-input-name']
                 saved_payment.status_of_payment =f'Отклонено {request.user.username}'
-                saved_payment.save(update_fields=['status_of_payment'])
+                saved_payment.save(update_fields=['status_of_payment', 'rejection_reason'])
         
         if request.method == 'GET':
             print(request.GET)
