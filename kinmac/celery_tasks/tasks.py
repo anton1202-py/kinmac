@@ -76,7 +76,7 @@ def add_data_stock_api():
 
 @app.task
 def add_data_sales():
-    control_date_sales = date.today() - timedelta(days=2)
+    control_date_sales = date.today() - timedelta(days=1)
     url_sales = f"https://statistics-api.wildberries.ru/api/v1/supplier/sales?dateFrom={control_date_sales}&flag=1"
 
     # Заголовок и сам ключ
@@ -88,7 +88,7 @@ def add_data_sales():
 
     for i in data_sales:
         check_data_sales = []
-	check_data_sales.append(control_date_sales)
+        check_data_sales.append(control_date_sales)
         check_data_sales.append(i['date'])
         check_data_sales.append(i['lastChangeDate'])
         check_data_sales.append(i['supplierArticle'])
