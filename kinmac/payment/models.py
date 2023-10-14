@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 class Projects(models.Model):
@@ -164,6 +165,15 @@ class Payments(models.Model):
         blank=True,
         null=True,
     )
+
+    @property
+    def my_file_of_payment(self):
+        try:
+            url = self.file_of_payment.url
+        except:
+            url=''
+        return url
+
 
 class PayWithCheckingAccount(models.Model):
     # Это организация  плательщик? Бухгалтер? Инициатор заявки? Или кто?

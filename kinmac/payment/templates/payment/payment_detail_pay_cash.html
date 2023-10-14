@@ -14,12 +14,9 @@
                 <th>Название проекта</th>
                 <th>Название категории</th>
                 <th>Способ оплаты</th>
-                <th>Плательщик</th>
-                <th>Организация плательщик</th>
-                <th>Название организации получателя</th>
-                <th>Номер счета организации получателя</th>
-                <th>БИК банка организации получателя</th>
-                <th>Файл счета</th>
+
+                <th>Получатель платежа</th>
+
                 <th>Сумма платежа</th>
                 <th>Комментарий к платежу</th>
                 <th>Присылать платежку после оплаты</th>
@@ -37,13 +34,8 @@
                 <td>{{ payments.project }}</td>
                 <td>{{ payments.category }}</td>
                 <td>{{ payments.payment_method }}</td>
-                  
-                <td>{{ second_model_data.payer }}</td>
-                <td>{{ second_model_data.payer_organization }}</td>
-                <td>{{ second_model_data.contractor_name }}</td>
-                <td>{{ second_model_data.contractor_bill_number }}</td>
-                <td>{{ second_model_data.contractor_bik_of_bank }}</td>                    
-                <td><a href="{{ second_model_data.file_of_bill.url }}" download>{{ second_model_data.file_of_bill }}</a></td>
+
+                <td>{{ second_model_data.cash_payment_payment_receiver }}</td>
 
                 <td>{{ payments.payment_sum }}</td>
                 <td>{{ payments.comment }}</td>
@@ -83,7 +75,7 @@
                         <button class="custom-button" type="submit" name="pay_payment">Оплатить</button>
                     </form>
                 </div>
-                <a href="{% url 'payment_update' payments.id %}">
+                <a href="{% url 'pay_cash_update' payments.id %}">
                     <button class="custom-button-change">
                        Редактировать
                     </button>

@@ -4,71 +4,113 @@
 {% block title%}Добавить заявку{% endblock %}
 
 {% block content%}
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
     <div class="features">
         <h1>Статистика оплат по расчетному счету</h1>
-        <table style="overflow-x: scroll; display: block; width: 100%;" name="mytable">
-            <tr>
-                <th>ID заявки</th>
-                <th>Дата создания</th>
-                <th>Создатель заявки</th>
-                <th>Название проекта</th>
-                <th>Название категории</th>
-                <th>Способ оплаты</th>
-                <th>Плательщик</th>
-                <th>Организация плательщик</th>
-                <th>Название организации получателя</th>
-                <th>Номер счета организации получателя</th>
-                <th>БИК банка организации получателя</th>
-                <th>Файл счета</th>
-                <th>Сумма платежа</th>
-                <th>Комментарий к платежу</th>
-                <th>Присылать платежку после оплаты</th>
-                <th>Файл платёжки</th>
-                <th>Срочный платеж</th>
-                <th>Статус заявки</th>
-                <th>Дата и время оплаты</th>
-                <th>Произвел оплату</th>
-                <th>Причина отклонения</th>
-
+        <div class='filter-data'>
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <p>От</p>
+                    <input type="date" name="datestart" class="form-filter-data" required="" id="datestart">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>До</p>
+                    <input type="date" name="datefinish" class="form-filter-data" required="" id="datefinish">
+                </div><br>
                 
-            </tr>
-            
-            {% for el in payments %}
-                {% for dat in pay_account %}
-                    <tr>
-                        {% if el.id == dat.payment_id_id %}
-                        
-                        <td><a href="{% url 'payment_detail' el.id %}">{{ el.id }}</a></td>
-                        <td>{{ el.pub_date }}</td>
-                        <td>{{ el.creator }}</td>
-                        <td>{{ el.project }}</td>
-                        <td>{{ el.category }}</td>
-                        <td>{{ el.payment_method }}</td>
-                    
-                    
-                        <td>{{ dat.payer }}</td>
-                        <td>{{ dat.payer_organization }}</td>
-                        <td>{{ dat.contractor_name }}</td>
-                        <td>{{ dat.contractor_bill_number }}</td>
-                        <td>{{ dat.contractor_bik_of_bank }}</td>                    
-                        <td><a href="{{ dat.file_of_bill.url }}" download>{{ dat.file_of_bill }}</a></td>
+                <div class="inner-form-data">
+                    <p>Категория</p>
+                    <input type="text"  name="category" class="form-filter-data" id="category">
+                </div><br>
+                
+                <div class="inner-form-data">
+                    <p>Организация получатель</p>
+                    <input type="text"  name="contractor_name" class="form-filter-data" id="contractor_name">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>Сумма</p>
+                    <input type="text"  name="payment_sum" class="form-filter-data" id="payment_sum">
+                </div><br>
 
+                <div class="inner-form-data">
+                    <p>Статус</p>
+                    <input type="text"  name="status_of_payment" class="form-filter-data" id="status_of_payment">
+                </div><br>
 
-                        <td>{{ el.payment_sum }}</td>
-                        <td>{{ el.comment }}</td>
-                        <td>{{ el.send_payment_file }}</td>
-                        <td>{{ el.file_of_payment }}</td>
-                        <td>{{ el.urgent_payment }}</td>
-                        <td>{{ el.status_of_payment }}</td>
-                        <td>{{ el.date_of_payment }}</td>
-                        <td>{{ el.accountant }}</td>
-                        <td>{{ el.rejection_reason }}</td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            {% endfor %}
-        </table>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
         
+        <div class="table_wrapper">
+            <p>С <b>{{ datestart }}</b> до <b>{{ datefinish }}</b> произведено оплат на <b>{{ amount_sum }}</b> рублей</p>
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                <tr>
+                    <th>ID заявки</th>
+                    <th>Дата создания</th>
+                    <th>Создатель заявки</th>
+                    <th>Название проекта</th>
+                    <th>Название категории</th>
+                    <th>Способ оплаты</th>
+                    <th>Плательщик</th>
+                    <th>Организация плательщик</th>
+                    <th>Название организации получателя</th>
+                    <th>Номер счета организации получателя</th>
+                    <th>БИК банка организации получателя</th>
+                    <th>Файл счета</th>
+                    <th>Сумма платежа</th>
+                    <th>Комментарий к платежу</th>
+                    <th>Присылать платежку после оплаты</th>
+                    <th>Файл платёжки</th>
+                    <th>Срочный платеж</th>
+                    <th>Статус заявки</th>
+                    <th>Дата и время оплаты</th>
+                    <th>Произвел оплату</th>
+                    <th>Причина отклонения</th>
+                </tr>
+
+                {% for el in payments %}
+                    {% for dat in pay_account %}
+                        <tr>
+                            {% if dat.payment_id_id == el.id %}
+                            <td><a href="{% url 'payment_detail' el.id %}">{{ el.id }}</a></td>
+                            <td>{{ el.pub_date }}</td>
+                            <td>{{ el.creator }}</td>
+                            <td>{{ el.project }}</td>
+                            <td>{{ el.category }}</td>
+                            <td>{{ el.payment_method }}</td>
+                        
+                        
+                            <td>{{ dat.payer }}</td>
+                            <td>{{ dat.payer_organization }}</td>
+                            <td>{{ dat.contractor_name }}</td>
+                            <td>{{ dat.contractor_bill_number }}</td>
+                            <td>{{ dat.contractor_bik_of_bank }}</td>                    
+                            <td><a href="{{ dat.file_of_bill.url }}" download>{{ dat.file_of_bill }}</a></td>
+
+
+                            <td>{{ el.payment_sum }}</td>
+                            <td>{{ el.comment }}</td>
+                            <td>{{ el.send_payment_file }}</td>
+                            {% if el.file_of_payment %}
+                                <td><a href="{{ el.file_of_payment.url }}" download>{{ el.file_of_payment }}</a></td>
+                            {% else %}
+                                <td><a href="" download>{{ el.file_of_payment }}</a></td>
+                            {% endif %}
+                            <td>{{ el.urgent_payment }}</td>
+                            <td>{{ el.status_of_payment }}</td>
+                            <td>{{ el.date_of_payment }}</td>
+                            <td>{{ el.accountant }}</td>
+                            <td>{{ el.rejection_reason }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        </div>
     </div>    
         
 {% endblock %} 
