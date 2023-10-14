@@ -14,9 +14,9 @@ class PaymentsForm(ModelForm):
         fields = ['creator', 'project', 'category', 'payment_method', 'payment_sum',
                   'comment', 'send_payment_file', 'file_of_payment',
                   'urgent_payment']
-        #project = forms.ChoiceField(choices=Projects.objects.all())
-        #category = forms.ChoiceField(choices=Categories.objects.all())
-        #payment_method = forms.ChoiceField(choices=PaymentMethod.objects.all())
+        project = forms.ChoiceField(choices=Projects.objects.all())
+        category = forms.ChoiceField(choices=Categories.objects.all())
+        payment_method = forms.ChoiceField(choices=PaymentMethod.objects.all())
     
         send_payment_file = forms.CheckboxSelectMultiple()
         urgent_payment = forms.CheckboxSelectMultiple()
@@ -49,12 +49,12 @@ class PayWithCheckingAccountForm(ModelForm):
         fields_required = ['payer', 'payer_organization', 'contractor_name',
                   'contractor_bill_number', 'contractor_bik_of_bank']
 
-        #payer = forms.ChoiceField(
-        #    choices=Payers.objects.all(),
-        #)
-        #payer_organization = forms.ChoiceField(
-        #    choices=PayerOrganization.objects.all(),
-        #)
+        payer = forms.ChoiceField(
+            choices=Payers.objects.all(),
+        )
+        payer_organization = forms.ChoiceField(
+            choices=PayerOrganization.objects.all(),
+        )
         send_payment_file = forms.CheckboxSelectMultiple()
         widgets = {            
             'contractor_name': TextInput(attrs={
@@ -86,8 +86,8 @@ class PayWithCardForm(ModelForm):
     class Meta:
         model = PayWithCard
         fields = ['payer', 'with_card_payer_organization', 'link_to_payment']
-        #payer = forms.ChoiceField(choices=Payers.objects.all())
-        #with_card_payer_organization = forms.ChoiceField(choices=PayerOrganization.objects.all())
+        payer = forms.ChoiceField(choices=Payers.objects.all())
+        with_card_payer_organization = forms.ChoiceField(choices=PayerOrganization.objects.all())
         widgets = {            
             'link_to_payment': TextInput(attrs={
                 'class': 'form-control',
