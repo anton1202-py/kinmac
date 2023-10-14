@@ -4,7 +4,7 @@
 :root{
     --color-primary: #7380ec;
     --color-danger: #ff7782;
-    --color-success: #41f1b6;
+    --color-success: #0ca572;
     --color-warning: #ffbb55;
     --color-white: #fff;
     --color-info-dark: #7d8da1;
@@ -49,6 +49,10 @@ body {
     overflow-x: hidden;
     background: var(--color-background);
     color: var(--color-dark);
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
 }
 
 .container {
@@ -306,6 +310,25 @@ ul.mainmenu li a:hover {
     transition: all 500ms ease;
 }
 
+.custom-button-success {
+    padding: 15px;
+    margin: 0;
+    border-radius: 8px;
+    border: none;
+    color: var(--color-white);
+    background: var(--color-success);
+    font-weight: 600;
+}
+
+.custom-button-success:hover {
+    padding: 15px;
+    border: none;
+    color: var(--color-white);
+    background: var(--color-dark);
+    font-weight: 600;
+    transition: all 500ms ease;
+}
+
 .custom-button-small {
     padding: 5px;
     margin: 0;
@@ -465,6 +488,14 @@ form {
     gap: 1rem;
 }
 
+.big-filter-form {
+    margin: 0 0 20px 0;
+    padding: 0;
+    float: left;
+    display: flex;
+    gap: 0.2rem;
+}
+
 .choose-date {
     padding: 15px;
     font-family: poppins, sans-serif;
@@ -484,7 +515,18 @@ form {
     font-size: 14px;
     border: 1px solid var(--color-primary);
     outline: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius-1);
+}
+
+.form-filter-data {
+    padding: 3px;
+    font-family: poppins, sans-serif;
+    margin: 0;
+    color: var(--color-dark);
+    font-size: 1rem;
+    border: 1px solid var(--color-primary);
+    outline: none;
+    border-radius: var(--border-radius-1);
 }
 
 .inner-form-data p {
@@ -561,7 +603,7 @@ main .recent-orders table:hover {
 
 table {
     text-align: center;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0px;
     width: 100%;
     margin-bottom: 20px;
@@ -571,7 +613,7 @@ table th {
     text-align: center;
     font-weight: bold;
 	padding: 10px 15px;
-	background: #ededed;
+	
  }
 
 table tr th:first-child {
@@ -586,20 +628,20 @@ table td {
 	padding: 10px 15px;
     text-align: center;
     vertical-align: center;
-    border: none;
 }
+
+table tr {
+    border-bottom: 1px solid #eeeeee;
+}
+
 table tr a {
     text-decoration: none;
     font-weight: 600;
     color: var(--color-primary);
 }
 table tr:hover {
-	transform: scale(1.02);
+    background: #eeeeee;
     transition: transform .6s;	
-}
-
-table tr:nth-child(odd){
-	background: #ededed;
 }
 
 table tr td:first-child {
@@ -610,3 +652,125 @@ table tr td:last-child {
 	border-radius: 0 8px 8px 0;
 }
 
+/* ========= PAYMENT DETAIL =========*/
+
+.creator-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.reduct-buttons form .custom-button {
+    margin-left: 2rem;
+}
+
+
+.form-buttons {
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+
+.reduct-buttons {
+    float: left;
+}
+
+
+#popup-container .reject_payment_class {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+#reject_payment_id {
+    margin-top: 20px;
+}
+
+#approve_payment_button_id {
+    display: inline-block;
+}
+
+#pay_payment_button_id {
+    display: inline-block;
+}
+
+#popup-icon_close {
+    float: right;
+    margin-bottom: 30px;
+}
+
+.table_wrapper{
+    overflow-x: scroll;
+    position: fixed;
+    width: 82%;
+    top: 200px;
+    left: 18%;
+    right: 0;
+    bottom: 0;
+}
+
+.form-paymentfile {
+    width: 100px;
+}
+
+.form-paymentfile {
+    margin: 0;
+    padding: 0;
+}
+
+/*========== ЗАГРУЗКА ФАЙЛА ОБ ОПЛАТЕ В ТАБЛИЦУ ========= */
+   
+.input_file {
+    opacity: 0;
+    display: none;
+}
+   
+#material-symbols-outlined {
+    height: 30px;
+    width: 30px;
+    display: flex;
+    border-right: 1px solid #fff;
+}
+
+.input-file-list {
+    font-size: 0.8rem;
+    color: #bcbcbc;
+    margin-bottom: 1rem;
+}
+
+/* кнопка */
+.table-button {
+    padding: 8px;
+    margin: 0;
+    border-radius: 8px;
+    border: var(--color-dark-variant) 1px solid;
+    color: var(--color-dark-variant);
+    font-weight: 600;
+}
+
+.table-button:hover {
+    border: none;
+    color: var(--color-white);
+    background: var(--color-info-dark);
+    transition: all 500ms ease;
+} 
+
+/* ========== POP UP окно о забытом файле платежки ========== */
+
+
+.error-popup-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 1.1rem;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    z-index: 9999;
+    width: 30%;
+    height: 30%;
+    background-color: #fff;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(200px);
+  }
