@@ -16,7 +16,7 @@ load_dotenv()
 
 @app.task
 def add_data_stock_api():
-    control_date_stock = date.today() - timedelta(days=1)
+    control_date_stock = date.today()
     url_stock = f"https://statistics-api.wildberries.ru/api/v1/supplier/stocks?dateFrom={control_date_stock}"
 
     # Заголовок и сам ключ
@@ -44,7 +44,7 @@ def add_data_stock_api():
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         # Курсор для выполнения операций с базой данных
         cursor = connection.cursor()
-        
+
         cursor.executemany(
            '''INSERT INTO database_stocksapi (pub_date, last_change_date,
                    warehouse_name,
@@ -76,7 +76,7 @@ def add_data_stock_api():
 
 @app.task
 def add_data_sales():
-    control_date_sales = date.today() - timedelta(days=1)
+    control_date_sales = date.today()
     url_sales = f"https://statistics-api.wildberries.ru/api/v1/supplier/sales?dateFrom={control_date_sales}&flag=1"
 
     # Заголовок и сам ключ
@@ -92,7 +92,7 @@ def add_data_sales():
         for key, value in data_sales[i].items():
             #print(key, value)
             check_data_sales.append(value)
-        common_data_sales.append(check_data_sales)        
+        common_data_sales.append(check_data_sales)
 
     try:
         # Подключение к существующей базе данных
@@ -104,7 +104,7 @@ def add_data_sales():
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         # Курсор для выполнения операций с базой данных
         cursor = connection.cursor()
-        
+
         cursor.executemany(
            '''INSERT INTO database_sales (pub_date,
                 sales_date,
@@ -312,7 +312,7 @@ def add_stock_data_site():
         response = requests.request("GET", url, headers=headers, data=payload)
 
         data = json.loads(response.text)
-        
+
         main_data = data['data']['products']
 
         for j in main_data:
@@ -406,4 +406,3 @@ def add_stock_data_site():
             connection.close()
             print("Соединение с PostgreSQL закрыто")
 
-add_data_sales()
