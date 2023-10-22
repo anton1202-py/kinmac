@@ -132,3 +132,58 @@ class CashPaymentForm(ModelForm):
                 'class': 'form-control',
             }),
         }
+
+
+class FilterPayWithCheckingForm(forms.Form):
+    datestart = forms.DateField(
+        input_formats=['%Y-%m-%d'],
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'choose-date',
+        }))
+    datefinish = forms.DateField(
+        input_formats=['%Y-%m-%d'],
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'choose-date',
+        }))
+    creator = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    project = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    category = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    payer = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    payer_organization = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    contractor_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    payment_sum = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))
+    status_of_payment = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }))

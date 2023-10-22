@@ -6,6 +6,43 @@
 {% block content%}
     <div class="features">
         <h1>Статистика переводов по карте</h1>
+        <div class='filter-data'>
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <p>От</p>
+                    <input type="date" name="datestart" class="form-filter-data" required="" id="datestart">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>До</p>
+                    <input type="date" name="datefinish" class="form-filter-data" required="" id="datefinish">
+                </div><br>
+                
+                <div class="inner-form-data">
+                    <p>Категория</p>
+                    <input type="text"  name="category" class="form-filter-data" id="category">
+                </div><br>
+                
+                <div class="inner-form-data">
+                    <p>Сумма</p>
+                    <input type="text"  name="payment_sum" class="form-filter-data" id="payment_sum">
+                </div><br>
+
+                <div class="inner-form-data">
+                    <p>Статус</p>
+                    <input type="text"  name="status_of_payment" class="form-filter-data" id="status_of_payment">
+                </div><br>
+
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
+        
+        <div class="table_wrapper">
+        <p>С <b>{{ datestart }}</b> до <b>{{ datefinish }}</b> произведено оплат на <b>{{ amount_sum }}</b> рублей</p>
+            
         <table style="overflow-x: scroll; display: block; width: 100%;">
             <tr>
                 <th>ID заявки</th>
@@ -36,7 +73,7 @@
                     <tr>
                         {% if el.id == dat.payment_id_id %}
                         
-                        <td><a href="{% url 'payment_update' el.id %}">{{ el.id }}</a></td>
+                        <td><a href="{% url 'transfer_card_detail' el.id %}">{{ el.id }}</a></td>
                         <td>{{ el.pub_date }}</td>
                         <td>{{ el.creator }}</td>
                         <td>{{ el.project }}</td>
@@ -51,7 +88,11 @@
                         <td>{{ el.payment_sum }}</td>
                         <td>{{ el.comment }}</td>
                         <td>{{ el.send_payment_file }}</td>
-                        <td>{{ el.file_of_payment }}</td>
+                        {% if el.file_of_payment %}
+                                <td><a href="{{ el.file_of_payment.url }}" download>{{ el.file_of_payment }}</a></td>
+                            {% else %}
+                                <td><a href="" download>{{ el.file_of_payment }}</a></td>
+                        {% endif %}
                         <td>{{ el.urgent_payment }}</td>
                         <td>{{ el.status_of_payment }}</td>
                         <td>{{ el.date_of_payment }}</td>
@@ -61,7 +102,7 @@
                 {% endfor %}
             {% endfor %}
         </table>
-        
+    </div>
     </div>    
         
 {% endblock %} 

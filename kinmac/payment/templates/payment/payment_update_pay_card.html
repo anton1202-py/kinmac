@@ -13,14 +13,10 @@
                 <label>{{form.project.label}}</label><p class="form-control" name="project_select">{{ form.project }}</p> <br>
                 <label>{{form.category.label}}</label><p class="form-control" id="category_select" name="category_select">{{ form.category }}</p> <br>
                 <label>{{form.payment_method.label}}</label><p class="form-control">{{ form.payment_method }}</p><br>
-                
-            
-                    <label>{{second_form.payer.label}}</label><p name="pay_with_checking_account" class="form-control">{{ second_form.payer }}</p><br>
-                    <label>{{second_form.payer_organization.label}}</label><p class="form-control">{{ second_form.payer_organization }}</p><br>
-                    <label>{{second_form.contractor_name.label}}</label>{{ second_form.contractor_name }}<br>
-                    <label>{{second_form.contractor_bill_number.label}}</label>{{ second_form.contractor_bill_number }}<br>
-                    <label>{{second_form.contractor_bik_of_bank.label}}</label>{{ second_form.contractor_bik_of_bank }}<br>
-                    <label>{{second_form.file_of_bill.label}}</label>{{ second_form.file_of_bill }}<br>
+                    
+                    <label>{{second_form.payer.label}}</label><p class="form-control">{{second_form.payer}}</p><br>
+                    <label>{{second_form.with_card_payer_organization.label}}</label><p class="form-control">{{second_form.with_card_payer_organization}}</p><br>
+                    <label>{{second_form.link_to_payment.label}}</label>{{second_form.link_to_payment}}<br>
            
 
                 <div id="pay_with_card" style="display: none;">

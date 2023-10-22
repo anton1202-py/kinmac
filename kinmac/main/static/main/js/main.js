@@ -15,7 +15,7 @@ if (paymentsForm) {
                 document.getElementById('id_contractor_bill_number').removeAttribute('required'); 
                 document.getElementById('id_contractor_bik_of_bank').removeAttribute('required'); 
                 document.getElementById('id_file_of_bill').removeAttribute('required');} 
-            if(options[index].textContent === 'Оплата картой на сайте'){ 
+            if(options[index].textContent === 'Оплата по карте на сайте'){ 
                 document.getElementById('pay_with_card').style.display = "";} 
             else { 
                 document.getElementById('pay_with_card').style.display = "none";} 
@@ -25,7 +25,7 @@ if (paymentsForm) {
                 document.getElementById('transfer_to_card').style.display = "none"; 
                 document.getElementById('id_phone_number').removeAttribute('required'); 
                 document.getElementById('id_bank_for_payment').removeAttribute('required');} 
-            if(options[index].textContent === 'Оплата наличными'){ 
+            if(options[index].textContent === 'Наличная оплата'){ 
                 document.getElementById('cash_payment').style.display = "";} 
             else { 
                 document.getElementById('cash_payment').style.display = "none";} 
@@ -71,3 +71,7 @@ if (elements && values && table) {
 } else {
   console.error('Элементы th, td и table не найдены на странице');
 }
+
+
+
+
