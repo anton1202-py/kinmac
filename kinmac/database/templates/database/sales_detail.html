@@ -38,11 +38,11 @@
                             {
                               type: 'line',
                               data: {
-                                labels: [{% for article in articles %} '{{ article.pub_date }}', {% endfor %}],
+                                labels: [{% for article in sales_amount %} '{{ article.pub_date }}', {% endfor %}],
                                 datasets: [
                                   {
                                     label: 'Количество продаж {{ articles.0.supplier_article }}',
-                                    data: [{% for article in articles %} {{ article.amount }}, {% endfor %}],
+                                    data: [{% for article in sales_amount %} {{ article.count_true }}, {% endfor %}],
                                     lineTension: 0.3,
                                     fill: true,
                                     backgroundColor: function (context) {
@@ -56,7 +56,7 @@
                                   },
                                   {
                                     label: 'Количество на складе {{ articles.0.supplier_article }}',
-                                    data: [{% for wbstock in wbstocks %} {{ wbstock.amount }}, {% endfor %}],
+                                    data: [{% for wbstock in wbstocks %} {{ wbstock.quantity_full }}, {% endfor %}],
                                     lineTension: 0.3,
                                     fill: true,
                                     backgroundColor: function (context) {
@@ -153,6 +153,7 @@
                   <th>isSupply</th>
                   <th>isRealization</th>
                   <th>promoCodeDiscount</th>
+                  <th>warehouseName</th>
                   <th>countryName</th>
                   <th>oblastOkrugName</th>
                   <th>regionName</th>

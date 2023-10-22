@@ -4,7 +4,7 @@ import pandas as pd
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
@@ -211,15 +211,18 @@ class DatabaseSalesDetailView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DatabaseSalesDetailView, self).get_context_data(**kwargs)
+        sales_amount = Sales.objects.filter(
+            barcode=self.kwargs['barcode']).values('pub_date').annotate(
+        count_true=Count('is_realization', filter=Q(is_realization='true'))
+        )
         context.update({
+            'sales_amount': sales_amount,
             'wbstocks': StocksApi.objects.filter(
             barcode=self.kwargs['barcode']).values()
         })
         return context
 
     def get_queryset(self):
-        #print(Sales.objects.filter(
-        #    article_marketplace=self.kwargs['article_marketplace']).values())
         return Sales.objects.filter(
             barcode=self.kwargs['barcode'])
 

@@ -432,5 +432,8 @@ def add_stock_data_site():
             connection.close()
             print("Соединение с PostgreSQL закрыто")
 
+
+#add_data_stock_api()
 #add_data_sales()
+#add_stock_data_site()
 
