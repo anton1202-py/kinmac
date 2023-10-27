@@ -6,33 +6,33 @@
 {% block content%}
     <div class="features">
         <div class="alert alert-warninng">
-            <table style="overflow-x: scroll; display: block; width: 100%;">
-                <tr><th>Артикул</th>
-                    <th>Бренд</th>
-                    <th>Баркод</th>
-                    <th>Номенклатура WB</th>
-                    <th>Номенклатура OZON</th>
-                    <th>Предмет</th>
-                    <th>Размер</th>
-                    <th>Модель</th>
-                    <th>Цвет</th>
-                    <th>Себестоимость</th>
-                    <th>Средняя себестоимость</th>
-                </tr>
-                <tr>
-                    <td>{{ article.common_article }}</td>
-                    <td>{{ article.brend }}</td>
-                    <td>{{ article.barcode }}</td>
-                    <td>{{ article.nomenclatura_wb }}</td>
-                    <td>{{ article.nomenclatura_ozon }}</td>
-                    <td>{{ article.predmet }}</td>
-                    <td>{{ article.size }}</td>
-                    <td>{{ article.model }}</td>
-                    <td>{{ article.color }}</td>
-                    <td>{{ article.prime_cost }}</td>
-                    <td>{{ article.average_cost }}</td>
-                </tr>
-            </table>
+                <table style="overflow-x: scroll; display: block; width: 100%;">
+                    <tr><th>Артикул</th>
+                        <th>Бренд</th>
+                        <th>Баркод</th>
+                        <th>Номенклатура WB</th>
+                        <th>Номенклатура OZON</th>
+                        <th>Предмет</th>
+                        <th>Размер</th>
+                        <th>Модель</th>
+                        <th>Цвет</th>
+                        <th>Себестоимость</th>
+                        <th>Средняя себестоимость</th>
+                    </tr>
+                    <tr>
+                        <td>{{ article.common_article }}</td>
+                        <td>{{ article.brend }}</td>
+                        <td>{{ article.barcode }}</td>
+                        <td>{{ article.nomenclatura_wb }}</td>
+                        <td>{{ article.nomenclatura_ozon }}</td>
+                        <td>{{ article.predmet }}</td>
+                        <td>{{ article.size }}</td>
+                        <td>{{ article.model }}</td>
+                        <td>{{ article.color }}</td>
+                        <td>{{ article.prime_cost }}</td>
+                        <td>{{ article.average_cost }}</td>
+                    </tr>
+                </table>
             <div class="reduct-buttons">
                 <a href="{% url 'database_delete' article.id %}">
                     <button class="custom-button-delete">

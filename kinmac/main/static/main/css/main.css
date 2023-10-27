@@ -422,7 +422,7 @@ ul.mainmenu li a:hover {
 .top-befor-header {
     display: flex;
     align-items: center;
-    margin-top: 35px;
+    margin-top: 25px;
     justify-content: space-between;
 }
 
@@ -625,7 +625,7 @@ table tr th:last-child {
 }
  /* границы ячеек тела таблицы */
 table td {
-	padding: 10px 15px;
+	padding: 0.5rem 0.5rem;
     text-align: center;
     vertical-align: center;
 }

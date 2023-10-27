@@ -36,7 +36,8 @@
             {#    {% endif %}#}
             {#</div>#}
         </div>
-            <table style="overflow-x: scroll; display: block; width: 100%;">
+        <div class="table_wrapper">
+            <table name="mytable" class="sortable" style="white-space: nowrap">
                 <tr>
                     <th>Артикул</th>
                     <th>Бренд</th>
@@ -70,6 +71,7 @@
                 </tr>
                 {% endfor %}
             </table>
+        </div>
     </div>    
         
 {% endblock %}
