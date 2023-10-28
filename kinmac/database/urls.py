@@ -49,6 +49,10 @@ urlpatterns = [
          views.DatabaseSalesDeleteView.as_view(),
          name='sales_delete'
          ),
+     path('weekly_sales/',
+     views.weekly_sales_data,
+     name='weekly_sales'
+     ),
     path('login/', views.LoginUser.as_view(), name='login'),
     path('logout/', views.logout_user, name='logout'),
 ]

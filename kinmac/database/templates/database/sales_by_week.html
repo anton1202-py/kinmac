@@ -1,0 +1,40 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}Скорость недельных продаж{% endblock %}
+
+{% block content %}
+
+
+<div class="features">
+    <div class="top-befor-header">
+       <h1>Продажи по неделям</h1>
+   </div>
+   <div class="table_wrapper">
+       <table name="mytable" class="sortable" style="white-space: nowrap">
+        <thead>
+            <tr>
+              <th>Supplier article</th>
+              {% for week in unique_week %}
+                <th>{{ week }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for article, value in data.items %}
+              <tr>
+                <td>{{ article }}</td>
+                {% for week in unique_week %}
+                  {% for date, amount in value.items %}
+                    {% if date == week  %}
+                        <td>{{ amount }}</td>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+   </div>
+</div>    
+{% endblock %}

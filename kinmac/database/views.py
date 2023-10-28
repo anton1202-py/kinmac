@@ -4,10 +4,12 @@ import pandas as pd
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.db.models import Count, Q
+from django.db.models import Case, Count, IntegerField, Q, When
+from django.db.models.functions import ExtractWeek, ExtractYear, TruncWeek
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from django_pivot import pivot
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
                     SelectDateStocksForm)
@@ -176,6 +178,54 @@ def database_sales(request):
         'seller_articles': seller_articles.all().values(),
     }
     return render(request, 'database/database_sales.html', context)
+
+
+def weekly_sales_data(request):
+    """Функция отвечает за отображение данных понедельных продаж"""
+
+    sales = Sales.objects.filter(is_realization='true').annotate(
+        week=ExtractWeek('pub_date'),
+        year=ExtractYear('pub_date')
+    ).values('supplier_article', 'week', 'year').annotate(
+        count=Count(Case(When(is_realization='true', then=1), output_field=IntegerField()))
+    ).order_by('supplier_article', 'year', 'week')
+
+    sales_data = Sales.objects.filter(is_realization='true').annotate(
+        week=ExtractWeek('pub_date'),
+        year=ExtractYear('pub_date')
+    ).values('week', 'year').order_by('year', 'week')
+
+    # Создаем словарь с данными для передачи в шаблон
+    data = {}
+    week_data = []
+    for tim in sales_data:
+        
+        week_year = f"{tim['week']}-{tim['year']}"
+        week_data.append(week_year)
+
+    unique_week = list(set(week_data))
+    unique_week.sort()
+
+    
+    for sale in sales:
+        supplier_article = sale['supplier_article']
+        week_year = f"{sale['week']}-{sale['year']}"
+        count = sale['count']
+        if supplier_article not in data:
+            data[supplier_article] = {}
+        data[supplier_article][week_year] = count
+
+    # Добавляем недостающие недели со значением 0
+    for article_data in data.values():
+        for week in unique_week:
+            if week not in article_data:
+                article_data[week] = 0
+
+    context = {
+        'data': data,
+        'unique_week': unique_week,
+    }
+    return render(request, 'database/sales_by_week.html', context)
 
 
 class DatabaseDetailView(DetailView):
