@@ -15,6 +15,7 @@
         <thead>
             <tr>
               <th>Supplier article</th>
+              <th>Barcode</th>
               {% for week in unique_week %}
                 <th>{{ week }}</th>
               {% endfor %}
@@ -23,7 +24,9 @@
           <tbody>
             {% for article, value in data.items %}
               <tr>
-                <td>{{ article }}</td>
+                <td>{{ article.0 }}</td>
+                <td><a href="{% url 'weekly_sales_detail' article.1 %}">{{ article.1 }}</a></td>
+
                 {% for week in unique_week %}
                   {% for date, amount in value.items %}
                     {% if date == week  %}

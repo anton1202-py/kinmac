@@ -135,11 +135,7 @@
                 </div>
             </div>
         </div>
-        {% for wbstock in wbstocks %}
-        {% if articles.0.article_marketplace ==  wbstock.seller_article_wb and wbstock.code_stock_id == 3 %} 
-        <p>{{ wbstock.amount }}</p> 
-        {% endif %}
-        {% endfor %}  
+  
         <div class="alert alert-warninng">
             <table style="overflow-x: scroll; display: block; width: 100%; white-space: nowrap">
                 <tr>

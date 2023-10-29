@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.db.models import Case, Count, IntegerField, Q, When
-from django.db.models.functions import ExtractWeek, ExtractYear, TruncWeek
+from django.db.models.functions import ExtractMonth, ExtractWeek, ExtractYear
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
@@ -181,16 +181,16 @@ def database_sales(request):
 
 
 def weekly_sales_data(request):
-    """Функция отвечает за отображение данных понедельных продаж"""
+    """Функция отвечает за отображение данных недельных продаж"""
 
-    sales = Sales.objects.filter(is_realization='true').annotate(
+    sales = Sales.objects.filter(finished_price__gte=0).annotate(
         week=ExtractWeek('pub_date'),
         year=ExtractYear('pub_date')
-    ).values('supplier_article', 'week', 'year').annotate(
-        count=Count(Case(When(is_realization='true', then=1), output_field=IntegerField()))
-    ).order_by('supplier_article', 'year', 'week')
+    ).values('supplier_article', 'barcode', 'week', 'year').annotate(
+        count=Count(Case(When(finished_price__gte=0, then=1), output_field=IntegerField()))
+    ).order_by('supplier_article', 'barcode', 'year', 'week')
 
-    sales_data = Sales.objects.filter(is_realization='true').annotate(
+    sales_data = Sales.objects.filter(finished_price__gte=0).annotate(
         week=ExtractWeek('pub_date'),
         year=ExtractYear('pub_date')
     ).values('week', 'year').order_by('year', 'week')
@@ -209,11 +209,13 @@ def weekly_sales_data(request):
     
     for sale in sales:
         supplier_article = sale['supplier_article']
+        barcode = sale['barcode']
         week_year = f"{sale['week']}-{sale['year']}"
         count = sale['count']
-        if supplier_article not in data:
-            data[supplier_article] = {}
-        data[supplier_article][week_year] = count
+        key = (supplier_article, barcode)
+        if key not in data:
+            data[key] = {}
+        data[key][week_year] = count
 
     # Добавляем недостающие недели со значением 0
     for article_data in data.values():
@@ -269,6 +271,65 @@ class DatabaseSalesDetailView(ListView):
             'sales_amount': sales_amount,
             'wbstocks': StocksApi.objects.filter(
             barcode=self.kwargs['barcode']).values()
+        })
+        return context
+
+    def get_queryset(self):
+        return Sales.objects.filter(
+            barcode=self.kwargs['barcode'])
+
+
+class DatabaseWeeklySalesDetailView(ListView):
+    model = Sales
+    template_name = 'database/sales_by_week_detail.html'
+    context_object_name = 'articles'
+
+    def get_context_data(self, **kwargs):
+        context = super(DatabaseWeeklySalesDetailView, self).get_context_data(**kwargs)
+
+        sales = Sales.objects.filter(
+            Q(barcode=self.kwargs['barcode']),
+            Q(finished_price__gte=0)).annotate(
+                week=ExtractWeek('pub_date'),
+                year=ExtractYear('pub_date')
+                ).values('supplier_article', 'barcode', 'week', 'year').annotate(
+                count=Count(Case(When(finished_price__gte=0, then=1), output_field=IntegerField()))
+                ).order_by('supplier_article', 'barcode', 'year', 'week')
+
+        sales_data = Sales.objects.filter(
+            Q(finished_price__gte=0)).annotate(
+                week=ExtractWeek('pub_date'),
+                year=ExtractYear('pub_date')
+                ).values('week', 'year').order_by('year', 'week')
+        data = {}
+        week_data = []
+        for tim in sales_data:
+            
+            week_year = f"{tim['week']}-{tim['year']}"
+            week_data.append(week_year)
+    
+        unique_week = list(set(week_data))
+        unique_week.sort()
+    
+        
+        for sale in sales:
+            supplier_article = sale['supplier_article']
+            barcode = sale['barcode']
+            week_year = f"{sale['week']}-{sale['year']}"
+            count = sale['count']
+            key = (supplier_article, barcode)
+            if key not in data:
+                data[key] = {}
+            data[key][week_year] = count
+    
+        # Добавляем недостающие недели со значением 0
+        for article_data in data.values():
+            for week in unique_week:
+                if week not in article_data:
+                    article_data[week] = 0
+        context.update({
+            'data': data,
+            'unique_week': unique_week,
         })
         return context
 
