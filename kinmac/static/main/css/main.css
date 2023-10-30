@@ -564,11 +564,25 @@ form {
     gap: 0.5rem;
     align-items: center;
     margin-top: 35px;
+}
 
+
+
+.chart_sales_by_week {
+    max-height: 20rem;
+    background: var(--color-white);
+    padding: var(--card-padding);
+    box-shadow: var(--box-shadow);
+    transition: all 300ms ease;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#acquisitions {
+    width: 100%; /* график растягивается на всю ширину контейнера */
 }
 
 .chart {
-
     background: var(--color-white);
     border-radius: var(--card-border-radius);
     padding: var(--card-padding);
@@ -692,6 +706,16 @@ table tr:hover {
     position: fixed;
     width: 82%;
     top: 200px;
+    left: 18%;
+    right: 0;
+    bottom: 0;
+}
+
+.table_wrapper_sales_by_week {
+    overflow-x: scroll;
+    position: fixed;
+    width: 82%;
+    top: 30rem;
     left: 18%;
     right: 0;
     bottom: 0;
