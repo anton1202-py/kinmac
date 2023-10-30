@@ -11,8 +11,8 @@
        <h1>Продажи по неделям артикула {{ articles.0.supplier_article }}</h1>
     </div>
     <div class="alert alert-warninng">
-      <div class="charts">
-        <div class='chart'>
+      <div class="charts_sales_by_week">
+        <div class='chart_sales_by_week'>
           <canvas id="acquisitions" width="580" height="300"></canvas>
           <script>
             function getGradient(ctx, chartArea) {
@@ -61,6 +61,8 @@
                     ]
                   },
                   options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             labels: {
