@@ -6,7 +6,7 @@ from time import sleep
 import pandas as pd
 import psycopg2
 import requests
-#from celery_tasks.celery import app
+from celery_tasks.celery import app
 from dotenv import load_dotenv
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -14,7 +14,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 load_dotenv()
 
 
-#@app.task
+@app.task
 def add_data_stock_api():
     control_date_stock = date.today() - timedelta(days=1)
     url_stock = f"https://statistics-api.wildberries.ru/api/v1/supplier/stocks?dateFrom={control_date_stock}"
@@ -73,7 +73,7 @@ def add_data_stock_api():
             print("Соединение с PostgreSQL закрыто")
 
 
-#@app.task
+@app.task
 def add_data_sales():
     control_date_sales = date.today() - timedelta(days=5)
     url_sales = f"https://statistics-api.wildberries.ru/api/v1/supplier/sales?dateFrom={control_date_sales}&flag=1"
@@ -171,7 +171,7 @@ def add_data_sales():
             print("Соединение с PostgreSQL закрыто")
 
 
-#@app.task
+@app.task
 def add_stock_data_site():
     wb_stock_id_name = {
         507: 'Коледино', 686: 'Новосибирск', 1193: 'Хабаровск', 1733: 'Екатеринбург',
@@ -434,6 +434,6 @@ def add_stock_data_site():
 
 
 #add_data_stock_api()
-add_data_sales()
+#add_data_sales()
 #add_stock_data_site()
 
