@@ -4,12 +4,11 @@ import pandas as pd
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.db.models import Case, Count, IntegerField, Q, When
-from django.db.models.functions import ExtractMonth, ExtractWeek, ExtractYear
+from django.db.models import Case, Count, IntegerField, Q, Sum, When
+from django.db.models.functions import ExtractMonth, ExtractWeek, ExtractYear, TruncWeek
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
-from django_pivot import pivot
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
                     SelectDateStocksForm)
@@ -190,6 +189,15 @@ def weekly_sales_data(request):
         count=Count(Case(When(finished_price__gte=0, then=1), output_field=IntegerField()))
     ).order_by('supplier_article', 'barcode', 'year', 'week')
 
+    articles_amount = Sales.objects.filter(finished_price__gte=0).annotate(
+        week=TruncWeek('pub_date')
+    ).values('week').annotate(
+        count=Count('supplier_article')
+    ).order_by('week')
+
+
+    print(articles_amount)
+
     sales_data = Sales.objects.filter(finished_price__gte=0).annotate(
         week=ExtractWeek('pub_date'),
         year=ExtractYear('pub_date')
@@ -226,6 +234,7 @@ def weekly_sales_data(request):
     context = {
         'data': data,
         'unique_week': unique_week,
+        'articles_amount': articles_amount,
     }
     return render(request, 'database/sales_by_week.html', context)
 
