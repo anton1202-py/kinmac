@@ -6,52 +6,91 @@
 {% block content%}
 
     <div class="features">
+        
         <h1>Добавить заявку</h1>
-        <div class="table">
+        <div class="main-form-create-payment">
             <form method="post" name="payments" enctype="multipart/form-data">
                 {% csrf_token %}
-                <label>{{form.project.label}}</label><p class="form-control" name="project_select">{{ form.project }}</p> <br>
-                <label>{{form.category.label}}</label><p class="form-control" id="category_select" name="category_select">{{ form.category }}</p> <br>
-                <label>{{form.payment_method.label}}</label><p class="form-control">{{ form.payment_method }}</p><br>
-                
-                <div id="pay_with_checking_account" style="display: none;">
-                    <label>{{form_pay_account.payer.label}}</label><p name="pay_with_checking_account" class="form-control">{{ form_pay_account.payer }}</p><br>
-                    <label>{{form_pay_account.payer_organization.label}}</label><p class="form-control">{{ form_pay_account.payer_organization }}</p><br>
-                    <label>{{form_pay_account.contractor_name.label}}</label>{{ form_pay_account.contractor_name }}<br>
-                    <label>{{form_pay_account.contractor_bill_number.label}}</label>{{ form_pay_account.contractor_bill_number }}<br>
-                    <label>{{form_pay_account.contractor_bik_of_bank.label}}</label>{{ form_pay_account.contractor_bik_of_bank }}<br>
-                    <label>{{form_pay_account.file_of_bill.label}}</label>{{ form_pay_account.file_of_bill }}<br>
-                </div>
+                <fieldset>
+                    <label for="project"><span>{{form.project.label}}</span>{{ form.project }}</label>
+                    <label for="category"><span>{{form.category.label}}</span>{{ form.category }}</label>
+                    <label for="payment_sum"><span>{{form.payment_sum.label}}</span>{{ form.payment_sum }}</label>
+                    <label for="urgent_payment"><span>{{form.urgent_payment.label}} </span>{{ form.urgent_payment }}</label>
+                    <label for="send_payment_file"><span>{{form.send_payment_file.label}}</span>{{form.send_payment_file}}</label>
+                    <label for="comment"><span>{{form.comment.label}}</span>{{ form.comment }}</label>
+                    <label for="payment_method"><span>{{form.payment_method.label}}</span>{{ form.payment_method }}</label>
+                </fieldset>
 
-                <div id="pay_with_card" style="display: none;">
-                    <label>{{form_pay_with_card.payer.label}}</label><p class="form-control">{{form_pay_with_card.payer}}</p><br>
-                    <label>{{form_pay_with_card.with_card_payer_organization.label}}</label><p class="form-control">{{form_pay_with_card.with_card_payer_organization}}</p><br>
-                    <label>{{form_pay_with_card.link_to_payment.label}}</label>{{form_pay_with_card.link_to_payment}}<br>
-                </div>
+                <fieldset id="pay_with_checking_account" style="display: none;">
+                    <label for="file_of_bill"><span>{{form_pay_account.file_of_bill.label}}</span>
+                        <span><label for="id_file_of_bill" class="choose-file-button">Выберете файл</label>
+                        <div class="input-file-list-create" id="input-file-list-create"></div></span>
+                        {{ form_pay_account.file_of_bill }}
+                    </label>
+                </fieldset>
+                        
+                <fieldset id="pay_with_card" style="display: none;">
+                    <label for="link_to_payment">
+                        <span>{{form_pay_with_card.link_to_payment.label}}</span>
+                        {{form_pay_with_card.link_to_payment}}
+                    </label>
+                </fieldset>
 
-                <div id="transfer_to_card" style="display: none;">
-                    <label>{{form_transfer_to_card.card_number.label}}</label>{{form_transfer_to_card.card_number}}<br>
-                    <label>{{form_transfer_to_card.phone_number.label}}</label>{{form_transfer_to_card.phone_number}}<br>
-                    <label>{{form_transfer_to_card.payment_receiver.label}}</label>{{form_transfer_to_card.payment_receiver}}<br>
-                    <label>{{form_transfer_to_card.bank_for_payment.label}}</label>{{form_transfer_to_card.bank_for_payment}}<br>
-                </div>
+                <fieldset id="transfer_to_card" style="display: none;">
+                    <label for="card_number"><span>{{form_transfer_to_card.card_number.label}}</span>
+                        {{form_transfer_to_card.card_number}}
+                    </label>
+                    <!-- {% if form_transfer_to_card.errors.card_number %}
+                        <div class="alert alert-danger">
+                            {{ form_transfer_to_card.errors.card_number }}
+                        </div>
+                    {% endif %} -->
+                    <label for="phone_number"><span>{{form_transfer_to_card.phone_number.label}}</span>
+                        {{form_transfer_to_card.phone_number}}
+                    </label>
+                    <label for="bank_for_payment"><span>{{form_transfer_to_card.bank_for_payment.label}}</span>
+                        {{form_transfer_to_card.bank_for_payment}}
+                    </label>
+                    <label for="payment_receiver"><span>{{form_transfer_to_card.payment_receiver.label}}</span>
+                        {{form_transfer_to_card.payment_receiver}}
+                    </label>   
+                </fieldset>
 
-                <div id="cash_payment" style="display: none;">
-                <label>{{form_cash_payment.cash_payment_payment_receiver.label}}</label>{{form_cash_payment.cash_payment_payment_receiver}}<br>   
-                </div>
-
-                <label>{{form.payment_sum.label}}</label>{{ form.payment_sum }} <br>
-                <label>{{form.comment.label}}</label>{{ form.comment }} <br>
-                <label>{{form.send_payment_file}} {{form.send_payment_file.label}}</label><br>
-                <label>{{form.file_of_payment.label}}</label>{{ form.file_of_payment }} <br>
-                <label>{{ form.urgent_payment }} {{form.urgent_payment.label}}</label><br>
+                <fieldset id="cash_payment" style="display: none;">
+                    <label for="cash_payment_payment_data"><span>{{form_cash_payment.cash_payment_payment_data.label}}</span>
+                        {{form_cash_payment.cash_payment_payment_data}}
+                    </label>
+                </fieldset>
 
                 <span>{{ error }}</span>
-
                 <button class="custom-button" type="submit" id="id_first" name="name_first">Создать заявку</button>
             </form>
-
         </div>
-        
+        <script>
+            document.getElementById('id_card_number').addEventListener('input', function (e) {
+                var value = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ');
+                e.target.value = value.trim();
+            });
+
+            // function formatPhoneNumber(phoneNumberString) {
+            //   var cleaned = ('' + phoneNumberString).replace(/\D/g, '');
+            //   var match = cleaned.match(/^7(\d{3})(\d{3})(\d{2})(\d{2})$/);
+            //   if (match) {
+            //     return '+7(' + match[1] + ') ' + match[2] + ' ' + match[3] + ' ' + match[4];
+            //   }
+            //   return null;
+            // }
+
+            // document.getElementById('id_phone_number').addEventListener('change', function(e) {
+            //   e.target.value = formatPhoneNumber(e.target.value);
+            // });
+            const fileInput = document.getElementById('id_file_of_bill');
+            const filePlace = document.getElementById('input-file-list-create');
+      
+            fileInput.addEventListener('change', (event) => {
+            const fileName = event.target.files[0].name;
+            filePlace.textContent = fileName;
+        });
+        </script>
     </div>
 {% endblock %} 

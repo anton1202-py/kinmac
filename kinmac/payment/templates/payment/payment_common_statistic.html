@@ -1,0 +1,226 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Статистика заявок{% endblock %}
+
+{% block content%}
+
+<!-- <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script> -->
+    <div class="features">
+        <h1>Статистика заявок</h1>
+        <div class='filter-data'>
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+
+                <div class="inner-form-data">
+                    <p>Дата</p>
+                    <input type="date" name="date" class="form-filter-data" required="" id="datestart">
+                </div><br>
+
+                <div class="inner-form-data">
+                    <p>Тип оплаты</p>
+                    <p class="form-filter-data">{{ form.payment_type }}</p>
+                </div><br>
+
+                <div class="inner-form-data">
+                    <p>Категория</p>
+                    <p class="form-filter-data">{{ form.category }}</p>
+                </div><br>
+                
+                <div class="inner-form-data">
+                    <p>Получатель</p>
+                    <input type="text"  name="contractor_name" class="form-filter-data" id="contractor_name">
+                </div><br>
+            
+                <div class="inner-form-data">
+                    <p>Статус</p>
+                    <input type="text"  name="status_of_payment" class="form-filter-data" id="status_of_payment">
+                </div><br>
+
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
+        
+        <div class="table_wrapper">
+            <p>С <b>{{ datestart }}</b> до <b>{{ datefinish }}</b> произведено оплат на <b>{{ amount_sum }}</b> рублей</p>
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                <tr>
+                    <th>ID заявки</th>
+                    <th>Дата создания</th>
+                    <th>Сумма</th>
+                    <th>Комментарий</th>
+                    <th>Проект</th>
+                    <th>Категория</th>
+                    <th>Плательщик</th>
+                    <th>Контрагент</th>
+                    <th>Способ платежа</th>
+                    <th>Статус</th>
+                    <th>Оплачено</th>
+                    <th>Действие</th>
+                    <th>Создатель</th>
+                    <th>Согласование</th>
+                    <th>Оплатил</th>
+                    <th>Счет</th>
+                    <th>Платёжка/Чек</th>
+                    <th style="display: none;">Присылать платежку</th>
+                </tr>
+                {% for el in payments %}
+                    <tr>
+                        <td><a href="{% url 'payment_detail' el.id %}">{{ el.id }}</a></td>
+                        
+                        <td>
+                            <div class="common-statistic-table-urgent-and-date">
+                                {% if el.urgent_payment == True and 'Оплачено' not in el.status_of_payment %}
+                                    <span class="material-symbols-outlined" id="urgent-icon">
+                                        local_fire_department
+                                    </span>
+                                {% endif %}
+                                {{ el.pub_date }}
+                            </div>
+                        </td>
+                        <td>{{ el.payment_sum }}</td>
+                        <td>{{ el.comment }}</td>
+                        <td>{{ el.project }}</td>
+                        <td>{{ el.category }}</td>
+                        <td>{{ el.payer_organization }}</td>
+                        <td>{{ el.contractor_name }}</td>
+                        <td>{{ el.payment_method }}</td>
+                        <td>{{ el.status_of_payment }}</td>
+                        <td>{{ el.date_of_payment }}</td>
+                        <td>
+                            <div class="action_icons">
+                                <form action="" method="POST">
+                                    {% csrf_token %}
+                                    {% if request.user.username in usernames  and 'Оплачено' not in el.status_of_payment %}
+                                        <button type="Submit" name="approval" value="{{ el.id }}">
+                                            <b>OK</b>
+                                        </button>
+                                    {% endif %}
+                                </form>
+                                {% if 'Оплачено' not in el.status_of_payment %}
+                                    <button type="Submit" name="to_pay" id="popup-pay-button">
+                                        <span class="material-symbols-outlined" id="pay-icon-button">
+                                            check_box
+                                        </span>
+                                    </button>
+                                    <button name="reject" value="{{ el.id }}" id="popup-button">
+                                        <span class="material-symbols-outlined" id="reject-icon-button">
+                                            do_not_disturb_on
+                                        </span>
+                                    </button>
+                                {% endif %}
+                                {% if request.user.username == 'admin' or request.user.username == 'yuriy_lisov' %}
+                                    <button type="Submit" name="edit" value="{{ el.id }}">
+                                        <a href="{% url 'payment_update' el.id %}">
+                                            <span class="material-symbols-outlined" id="edit-icon-button">
+                                                edit
+                                            </span>
+                                        </a>
+                                    </button>
+
+                                    <form action="" method="POST" id="ytr">
+                                        {% csrf_token %}
+                                        <button type="Submit" name="delete" value="{{ el.id }}" class="delete-icon-button">
+                                            <span class="material-symbols-outlined" id="delete-icon-button">
+                                                delete
+                                            </span>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                
+                            </div>
+                        </td>
+                        <td>{{ el.creator }}</td>
+                        <td>
+                            {% for status in approval_status %}
+                                    {% if status.payment.id == el.id  %}
+                                        <div class="common-statistic-table-approve">
+                                        {{status.user.last_name}} {{status.user.first_name}} 
+                                            {% if status.status == 'NOK'  %}
+                                                <span class="material-symbols-outlined">
+                                                    schedule
+                                                </span>
+                                            {% elif status.status == 'OK'  %}
+                                                <span class="material-symbols-outlined" id="pay-icon-button">
+                                                    done
+                                                </span>
+                                            {% elif status.status == 'REJECTED'  %}
+                                                <span class="material-symbols-outlined" id="reject-icon-button">
+                                                    do_not_disturb_on
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                            {% endfor %}
+                        </td>
+                        
+                        <td>{{ el.accountant }}</td>
+                        <td>
+                            {% for account in pay_account %}
+                                {% if account.payment_id.id == el.id %}
+                                <a href="{{ account.file_of_bill.url }}" download>{{ account.file_of_bill }}</a>
+                                {% else %}
+                                <p></p>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        {% if el.file_of_payment %}
+                            <td><a href="{{ el.file_of_payment.url }}" download>{{ el.file_of_payment }}</a></td>
+                        {% else %}
+                            <td><a href="" download>{{ el.file_of_payment }}</a></td>
+                        {% endif %}
+                        <td style="display: none;">{{el.send_payment_file}}</td>
+                    </tr>
+                    
+                {% endfor %}
+            </table>
+            
+        </div>
+        <div id="popup-container" style="display:none;">        
+            <form method="post" class="reject_payment_class" name="form_reject_payment_name" enctype="multipart/form-data">
+                {% csrf_token %} 
+                <span class="material-symbols-sharp" onclick="closePopup()" id="popup-icon_close">close</span>
+                <br>
+                <label for="popup-input">Введите причины, по которой отклонили заявку:</label>
+                <textarea class="form-control" type="text" id="popup-input" name="popup-input-name"></textarea>
+                <button class="custom-button" type="submit" id="reject_payment_id" name="reject_payment">Сохранить</button>
+            </form>
+        </div>
+
+        <div id="popup-pay-container" style="display:none;">    
+            <div class="popup-pay-container-class" >   
+                <form method="POST" class="pay_payment_class" name="form_pay_payment_name" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <span class="material-symbols-sharp" onclick="closePopup()" id="popup-icon_close">close</span>
+                    <br>
+                    <fieldset>
+                        <label for="project"><span>{{main_form.payer_organization.label}}</span>{{ main_form.payer_organization }}</label>
+                        <label for="project"><span>{{main_form.contractor_name.label}}</span>{{ main_form.contractor_name }}</label>
+                        <div id="id-form-pay_payment-add-file">
+                            <label for="project"><span>{{main_form.file_of_payment.label}}</span>
+                                <span><label for="id_file_of_payment" class="choose-file-button">Выберете файл</label>
+                                <div class="input-file-list-create" id="input-file-list-create"></div></span>
+                                {{ main_form.file_of_payment }}
+                            </label>
+                        </div>
+                    </fieldset>
+                    <button class="custom-button" type="submit" id="pay_payment_id" name="pay_payment">Сохранить</button>
+                </form>
+            </div> 
+        </div>
+        <script>
+            
+            const fileInput = document.getElementById('id_file_of_payment');
+            const filePlace = document.getElementById('input-file-list-create');
+      
+            fileInput.addEventListener('change', (event) => {
+            const fileName = event.target.files[0].name;
+            filePlace.textContent = fileName;
+        });
+        </script>
+    </div>    
+        
+{% endblock %} 

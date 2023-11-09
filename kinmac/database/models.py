@@ -40,7 +40,7 @@ class Articles(models.Model):
         verbose_name='Размер',
         max_length=50,
         null=True,
-    )    
+    )
     model = models.CharField(
         verbose_name='Модель',
         max_length=50,
@@ -197,7 +197,6 @@ class StocksApi(models.Model):
     class Meta:
         verbose_name = 'Остатки WB API'
         verbose_name_plural = 'Остатки WB API'
-
 
 
 class StocksSite(models.Model):
