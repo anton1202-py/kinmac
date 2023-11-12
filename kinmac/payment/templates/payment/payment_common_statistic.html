@@ -109,7 +109,7 @@
                                         </span>
                                     </button>
                                 {% endif %}
-                                {% if request.user.username == 'admin' or request.user.username == 'yuriy_lisov' %}
+                                {% if request.user.is_staff or request.user.username == 'yuriy_lisov' %}
                                     <button type="Submit" name="edit" value="{{ el.id }}">
                                         <a href="{% url 'payment_update' el.id %}">
                                             <span class="material-symbols-outlined" id="edit-icon-button" title="Редактировать заявку">
