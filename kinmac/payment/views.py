@@ -13,9 +13,9 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
-from .forms import (CashPaymentForm, FilterPayWithCheckingForm, PaymentsForm,
-                    PayWithCardForm, PayWithCheckingAccountForm,
-                    TransferToCardForm)
+from .forms import (ApprovalStatusForm, CashPaymentForm,
+                    FilterPayWithCheckingForm, PaymentsForm, PayWithCardForm,
+                    PayWithCheckingAccountForm, TransferToCardForm)
 from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      PayerOrganization, Payments, PayWithCard,
                      PayWithCheckingAccount, TransferToCard)
@@ -224,7 +224,11 @@ def payment_common_statistic(request):
             payment=Payments.objects.get(id=request.POST['reject_payment']),
             user=ApprovedFunction.objects.get(
                 username=request.user.id)
-        ).update(status='REJECTED')
+        ).update(
+            status='REJECTED',
+            rejection_reason=request.POST['popup-input-name']
+        )
+
         payments.filter(id=request.POST['reject_payment']).update(
             accountant='',
             date_of_payment=None,
@@ -234,16 +238,21 @@ def payment_common_statistic(request):
         return redirect('payment_common_statistic')
 
     elif request.method == 'POST' and 'pay_payment' in request.POST.keys():
-
-        print(request.POST)
-        print(request.FILES.get('file_of_payment'))
-
         pay = Payments.objects.get(id=request.POST['pay_payment'])
+
         pay.status_of_payment = 'Оплачено'
         pay.date_of_payment = now
         pay.payer_organization = PayerOrganization.objects.get(
             id=request.POST['payer_organization'])
+
+        if str(pay.project) == 'KINMAC' and str(pay.payer_organization) == 'ИП Лисов Юрий Владимирович ИНН 366315065753' and (
+           str(pay.payment_method) == 'Оплата по расчетному счету' or str(pay.payment_method) == 'Оплата по карте на сайте'):
+            pay.payment_coefficient = 1.02
+        if str(pay.project) == 'KINMAC' and (
+           str(pay.payment_method) == 'Перевод на карту' or str(pay.payment_method) == 'Наличная оплата'):
+            pay.payment_coefficient = 1.02
         pay.contractor_name = request.POST['contractor_name']
+
         if request.FILES:
             pay.file_of_payment = request.FILES['file_of_payment']
         pay.accountant = f'{request.user.last_name} {request.user.first_name}'
@@ -266,14 +275,12 @@ def payment_common_statistic(request):
 
         payment_for_del.delete()
         return redirect('payment_common_statistic')
-    elif request.method == 'POST':
-        print(request.POST)
 
     if form.is_valid():
         date_filter = form.cleaned_data.get("date")
         payment_type = form.cleaned_data.get("payment_type")
         category = form.cleaned_data.get("category")
-        contractor = form.cleaned_data.get("contractor")
+        contractor_name = form.cleaned_data.get("contractor_name")
         status_of_payment = form.cleaned_data.get("status_of_payment")
 
         if date_filter:
@@ -284,9 +291,9 @@ def payment_common_statistic(request):
             payments = payments.filter(
                 Q(category__name=category)).order_by('id')
 
-        if contractor:
-            pay_account = PayWithCheckingAccount.objects.filter(
-                Q(contractor_name=contractor)).order_by('id')
+        if contractor_name:
+            payments = Payments.objects.filter(
+                Q(contractor_name=contractor_name)).order_by('id')
 
         if payment_type:
             payments = payments.filter(
@@ -318,29 +325,44 @@ def payment_common_statistic(request):
 class PaymentDetailView(UpdateView):
     model = Payments
     second_model = PayWithCheckingAccount
-    cash_payment = CashPayment
     pay_with_card = PayWithCard
+    transfer_for_card = TransferToCard
+    cash_payment = CashPayment
+    approval_model = ApprovalStatus
 
     form_class = PaymentsForm
     form_class2 = PayWithCheckingAccountForm
-    cash_payment_form = CashPaymentForm
     pay_with_card_form = PayWithCardForm
+    transfer_for_card_form = TransferToCardForm
+    cash_payment_form = CashPaymentForm
+    approval_model_form = ApprovalStatusForm
 
-    template_name = 'payment/payment_detail_pay_account.html'
+    template_name = 'payment/payment_detail.html'
     context_object_name = 'payments'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['second_model_data'] = self.second_model.objects.filter(
-            payment_id=self.object.pk)[0]
-        context['pay_with_card'] = self.pay_with_card.objects.filter(
-            payment_id=self.object.pk)[0]
-        context['cash_payment'] = self.cash_payment.objects.filter(
-            payment_id=self.object.pk)[0]
-        model_data = self.model.objects.filter(id=self.object.pk)[0]
 
-        form_class_data = self.form_class(instance=model_data)
-        context['form_class'] = form_class_data
+        context['approval_model'] = self.approval_model.objects.filter(
+            payment=self.object.pk)
+        data_update_dict = {
+            self.second_model.objects.filter(
+                payment_id=self.object.pk): [self.form_class2, 'second_form'],
+            self.pay_with_card.objects.filter(
+                payment_id=self.object.pk): [self.pay_with_card_form, 'pay_with_card_form'],
+            self.transfer_for_card.objects.filter(
+                payment_id=self.object.pk): [self.transfer_for_card_form, 'transfer_for_card_form'],
+            self.cash_payment.objects.filter(
+                payment_id=self.object.pk): [self.cash_payment_form, 'cash_payment_form'],
+            self.approval_model.objects.filter(
+                payment=self.object.pk): [self.approval_model_form, 'approval_model_form']
+        }
+
+        for key, value in data_update_dict.items():
+            if key:
+                model_data = key[0]
+                form_class_data = value[0](instance=model_data)
+                context[f'{value[1]}'] = form_class_data
         return context
 
     def get_queryset(self):
@@ -350,40 +372,6 @@ class PaymentDetailView(UpdateView):
         self.object = self.get_object()
         form = self.get_form()
         form.instance = self.object
-        saved_payment = Payments.objects.get(id=self.object.pk)
-
-        file = request.FILES.get('file_of_payment')
-        if file:
-            form.instance.file_of_payment.save(file.name, file)
-            return redirect(f'payment_detail', self.object.pk)
-
-        if request.method == 'POST':
-            if 'pay_payment' in request.POST:
-                if saved_payment.send_payment_file == True and not saved_payment.file_of_payment:
-                    context = self.get_context_data(**kwargs)
-                    context['error_payment_file'] = 'Добавьте файл об оплате!'
-                    return self.render_to_response(context)
-                saved_payment.status_of_payment = f'Оплачено {request.user.username}'
-                saved_payment.accountant = request.user.username
-                saved_payment.date_of_payment = now
-                saved_payment.save(
-                    update_fields=['accountant', 'date_of_payment', 'status_of_payment'])
-            elif 'cancel_payment' in request.POST:
-                saved_payment.status_of_payment = f'Отменена {request.user.username}'
-                saved_payment.accountant = None
-                saved_payment.date_of_payment = None
-                saved_payment.save(
-                    update_fields=['accountant', 'date_of_payment', 'status_of_payment'])
-            elif 'approve_payment' in request.POST:
-                saved_payment.status_of_payment = approval_person(
-                    request.user.username)
-                saved_payment.save(update_fields=['status_of_payment'])
-            elif 'reject_payment' in request.POST:
-                saved_payment.rejection_reason = request.POST['popup-input-name']
-                saved_payment.status_of_payment = f'Отклонено {request.user.username}'
-                saved_payment.save(
-                    update_fields=['status_of_payment', 'rejection_reason'])
-
         return redirect(f'payment_detail', self.object.pk)
 
 
@@ -393,18 +381,27 @@ class PaymentUpdateView(UpdateView):
     pay_with_card = PayWithCard
     transfer_for_card = TransferToCard
     cash_payment = CashPayment
+    approval_model = ApprovalStatus
 
     form_class = PaymentsForm
     form_class2 = PayWithCheckingAccountForm
     pay_with_card_form = PayWithCardForm
     transfer_for_card_form = TransferToCardForm
     cash_payment_form = CashPaymentForm
+    approval_model_form = ApprovalStatusForm
 
-    template_name = 'payment/payment_update_account.html'
+    template_name = 'payment/payment_update.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        self.approval_model.objects.filter(
+            payment=self.object.pk)[0]
 
+        context['approval_model'] = self.approval_model.objects.filter(
+            payment=self.object.pk)
+        for i in self.approval_model.objects.filter(
+                payment=self.object.pk):
+            print(i.user.username, i.status)
         data_update_dict = {
             self.second_model.objects.filter(
                 payment_id=self.object.pk): [self.form_class2, 'second_form'],
@@ -413,7 +410,9 @@ class PaymentUpdateView(UpdateView):
             self.transfer_for_card.objects.filter(
                 payment_id=self.object.pk): [self.transfer_for_card_form, 'transfer_for_card_form'],
             self.cash_payment.objects.filter(
-                payment_id=self.object.pk): [self.cash_payment_form, 'cash_payment_form']
+                payment_id=self.object.pk): [self.cash_payment_form, 'cash_payment_form'],
+            self.approval_model.objects.filter(
+                payment=self.object.pk): [self.approval_model_form, 'approval_model_form']
         }
 
         for key, value in data_update_dict.items():
@@ -452,9 +451,9 @@ class PaymentUpdateView(UpdateView):
                 if form.is_valid() and form_class.is_valid():
                     return self.form_valid(form, form_class)
                 else:
-                    print(form_class.errors)
-                    messages.error(request, "Error")
-                    print('Формы НЕ валидны')
+                    # print(form_class.errors)
+                    # messages.error(request, "Error")
+                    # print('Формы НЕ валидны')
                     return self.form_invalid(form, form_class)
 
     def form_valid(self, form, form_2):

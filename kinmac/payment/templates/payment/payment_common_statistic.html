@@ -12,30 +12,26 @@
             <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
 
-                <div class="inner-form-data">
-                    <p>Дата</p>
-                    <input type="date" name="date" class="form-filter-data" required="" id="datestart">
-                </div><br>
-
-                <div class="inner-form-data">
-                    <p>Тип оплаты</p>
-                    <p class="form-filter-data">{{ form.payment_type }}</p>
-                </div><br>
-
-                <div class="inner-form-data">
-                    <p>Категория</p>
-                    <p class="form-filter-data">{{ form.category }}</p>
-                </div><br>
-                
-                <div class="inner-form-data">
-                    <p>Получатель</p>
-                    <input type="text"  name="contractor_name" class="form-filter-data" id="contractor_name">
-                </div><br>
-            
-                <div class="inner-form-data">
-                    <p>Статус</p>
-                    <input type="text"  name="status_of_payment" class="form-filter-data" id="status_of_payment">
-                </div><br>
+                <label for="datestart">
+                    <span>Дата</span><br>
+                    <input type="date" name="date" id="datestart">
+                </label>
+                <label for="id_payment_type">
+                    <span>Тип оплаты</span><br>
+                    {{ form.payment_type }}
+                </label>
+                <label for="id_category">
+                    <span>Категория</span><br>
+                    {{ form.category }}
+                </label>
+                <label for="contractor_name">
+                    <span>Контрагент</span><br>
+                    <input type="text"  name="contractor_name" id="contractor_name">
+                </label>
+                <label for="status_of_payment">
+                    <span>Статус</span><br>
+                    <input type="text"  name="status_of_payment" id="status_of_payment">
+                </label>
 
                 <div class="inner-form-data">
                     <br>
@@ -66,6 +62,7 @@
                     <th>Счет</th>
                     <th>Платёжка/Чек</th>
                     <th style="display: none;">Присылать платежку</th>
+                    <th>Причина отклонения</th>
                 </tr>
                 {% for el in payments %}
                     <tr>
@@ -96,18 +93,18 @@
                                     {% csrf_token %}
                                     {% if request.user.username in usernames  and 'Оплачено' not in el.status_of_payment %}
                                         <button type="Submit" name="approval" value="{{ el.id }}">
-                                            <b>OK</b>
+                                            <b title="Согласовать">OK</b>
                                         </button>
                                     {% endif %}
                                 </form>
                                 {% if 'Оплачено' not in el.status_of_payment %}
                                     <button type="Submit" name="to_pay" id="popup-pay-button">
-                                        <span class="material-symbols-outlined" id="pay-icon-button">
+                                        <span class="material-symbols-outlined" id="pay-icon-button" title="Оплатить">
                                             check_box
                                         </span>
                                     </button>
                                     <button name="reject" value="{{ el.id }}" id="popup-button">
-                                        <span class="material-symbols-outlined" id="reject-icon-button">
+                                        <span class="material-symbols-outlined" id="reject-icon-button" title="Отклонить и написать причину">
                                             do_not_disturb_on
                                         </span>
                                     </button>
@@ -115,7 +112,7 @@
                                 {% if request.user.username == 'admin' or request.user.username == 'yuriy_lisov' %}
                                     <button type="Submit" name="edit" value="{{ el.id }}">
                                         <a href="{% url 'payment_update' el.id %}">
-                                            <span class="material-symbols-outlined" id="edit-icon-button">
+                                            <span class="material-symbols-outlined" id="edit-icon-button" title="Редактировать заявку">
                                                 edit
                                             </span>
                                         </a>
@@ -124,7 +121,7 @@
                                     <form action="" method="POST" id="ytr">
                                         {% csrf_token %}
                                         <button type="Submit" name="delete" value="{{ el.id }}" class="delete-icon-button">
-                                            <span class="material-symbols-outlined" id="delete-icon-button">
+                                            <span class="material-symbols-outlined" id="delete-icon-button" title="Удалить заявку">
                                                 delete
                                             </span>
                                         </button>
@@ -173,8 +170,13 @@
                             <td><a href="" download>{{ el.file_of_payment }}</a></td>
                         {% endif %}
                         <td style="display: none;">{{el.send_payment_file}}</td>
+                        {% if el.rejection_reason == None %}
+                            <td> </td>
+                        {% else %}   
+                            <td>{{ el.rejection_reason }}</td>
+                        {% endif %}
+                        
                     </tr>
-                    
                 {% endfor %}
             </table>
             

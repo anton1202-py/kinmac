@@ -3,9 +3,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.forms import (CheckboxInput, ChoiceField, FileInput, ModelForm,
                           Select, TextInput)
 
-from .models import (CashPayment, Categories, PayerOrganization, Payers,
-                     PaymentMethod, Payments, PayWithCard,
-                     PayWithCheckingAccount, Projects, TransferToCard)
+from .models import (ApprovalStatus, CashPayment, Categories,
+                     PayerOrganization, Payers, PaymentMethod, Payments,
+                     PayWithCard, PayWithCheckingAccount, Projects,
+                     TransferToCard)
 from .validators import (StripToNumbers, format_phone_number,
                          validate_credit_card)
 
@@ -13,9 +14,9 @@ from .validators import (StripToNumbers, format_phone_number,
 class PaymentsForm(ModelForm):
     class Meta:
         model = Payments
-        fields = ['creator', 'project', 'payer_organization', 'category', 'payment_method', 'payment_sum',
-                  'comment', 'send_payment_file', 'contractor_name', 'file_of_payment',
-                  'urgent_payment']
+        fields = ['pub_date', 'creator', 'project', 'payer_organization', 'category', 'payment_method', 'payment_sum',
+                  'comment', 'send_payment_file', 'contractor_name', 'file_of_payment', 'accountant',
+                  'urgent_payment', 'status_of_payment', 'date_of_payment', 'accountant', 'file_of_payment', 'payment_coefficient']
         project = forms.ChoiceField(choices=Projects.objects.all())
         category = forms.ChoiceField(choices=Categories.objects.all())
         payer_organization = forms.ChoiceField(
@@ -24,6 +25,7 @@ class PaymentsForm(ModelForm):
 
         send_payment_file = forms.CheckboxSelectMultiple()
         urgent_payment = forms.CheckboxSelectMultiple()
+        payment_coefficient = forms.FloatField(required=False)
         widgets = {
             'project': Select(attrs={
                 'class': 'input-field',
@@ -151,6 +153,12 @@ class CashPaymentForm(ModelForm):
         }
 
 
+class ApprovalStatusForm(ModelForm):
+    class Meta:
+        model = ApprovalStatus
+        fields = ['user', 'status']
+
+
 class FilterPayWithCheckingForm(forms.Form):
     """Форма отвечает за фильтрацию записей на странице со списком заявок"""
     date = forms.DateField(
@@ -165,13 +173,13 @@ class FilterPayWithCheckingForm(forms.Form):
     category = forms.ModelChoiceField(
         queryset=Categories.objects.all(),
         required=False,)
-    contractor = forms.CharField(
+    contractor_name = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'class': 'input-field',
         }))
     status_of_payment = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'class': 'input-field',
         }))

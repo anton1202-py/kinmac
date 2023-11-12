@@ -489,6 +489,18 @@ form {
 
 }
 
+.filter-data .big-filter-form input,
+.filter-data .big-filter-form select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+}
+
 .filter-form {
     margin: 0 0 20px 0;
     padding: 0;
@@ -538,10 +550,6 @@ form {
     border-radius: var(--border-radius-1);
 }
 
-.inner-form-data p {
-    margin: 0;
-    padding: 0;
-}
 /* ========= КОНЕЦ ФИЛЬТРА =========*/
 
 /* ==========ЗАГРУЗКА ИЗ EXCEL ========= */
@@ -731,6 +739,7 @@ table tr:hover {
 	background: var(--color-background);
 }
 
+
 .main-form-create-payment textarea{
 	width:250px;
 	height:50px;
@@ -872,13 +881,6 @@ table tr:hover {
     display: block;
 	margin-bottom: 2rem;
     gap: 2rem;
-}
-
-.input-file-list-create {
-    font-size: 0.8rem;
-    color: #bcbcbc;
-    margin: 0;
-    padding: 0;
 }
 
 .popup-pay-container-class label > span{
@@ -1113,7 +1115,6 @@ table tr:hover {
 
 /* ========== POP UP окно о забытом файле платежки ========== */
 
-
 .error-popup-container {
     position: fixed;
     top: 50%;
@@ -1129,3 +1130,85 @@ table tr:hover {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(200px);
   }
+
+/* ========== ФОРМА РЕДАКТИРОВАНИЯ ЗАЯВКИ ========= */
+
+.main-form-create-payment form .update-form-table {
+    background: var(--color-background);
+    box-shadow: none;  
+}
+
+.features .main-form-create-payment form table th:first-child, 
+.features .main-form-create-payment form table td:first-child {
+    text-align: left;
+}
+
+.features .main-form-create-payment form table input,
+.features .main-form-create-payment form table textarea,
+.features .main-form-create-payment form table select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+    border: none;
+    width: 100%;
+}
+
+.features .main-form-create-payment form table label {
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: var(--color-dark);
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+    margin: 0;
+}
+
+/* ========== КОНЕЦ ФОРМЫ РЕДАКТИРОВАНИЯ ЗАЯВКИ ========= */
+
+/* ========== ФОРМА ПРОСМОТРА ЗАЯВКИ ========= */
+
+.main-form-create-payment .update-form-table {
+    background: var(--color-background);
+    box-shadow: none;  
+}
+
+.features .main-form-create-payment table th:first-child, 
+.features .main-form-create-payment table td:first-child {
+    text-align: left;
+}
+
+.features .main-form-create-payment table input,
+.features .main-form-create-payment table textarea,
+.features .main-form-create-payment table select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+    border: none;
+    width: 100%;
+}
+
+.features .main-form-create-payment table label {
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: var(--color-dark);
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+    margin: 0;
+}
+
+/* ========== КОНЕЦ ФОРМЫ ПРОСМОТРА ЗАЯВКИ ========= */

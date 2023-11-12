@@ -105,7 +105,8 @@ class Contractors(models.Model):
 class Payments(models.Model):
     pub_date = models.DateTimeField(
         verbose_name='Дата создания заявки',
-        default=datetime.now().strftime('%Y-%m-%d %H:%M')
+        default=datetime.now().strftime('%Y-%m-%d %H:%M'),
+        blank=True,
     )
     creator = models.CharField(
         verbose_name='Создатель заявки',
@@ -184,6 +185,11 @@ class Payments(models.Model):
         blank=True,
         null=True,
     )
+    payment_coefficient = models.FloatField(
+        verbose_name='Коэффициент для учета',
+        default=1.0,
+        blank=True,
+    )
 
     @property
     def my_file_of_payment(self):
@@ -209,6 +215,17 @@ class ApprovalStatus(models.Model):
     status = models.CharField(
         verbose_name='Статус',
         max_length=20,
+        blank=True,
+        null=True,
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Изменения статуса',
+        blank=True,
+        null=True,
+    )
+    rejection_reason = models.CharField(
+        verbose_name='Причина отказа заявки',
+        max_length=300,
         blank=True,
         null=True,
     )
