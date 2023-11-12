@@ -91,7 +91,7 @@
                             <div class="action_icons">
                                 <form action="" method="POST">
                                     {% csrf_token %}
-                                    {% if (request.user.username in usernames or request.user.is_staff)  and 'Оплачено' not in el.status_of_payment %}
+                                    {% if request.user.username in usernames and 'Оплачено' not in el.status_of_payment %}
                                         <button type="Submit" name="approval" value="{{ el.id }}">
                                             <b title="Согласовать">OK</b>
                                         </button>
