@@ -26,6 +26,10 @@
     --padding-1: 1.2rem;
     
     --box-shadow: 0 2rem 3rem var(--color-light);
+
+    --small-table-gap: 0.2rem;
+    --normal-table-gap: 1rem;
+    --big-table-gap: 2rem;
 }
 
 * {
@@ -383,6 +387,9 @@ ul.mainmenu li a:hover {
     border-radius: 8px;
     border: 1px solid var(--color-primary);
     color: var(--color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     white-space: nowrap;
     font-weight: 600;
 }
@@ -482,6 +489,18 @@ form {
 
 }
 
+.filter-data .big-filter-form input,
+.filter-data .big-filter-form select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+}
+
 .filter-form {
     margin: 0 0 20px 0;
     padding: 0;
@@ -531,15 +550,12 @@ form {
     border-radius: var(--border-radius-1);
 }
 
-.inner-form-data p {
-    margin: 0;
-    padding: 0;
-}
 /* ========= КОНЕЦ ФИЛЬТРА =========*/
 
 /* ==========ЗАГРУЗКА ИЗ EXCEL ========= */
 
 .input-file {
+    display: none;
     visibility: hidden;
 }
 /* ==========ИМПОРТ В EXCEL ==========*/
@@ -656,6 +672,131 @@ table tr:hover {
     transition: transform .6s;	
 }
 
+
+/* =========== СОЗДАНИЕ ЗАЯВКИ НА ОПЛАТУ ==========*/
+
+.main-form-create-payment {
+    max-width: 450px;
+}
+
+/* Кнопка для выбора файла */
+.main-form-create-payment label .choose-file-button{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    color: var(--color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    margin: 0;
+}
+
+.main-form-create-payment label .choose-file-button:hover{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    font-weight: 600;
+    margin: 0;
+}
+/* Конец кнопки для выбора файла */
+
+.main-form-create-payment label{
+    display: block;
+	margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.input-file-list-create {
+    font-size: 0.8rem;
+    color: #bcbcbc;
+    margin: 0;
+    padding: 0;
+}
+
+.main-form-create-payment label > span{
+    float: left;
+	width: 45%;
+	color: var(--color-dark);
+	font-weight: bold;
+	font-size: 13px;
+	text-shadow: 1px 1px 1px #fff;
+}
+
+.main-form-create-payment fieldset{
+    border-radius: var(--border-radius-2);
+	-webkit-border-radius: var(--border-radius-2);
+	-moz-border-radius: var(--border-radius-2);
+	margin: 0px 0px 10px 0px;
+	border: 1px solid var(--color-primary);
+	padding: 20px;
+	background: var(--color-background);
+}
+
+
+.main-form-create-payment textarea{
+	width:250px;
+	height:50px;
+}
+
+.main-form-create-payment input[type=text],
+.main-form-create-payment input[type=date],
+.main-form-create-payment input[type=datetime],
+.main-form-create-payment input[type=number],
+.main-form-create-payment input[type=search],
+.main-form-create-payment input[type=time],
+.main-form-create-payment input[type=url],
+.main-form-create-payment input[type=email],
+.main-form-create-payment input[type=file],
+.main-form-create-payment select, 
+.main-form-create-payment textarea{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+	width:50%;
+}
+.main-form-create-payment  input[type=submit],
+.main-form-create-payment  input[type=button]{
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: #FFCBE2;
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+}
+.form-create-payment {
+    display: flex;
+    vertical-align: middle;
+    gap: 1rem;
+}
+
+.form-create-payment p {
+    white-space: nowrap;
+    padding: 0;
+
+}
+.form-control-div {
+    padding: 0;
+    margin: 0;
+}
+
+
+/* =========== КОНЕЦ СОЗДАНИЯ ЗАЯВКИ НА ОПЛАТУ ==========*/
+
 /* ========= PAYMENT DETAIL =========*/
 
 .creator-buttons {
@@ -678,11 +819,122 @@ table tr:hover {
     float: left;
 }
 
+/* ========== ВСПЛЫВАЮЩИЕ ФОРМЫ =========== */
+
+#popup-container {
+    z-index: 1;
+    position: absolute;
+}
+
+#popup-pay-container {
+    z-index: 1;
+    position: absolute;
+}
+
 #popup-container .reject_payment_class {
     background-color: #f2f2f2;
     padding: 20px;
     border-radius: var(--border-radius-1);
     box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+#popup-pay-container .pay_payment_class {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+.popup-pay-container-class {
+    max-width: 450px;
+}
+
+/* Кнопка для выбора файла */
+.popup-pay-container-class label .choose-file-button{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    color: var(--color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    margin: 0;
+}
+
+.popup-pay-container-class label .choose-file-button:hover{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    font-weight: 600;
+    margin: 0;
+}
+/* Конец кнопки для выбора файла */
+
+.popup-pay-container-class label{
+    display: block;
+	margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.popup-pay-container-class label > span{
+    float: left;
+	width: 45%;
+	color: var(--color-dark);
+	font-weight: bold;
+	font-size: 13px;
+	text-shadow: 1px 1px 1px #fff;
+}
+
+.pay_payment_class fieldset{
+    border-radius: var(--border-radius-2);
+	-webkit-border-radius: var(--border-radius-2);
+	-moz-border-radius: var(--border-radius-2);
+	margin: 0px 0px 10px 0px;
+	border: 1px solid var(--color-primary);
+	padding: 20px;
+	background: var(--color-background);
+}
+
+
+.pay_payment_class input[type=text],
+.pay_payment_class input[type=date],
+.pay_payment_class input[type=datetime],
+.pay_payment_class input[type=number],
+.pay_payment_class input[type=search],
+.pay_payment_class input[type=time],
+.pay_payment_class input[type=url],
+.pay_payment_class input[type=email],
+.pay_payment_class input[type=file],
+.pay_payment_class select, 
+.pay_payment_class textarea{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+	width:50%;
+}
+.pay_payment_class input[type=submit],
+.pay_payment_class input[type=button]{
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: #FFCBE2;
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
 }
 
 #reject_payment_id {
@@ -700,6 +952,68 @@ table tr:hover {
 #popup-icon_close {
     float: right;
     margin-bottom: 30px;
+}
+
+#id-form-pay_payment-add-file {
+    display: none;
+}
+
+/* ========== КОНЕЦ ВСПЛЫВАЮЩИХ ФОРМ =========== */
+
+/* ========== ОБЩАЯ СТАТИСТИКА. ТАБЛИЦА ==========*/
+
+.common-statistic-table-urgent-and-date {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--small-table-gap);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+}
+
+.common-statistic-table-approve {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--small-table-gap);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+
+}
+
+.action_icons {
+    display: flex;
+    gap: 1rem;
+}
+
+.action_icons form button b{
+    color: var(--color-info-dark);
+}
+
+#urgent-icon {
+    color: var(--color-danger);
+    margin: 0;
+    padding-bottom: 3px;
+}
+
+#pay-icon-button {
+    color: var(--color-success);
+}
+
+#reject-icon-button {
+    color: var(--color-danger);
+}
+
+#delete-icon-button {
+    color: var(--color-info-dark);
+}
+
+#edit-icon-button {
+    color: var(--color-info-dark);
 }
 
 .table_wrapper{
@@ -724,10 +1038,34 @@ table tr:hover {
 
 .table_wrapper table td {
 	padding: 0.5rem 0.5rem;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     vertical-align: center;
     border: 1px solid var(--color-table-separator);  
 }
+
+.table_wrapper table td form{
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 1rem;
+    width: auto;
+}
+
+.table_wrapper table td p{
+    padding: 0;
+    margin: 0;
+}
+
+.table_wrapper table td button{
+    background: transparent;
+}
+/* ========== ПОДСКАЗКИ ========== */
+
+
+/* ========== КОНЕЦ ПОДСКАЗКИ ========== */
+
 
 .form-paymentfile {
     width: 100px;
@@ -777,7 +1115,6 @@ table tr:hover {
 
 /* ========== POP UP окно о забытом файле платежки ========== */
 
-
 .error-popup-container {
     position: fixed;
     top: 50%;
@@ -793,3 +1130,85 @@ table tr:hover {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(200px);
   }
+
+/* ========== ФОРМА РЕДАКТИРОВАНИЯ ЗАЯВКИ ========= */
+
+.main-form-create-payment form .update-form-table {
+    background: var(--color-background);
+    box-shadow: none;  
+}
+
+.features .main-form-create-payment form table th:first-child, 
+.features .main-form-create-payment form table td:first-child {
+    text-align: left;
+}
+
+.features .main-form-create-payment form table input,
+.features .main-form-create-payment form table textarea,
+.features .main-form-create-payment form table select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+    border: none;
+    width: 100%;
+}
+
+.features .main-form-create-payment form table label {
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: var(--color-dark);
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+    margin: 0;
+}
+
+/* ========== КОНЕЦ ФОРМЫ РЕДАКТИРОВАНИЯ ЗАЯВКИ ========= */
+
+/* ========== ФОРМА ПРОСМОТРА ЗАЯВКИ ========= */
+
+.main-form-create-payment .update-form-table {
+    background: var(--color-background);
+    box-shadow: none;  
+}
+
+.features .main-form-create-payment table th:first-child, 
+.features .main-form-create-payment table td:first-child {
+    text-align: left;
+}
+
+.features .main-form-create-payment table input,
+.features .main-form-create-payment table textarea,
+.features .main-form-create-payment table select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+    border: none;
+    width: 100%;
+}
+
+.features .main-form-create-payment table label {
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: var(--color-dark);
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+    margin: 0;
+}
+
+/* ========== КОНЕЦ ФОРМЫ ПРОСМОТРА ЗАЯВКИ ========= */
