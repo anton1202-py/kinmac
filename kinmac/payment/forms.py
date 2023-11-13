@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.forms import (CheckboxInput, ChoiceField, FileInput, ModelForm,
                           Select, TextInput)
 
@@ -7,8 +6,7 @@ from .models import (ApprovalStatus, CashPayment, Categories,
                      PayerOrganization, Payers, PaymentMethod, Payments,
                      PayWithCard, PayWithCheckingAccount, Projects,
                      TransferToCard)
-from .validators import (StripToNumbers, format_phone_number,
-                         validate_credit_card)
+from .validators import StripToNumbers, format_phone_number
 
 
 class PaymentsForm(ModelForm):

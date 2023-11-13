@@ -1,19 +1,9 @@
 import datetime
-import json
-from datetime import date, timedelta
+from datetime import date
 
-import pandas as pd
-import pytz
-from django.contrib import messages
-from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group, User
-from django.contrib.auth.views import LoginView
 from django.db.models import Q, Sum
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
-from django.utils import timezone
-from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
+from django.views.generic import UpdateView
 
 from .forms import (ApprovalStatusForm, CashPaymentForm,
                     FilterPayWithCheckingForm, PaymentsForm, PayWithCardForm,
@@ -21,8 +11,7 @@ from .forms import (ApprovalStatusForm, CashPaymentForm,
 from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      PayerOrganization, Payments, PayWithCard,
                      PayWithCheckingAccount, TransferToCard)
-from .validators import (StripToNumbers, format_phone_number,
-                         validate_credit_card)
+from .validators import StripToNumbers
 
 now_time = datetime.datetime.now()
 now = now_time.strftime("%Y-%m-%d %H:%M:%S")
