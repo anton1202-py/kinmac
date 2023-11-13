@@ -26,7 +26,7 @@
                 </label>
                 <label for="contractor_name">
                     <span>Контрагент</span><br>
-                    <input type="text"  name="contractor_name" id="contractor_name">
+                    {{ form.contractor_name }}
                 </label>
                 <label for="status_of_payment">
                     <span>Статус</span><br>
@@ -109,7 +109,7 @@
                                         </span>
                                     </button>
                                 {% endif %}
-                                {% if request.user.is_staff or request.user.username == 'yuriy_lisov' %}
+                                {% if request.user.is_staff or request.user.username == 'yuriy.lisov' %}
                                     <button type="Submit" name="edit" value="{{ el.id }}">
                                         <a href="{% url 'payment_update' el.id %}">
                                             <span class="material-symbols-outlined" id="edit-icon-button" title="Редактировать заявку">
@@ -158,14 +158,14 @@
                         <td>
                             {% for account in pay_account %}
                                 {% if account.payment_id.id == el.id %}
-                                <a href="{{ account.file_of_bill.url }}" download>{{ account.file_of_bill }}</a>
+                                <a href="{{ account.file_of_bill.url }}" download>Скачать файл</a>
                                 {% else %}
                                 <p></p>
                                 {% endif %}
                             {% endfor %}
                         </td>
                         {% if el.file_of_payment %}
-                            <td><a href="{{ el.file_of_payment.url }}" download>{{ el.file_of_payment }}</a></td>
+                            <td><a href="{{ el.file_of_payment.url }}" download>Скачать файл</a></td>
                         {% else %}
                             <td><a href="" download>{{ el.file_of_payment }}</a></td>
                         {% endif %}
@@ -200,7 +200,6 @@
                     <br>
                     <fieldset>
                         <label for="project"><span>{{main_form.payer_organization.label}}</span>{{ main_form.payer_organization }}</label>
-                        <label for="project"><span>{{main_form.contractor_name.label}}</span>{{ main_form.contractor_name }}</label>
                         <div id="id-form-pay_payment-add-file">
                             <label for="project"><span>{{main_form.file_of_payment.label}}</span>
                                 <span><label for="id_file_of_payment" class="choose-file-button">Выберете файл</label>

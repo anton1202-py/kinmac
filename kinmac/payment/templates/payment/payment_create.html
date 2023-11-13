@@ -15,9 +15,14 @@
                     <label for="project"><span>{{form.project.label}}</span>{{ form.project }}</label>
                     <label for="category"><span>{{form.category.label}}</span>{{ form.category }}</label>
                     <label for="payment_sum"><span>{{form.payment_sum.label}}</span>{{ form.payment_sum }}</label>
+                    <label for="comment"><span>{{form.comment.label}}</span>{{ form.comment }}</label>
+                    <label for="contractor_name"><span>{{form.contractor_name.label}}</span>
+                        {{ form.contractor_name }} <br>
+                        <input type="text" name="contractor_name_new">
+                    </label>
                     <label for="urgent_payment"><span>{{form.urgent_payment.label}} </span>{{ form.urgent_payment }}</label>
                     <label for="send_payment_file"><span>{{form.send_payment_file.label}}</span>{{form.send_payment_file}}</label>
-                    <label for="comment"><span>{{form.comment.label}}</span>{{ form.comment }}</label>
+                    
                     <label for="payment_method"><span>{{form.payment_method.label}}</span>{{ form.payment_method }}</label>
                 </fieldset>
 

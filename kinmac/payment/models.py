@@ -80,14 +80,26 @@ class Contractors(models.Model):
     name = models.CharField(
         verbose_name='Название организации',
         max_length=150,
+        blank=True,
+        null=True,
     )
     bill_number = models.CharField(
         verbose_name='Номер счета',
-        max_length=20,
+        max_length=30,
+        blank=True,
+        null=True,
     )
     bik_of_bank = models.CharField(
         verbose_name='БИК банка',
         max_length=20,
+        blank=True,
+        null=True,
+    )
+    bank_name = models.CharField(
+        verbose_name='Название банка',
+        max_length=50,
+        blank=True,
+        null=True,
     )
 
     def __str__(self):
@@ -140,9 +152,11 @@ class Payments(models.Model):
         blank=True,
         null=True,
     )
-    contractor_name = models.CharField(
+    contractor_name = models.ForeignKey(
+        Contractors,
         verbose_name='Название организации получателя',
         max_length=100,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
     )

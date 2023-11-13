@@ -25,6 +25,14 @@
                             <td colspan="3">{{ form.payment_sum }}</td>
                         </tr>
                         <tr>
+                            <td><span>{{form.comment.label}}</span></td>
+                            <td colspan="3">{{ form.comment }}</td>
+                        </tr>
+                        <tr>
+                            <td><span>{{form.contractor_name.label}}</span></td>
+                            <td colspan="3">{{ form.contractor_name }}</td>
+                        </tr>
+                        <tr>
                             <td><span>{{form.urgent_payment.label}} </span></td>
                             <td colspan="3">{{ form.urgent_payment }}</td>
                         </tr>
@@ -33,12 +41,68 @@
                             <td colspan="3">{{form.send_payment_file}}</td>
                         </tr>
                         <tr>
-                            <td><span>{{form.comment.label}}</span></td>
-                            <td colspan="3">{{ form.comment }}</td>
-                        </tr>
-                        <tr>
                             <td><span>{{form.payment_method.label}}</span></td>
                             <td colspan="3">{{ form.payment_method }}</td>
+                        </tr>
+
+                        <!-- ========= ПЕРЕВОД НА СЧЕТ ========= -->
+                        {% if second_form %}
+                        <tr>
+                            <td><span>{{second_form.file_of_bill.label}}</span></td>
+                            <td colspan="3">
+                                <label for="id_file_of_bill" class="choose-file-button">Выберете файл</label>
+                                <div class="input-file-list-create" id="input-file-list-create-file_of_bill"></div>
+                                {{ second_form.file_of_bill }}
+                                <a href="{{ second_form.instance.file_of_bill.url }}" download>
+                                    Скачать файл
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        <!-- ========= ОПЛАТА КАРТОЙ ========= -->
+                        {% if pay_with_card_form %}
+                        <tr>
+                            <td><span>{{pay_with_card_form.link_to_payment.label}}</span></td>
+                            <td colspan="3">{{ pay_with_card_form.link_to_payment }}</td>
+                        </tr>
+                        {% endif %}
+
+                        <!-- ========= ПЕРЕВОД НА КАРТУ ========= -->
+                        {% if transfer_for_card_form %}
+                        <tr>
+                            <td><span>{{transfer_for_card_form.card_number.label}}</span></td>
+                            <td colspan="3">{{transfer_for_card_form.card_number}}</td>
+                        </tr>
+                        <tr>
+                            <td><span>{{transfer_for_card_form.phone_number.label}}</span></td>
+                            <td colspan="3">{{transfer_for_card_form.phone_number}}</td>
+                        </tr>
+                        <tr>
+                            <td><span>{{transfer_for_card_form.payment_receiver.label}}</span></td>
+                            <td colspan="3">{{transfer_for_card_form.payment_receiver}}</td>
+                        </tr>
+                        <tr>
+                            <td><span>{{transfer_for_card_form.bank_for_payment.label}}</span></td>
+                            <td colspan="3">{{transfer_for_card_form.bank_for_payment}}</td>
+                        </tr>
+                        {% endif %}
+
+                        <!-- ========= ОПЛАТА НАЛИЧНЫМИ ========= -->
+                        {% if cash_payment_form %}
+                        <tr>
+                            <td><span>{{cash_payment_form.cash_payment_payment_data.label}}</span></td>
+                            <td colspan="3">{{cash_payment_form.cash_payment_payment_data}}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                        
+
+                    <table class="update-form-table">
+                        
+                        <tr>
+                            <td><span>{{form.status_of_payment.label}}</span></td>
+                            <td colspan="3">{{ form.status_of_payment }}</td>
                         </tr>
                         <tr>
                             <td><span>{{ form.pub_date.label }}</span></td>
@@ -48,12 +112,8 @@
                             <td><span>{{form.creator.label}}</span></td>
                             <td colspan="3">{{ form.creator }}</td>
                         </tr>
-                        <tr>
-                            <td><span>{{form.status_of_payment.label}}</span></td>
-                            <td colspan="3">{{ form.status_of_payment }}</td>
-                        </tr>
                         
-                        <!-- СТРОКА С СОГЛАСОВАНИЕМ -->
+                        <!-- =========== СТРОКА С СОГЛАСОВАНИЕМ ========== -->
                         {% for data in approval_model %}
                             <tr>
                                 <td>{{ data.user.last_name }} {{ data.user.first_name }}</td>
@@ -89,6 +149,7 @@
                             </tr>
                         {% endfor %}
                         <!-- КОНЕЦ СТРОКИ С СОГЛАСОВАНИЕМ -->
+                        
                         <tr>
                             <td><span>{{form.date_of_payment.label}}</span></td>
                             <td colspan="3">{{ form.date_of_payment }}</td>
@@ -101,17 +162,14 @@
                             <td><span>{{form.payer_organization.label}}</span></td>
                             <td colspan="3">{{ form.payer_organization }}</td>
                         </tr>
-                        <tr>
-                            <td><span>{{form.contractor_name.label}}</span></td>
-                            <td colspan="3">{{ form.contractor_name }}</td>
-                        </tr>
+                        
                         {% if form.instance.file_of_payment %}
                         <tr>
                             <td><span>{{form.file_of_payment.label}}</span></td>
                             <td colspan="3">
                                 <label for="id_file_of_payment" class="choose-file-button">Выберете файл</label>
                                 <div class="input-file-list-create" id="input-file-list-create-file_of_payment"></div>
-                                {{form.file_of_payment}}<a href="{{ form.instance.file_of_payment.url }}" download>{{ form.instance.file_of_payment }}</a>
+                                {{form.file_of_payment}}<a href="{{ form.instance.file_of_payment.url }}" download>Скачать файл</a>
                             </td>
                         </tr>
                         {% endif %}
@@ -119,54 +177,7 @@
                             <td><span>{{form.payment_coefficient.label}}</span></td>
                             <td colspan="3">{{ form.payment_coefficient }}</td>
                         </tr>
-                    
-                    <!-- ========= ПЕРЕВОД НА СЧЕТ ========= -->
-                    {% if second_form %}
-                        <tr>
-                            <td><span>{{second_form.file_of_bill.label}}</span></td>
-                            <td colspan="3">
-                                <label for="id_file_of_bill" class="choose-file-button">Выберете файл</label>
-                                <div class="input-file-list-create" id="input-file-list-create-file_of_bill"></div>
-                                {{ second_form.file_of_bill }}<a href="{{ second_form.instance.file_of_bill.url }}" download>
-                                {{ second_form.instance.file_of_bill }}</a>
-                            </td>
-                        </tr>
-                    {% endif %}
-                    <!-- ========= ОПЛАТА КАРТОЙ ========= -->
-                    {% if pay_with_card_form %}
-                    <tr>
-                        <td><span>{{pay_with_card_form.link_to_payment.label}}</span></td>
-                        <td colspan="3">{{ pay_with_card_form.link_to_payment }}</td>
-                    </tr>
-                    {% endif %}
-                    <!-- ========= ПЕРЕВОД НА КАРТУ ========= -->
-                    {% if transfer_for_card_form %}
-                    <tr>
-                        <td><span>{{transfer_for_card_form.card_number.label}}</span></td>
-                        <td colspan="3">{{transfer_for_card_form.card_number}}</td>
-                    </tr>
-                    <tr>
-                        <td><span>{{transfer_for_card_form.phone_number.label}}</span></td>
-                        <td colspan="3">{{transfer_for_card_form.phone_number}}</td>
-                    </tr>
-                    <tr>
-                        <td><span>{{transfer_for_card_form.payment_receiver.label}}</span></td>
-                        <td colspan="3">{{transfer_for_card_form.payment_receiver}}</td>
-                    </tr>
-                    <tr>
-                        <td><span>{{transfer_for_card_form.bank_for_payment.label}}</span></td>
-                        <td colspan="3">{{transfer_for_card_form.bank_for_payment}}</td>
-                    </tr>
-                    {% endif %}
-                    <!-- ========= ОПЛАТА НАЛИЧНЫМИ ========= -->
-                    {% if cash_payment_form %}
-                    <tr>
-                        <td><span>{{cash_payment_form.cash_payment_payment_data.label}}</span></td>
-                        <td colspan="3">{{cash_payment_form.cash_payment_payment_data}}</td>
-                    </tr>
-                    {% endif %}
-
-                </table>
+                    </table>
                 <button class="custom-button" type="submit" id="id_first" name="name_first">Сохранить</button>
             </form>
         </div> 

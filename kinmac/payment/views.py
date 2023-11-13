@@ -9,7 +9,7 @@ from .forms import (ApprovalStatusForm, CashPaymentForm,
                     FilterPayWithCheckingForm, PaymentsForm, PayWithCardForm,
                     PayWithCheckingAccountForm, TransferToCardForm)
 from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
-                     PayerOrganization, Payments, PayWithCard,
+                     Contractors, PayerOrganization, Payments, PayWithCard,
                      PayWithCheckingAccount, TransferToCard)
 from .validators import StripToNumbers
 
@@ -35,15 +35,38 @@ def payment_create(request):
         form_transfer_to_card = TransferToCardForm(request.POST)
         form_cash_payment = CashPaymentForm(request.POST)
 
+        print(request.POST)
+
         if form.is_valid():
             # Заполнение статуса заявки
+            if request.POST['contractor_name']:
+                contractor_name_data = Contractors.objects.get(
+                    id=request.POST['contractor_name']).name
+            elif request.POST['contractor_name_new']:
+                contractor_name_data = request.POST['contractor_name_new']
+            print('contractor_name_data', contractor_name_data)
 
+            if request.POST['contractor_name_new']:
+                if Contractors.objects.filter(
+                        name=request.POST['contractor_name_new']):
+                    Contractors.objects.filter(
+                        name=request.POST['contractor_name_new']).update()
+                else:
+                    contractor = Contractors(
+                        name=request.POST['contractor_name_new']
+                    )
+                    contractor.save()
+
+            # print('Contractors.objects.get(name=contractor_name_data)', Contractors.objects.get(
+            #    name=contractor_name_data))
             payment = Payments(
                 creator=f'{request.user.last_name} {request.user.first_name}',
                 project=form.cleaned_data['project'],
                 category=form.cleaned_data['category'],
                 payment_method=form.cleaned_data['payment_method'],
                 payment_sum=form.cleaned_data['payment_sum'],
+                contractor_name=Contractors.objects.get(
+                        name=contractor_name_data),
                 comment=form.cleaned_data['comment'],
                 send_payment_file=form.cleaned_data['send_payment_file'],
                 file_of_payment=form.cleaned_data['file_of_payment'],
@@ -52,6 +75,16 @@ def payment_create(request):
             )
             payment.save()
 
+            if request.POST['contractor_name_new']:
+                if Contractors.objects.get(
+                        name=request.POST['contractor_name_new']):
+                    Contractors.objects.filter(
+                        name=request.POST['contractor_name_new']).update()
+                else:
+                    contractor = Contractors(
+                        name=request.POST['contractor_name_new']
+                    )
+                    contractor.save()
             raw_users_list = []
 
             # Алгоритм, который удаляет из согласования юзера, создавшего заявку
@@ -242,7 +275,6 @@ def payment_common_statistic(request):
         if str(pay.project) == 'KINMAC' and (
            str(pay.payment_method) == 'Перевод на карту' or str(pay.payment_method) == 'Наличная оплата'):
             pay.payment_coefficient = 1.02
-        pay.contractor_name = request.POST['contractor_name']
 
         if request.FILES:
             pay.file_of_payment = request.FILES['file_of_payment']
@@ -382,11 +414,10 @@ class PaymentUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.approval_model.objects.filter(
-            payment=self.object.pk)[0]
 
         context['approval_model'] = self.approval_model.objects.filter(
             payment=self.object.pk)
+
         for i in self.approval_model.objects.filter(
                 payment=self.object.pk):
             print(i.user.username, i.status)

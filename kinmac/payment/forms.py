@@ -2,7 +2,7 @@ from django import forms
 from django.forms import (CheckboxInput, ChoiceField, FileInput, ModelForm,
                           Select, TextInput)
 
-from .models import (ApprovalStatus, CashPayment, Categories,
+from .models import (ApprovalStatus, CashPayment, Categories, Contractors,
                      PayerOrganization, Payers, PaymentMethod, Payments,
                      PayWithCard, PayWithCheckingAccount, Projects,
                      TransferToCard)
@@ -17,10 +17,12 @@ class PaymentsForm(ModelForm):
                   'urgent_payment', 'status_of_payment', 'date_of_payment', 'accountant', 'file_of_payment', 'payment_coefficient']
         project = forms.ChoiceField(choices=Projects.objects.all())
         category = forms.ChoiceField(choices=Categories.objects.all())
+        # contractor_name = forms.ChoiceField(
+        #    choices=Contractors.objects.all(), required=False)
         payer_organization = forms.ChoiceField(
             choices=PayerOrganization.objects.all())
-        payment_method = forms.ChoiceField(choices=PaymentMethod.objects.all())
 
+        payment_method = forms.ChoiceField(choices=PaymentMethod.objects.all())
         send_payment_file = forms.CheckboxSelectMultiple()
         urgent_payment = forms.CheckboxSelectMultiple()
         payment_coefficient = forms.FloatField(required=False)
@@ -37,7 +39,7 @@ class PaymentsForm(ModelForm):
             'payment_sum': TextInput(attrs={
                 'class': 'input-field',
             }),
-            'contractor_name': TextInput(attrs={
+            'contractor_name': Select(attrs={
                 'class': 'input-field',
             }),
             'urgent_payment': CheckboxInput(attrs={
@@ -171,11 +173,9 @@ class FilterPayWithCheckingForm(forms.Form):
     category = forms.ModelChoiceField(
         queryset=Categories.objects.all(),
         required=False,)
-    contractor_name = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'input-field',
-        }))
+    contractor_name = forms.ModelChoiceField(
+        queryset=Contractors.objects.all(),
+        required=False,)
     status_of_payment = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={

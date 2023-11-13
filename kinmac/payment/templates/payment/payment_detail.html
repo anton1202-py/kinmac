@@ -8,173 +8,173 @@
     <h1>Просмотр заявки</h1>
     <div class="main-form-create-payment">
         
-            <table class="update-form-table">
-                <tr>
-                    <td><span>{{form.project.label}}</span></td>
-                    <td colspan="3">{{ payments.project }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.category.label}}</span</td>
-                    <td colspan="3">{{ payments.category }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.payment_sum.label}}</span></td>
-                    <td colspan="3">{{ payments.payment_sum }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.urgent_payment.label}} </span></td>
-
-                    <td colspan="3">
-                        {% if payments.urgent_payment == True  %}
-                            Да
-                        {% else %}
-                            Нет
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td><span>{{form.send_payment_file.label}}</span></td>
-                    <td colspan="3">
-                        {% if payments.send_payment_file == True  %}
-                            Да
-                        {% else %}
-                            Нет
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td><span>{{form.comment.label}}</span></td>
-                    <td colspan="3">{{ payments.comment }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.payment_method.label}}</span></td>
-                    <td colspan="3">{{ payments.payment_method }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{ form.pub_date.label }}</span></td>
-                    <td colspan="3">{{ payments.pub_date }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.creator.label}}</span></td>
-                    <td colspan="3">{{ payments.creator }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.status_of_payment.label}}</span></td>
-                    <td colspan="3">{{ payments.status_of_payment }}</td>
-                </tr>
-                
-                <!-- СТРОКА С СОГЛАСОВАНИЕМ -->
-                {% for data in approval_model %}
-                    <tr>
-                        <td>{{ data.user.last_name }} {{ data.user.first_name }}</td>
-                        <td>
-                            {% if data.status == 'NOK'  %}
-                                <span class="material-symbols-outlined">
-                                    schedule
-                                </span>
-                            {% elif data.status == 'OK'  %}
-                                <span class="material-symbols-outlined" id="pay-icon-button">
-                                    done
-                                </span>
-                            {% elif data.status == 'REJECTED'  %}
-                                <span class="material-symbols-outlined" id="reject-icon-button">
-                                    do_not_disturb_on
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if data.pub_date == None %}
-                               
-                            {% else %}
-                                {{ data.pub_date }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if data.rejection_reason == None %}
-                               
-                            {% else %}
-                                {{ data.rejection_reason }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                <!-- КОНЕЦ СТРОКИ С СОГЛАСОВАНИЕМ -->
-                <tr>
-                    <td><span>{{form.date_of_payment.label}}</span></td>
-                    <td colspan="3">{{ payments.date_of_payment }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.accountant.label}}</span></td>
-                    <td colspan="3">{{ payments.accountant }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.payer_organization.label}}</span></td>
-                    <td colspan="3">{{ payments.payer_organization }}</td>
-                </tr>
-                <tr>
-                    <td><span>{{form.contractor_name.label}}</span></td>
-                    <td colspan="3">{{ payments.contractor_name }}</td>
-                </tr>
-                {% if form.instance.file_of_payment %}
-                <tr>
-                    <td><span>{{form.file_of_payment.label}}</span></td>
-                    <td colspan="3">
-                        <a href="{{ form.instance.file_of_payment.url }}" download>
-                            {{ form.instance.file_of_payment }}
-                        </a>
-                    </td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <td><span>{{form.payment_coefficient.label}}</span></td>
-                    <td colspan="3">{{ payments.payment_coefficient }}</td>
-                </tr>
-            
+        <table class="update-form-table">
+            <tr>
+                <td><span>{{form.project.label}}</span></td>
+                <td colspan="3">{{ payments.project }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.category.label}}</span</td>
+                <td colspan="3">{{ payments.category }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.payment_sum.label}}</span></td>
+                <td colspan="3">{{ payments.payment_sum }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.comment.label}}</span></td>
+                <td colspan="3">{{ payments.comment }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.contractor_name.label}}</span></td>
+                <td colspan="3">{{ payments.contractor_name }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.urgent_payment.label}} </span></td>
+                <td colspan="3">
+                    {% if payments.urgent_payment == True  %}
+                        Да
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><span>{{form.send_payment_file.label}}</span></td>
+                <td colspan="3">
+                    {% if payments.send_payment_file == True  %}
+                        Да
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><span>{{form.payment_method.label}}</span></td>
+                <td colspan="3">{{ payments.payment_method }}</td>
+            </tr>
             <!-- ========= ПЕРЕВОД НА СЧЕТ ========= -->
             {% if second_form %}
                 <tr>
                     <td><span>{{second_form.file_of_bill.label}}</span></td>
                     <td colspan="3">
                         <a href="{{ second_form.instance.file_of_bill.url }}" download>
-                            {{ second_form.instance.file_of_bill }}
+                            Скачать файл
                         </a>
                     </td>
                 </tr>
             {% endif %}
             <!-- ========= ОПЛАТА КАРТОЙ ========= -->
             {% if pay_with_card_form %}
-            <tr>
-                <td><span>{{pay_with_card_form.link_to_payment.label}}</span></td>
-                <td colspan="3">{{ pay_with_card_form.instance.link_to_payment }}</td>
-            </tr>
+                <tr>
+                    <td><span>{{pay_with_card_form.link_to_payment.label}}</span></td>
+                    <td colspan="3">{{ pay_with_card_form.instance.link_to_payment }}</td>
+                </tr>
             {% endif %}
             <!-- ========= ПЕРЕВОД НА КАРТУ ========= -->
             {% if transfer_for_card_form %}
-            <tr>
-                <td><span>{{transfer_for_card_form.card_number.label}}</span></td>
-                <td colspan="3">{{transfer_for_card.instance.card_number}}</td>
-            </tr>
-            <tr>
-                <td><span>{{transfer_for_card_form.phone_number.label}}</span></td>
-                <td colspan="3">{{transfer_for_card.instance.phone_number}}</td>
-            </tr>
-            <tr>
-                <td><span>{{transfer_for_card_form.payment_receiver.label}}</span></td>
-                <td colspan="3">{{transfer_for_card.instance.payment_receiver}}</td>
-            </tr>
-            <tr>
-                <td><span>{{transfer_for_card_form.bank_for_payment.label}}</span></td>
-                <td colspan="3">{{transfer_for_card.instance.bank_for_payment}}</td>
-            </tr>
+                <tr>
+                    <td><span>{{transfer_for_card_form.card_number.label}}</span></td>
+                    <td colspan="3">{{transfer_for_card.instance.card_number}}</td>
+                </tr>
+                <tr>
+                    <td><span>{{transfer_for_card_form.phone_number.label}}</span></td>
+                    <td colspan="3">{{transfer_for_card.instance.phone_number}}</td>
+                </tr>
+                <tr>
+                    <td><span>{{transfer_for_card_form.payment_receiver.label}}</span></td>
+                    <td colspan="3">{{transfer_for_card.instance.payment_receiver}}</td>
+                </tr>
+                <tr>
+                    <td><span>{{transfer_for_card_form.bank_for_payment.label}}</span></td>
+                    <td colspan="3">{{transfer_for_card.instance.bank_for_payment}}</td>
+                </tr>
             {% endif %}
             <!-- ========= ОПЛАТА НАЛИЧНЫМИ ========= -->
             {% if cash_payment_form %}
-            <tr>
-                <td><span>{{cash_payment_form.cash_payment_payment_data.label}}</span></td>
-                <td colspan="3">{{cash_payment_form.instance.cash_payment_payment_data}}</td>
-            </tr>
+                <tr>
+                    <td><span>{{cash_payment_form.cash_payment_payment_data.label}}</span></td>
+                    <td colspan="3">{{cash_payment_form.instance.cash_payment_payment_data}}</td>
+                </tr>
             {% endif %}
-
+        </table>
+        <table class="update-form-table">
+            <tr>
+                <td><span>{{form.status_of_payment.label}}</span></td>
+                <td colspan="3">{{ payments.status_of_payment }}</td>
+            </tr>
+            
+            <tr>
+                <td><span>{{ form.pub_date.label }}</span></td>
+                <td colspan="3">{{ payments.pub_date }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.creator.label}}</span></td>
+                <td colspan="3">{{ payments.creator }}</td>
+            </tr>
+            <!-- СТРОКА С СОГЛАСОВАНИЕМ -->
+            {% for data in approval_model %}
+                <tr>
+                    <td>{{ data.user.last_name }} {{ data.user.first_name }}</td>
+                    <td>
+                        {% if data.status == 'NOK'  %}
+                            <span class="material-symbols-outlined">
+                                schedule
+                            </span>
+                        {% elif data.status == 'OK'  %}
+                            <span class="material-symbols-outlined" id="pay-icon-button">
+                                done
+                            </span>
+                        {% elif data.status == 'REJECTED'  %}
+                            <span class="material-symbols-outlined" id="reject-icon-button">
+                                do_not_disturb_on
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if data.pub_date == None %}
+                           
+                        {% else %}
+                            {{ data.pub_date }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if data.rejection_reason == None %}
+                           
+                        {% else %}
+                            {{ data.rejection_reason }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            <!-- КОНЕЦ СТРОКИ С СОГЛАСОВАНИЕМ -->
+            <tr>
+                <td><span>{{form.date_of_payment.label}}</span></td>
+                <td colspan="3">{{ payments.date_of_payment }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.accountant.label}}</span></td>
+                <td colspan="3">{{ payments.accountant }}</td>
+            </tr>
+            <tr>
+                <td><span>{{form.payer_organization.label}}</span></td>
+                <td colspan="3">{{ payments.payer_organization }}</td>
+            </tr>
+            
+            {% if form.instance.file_of_payment %}
+                <tr>
+                    <td><span>{{form.file_of_payment.label}}</span></td>
+                    <td colspan="3">
+                        <a href="{{ form.instance.file_of_payment.url }}" download>
+                            Скачать файл
+                        </a>
+                    </td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td><span>{{form.payment_coefficient.label}}</span></td>
+                <td colspan="3">{{ payments.payment_coefficient }}</td>
+            </tr>
         </table>
     </div> 
 </div>
