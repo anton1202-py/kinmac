@@ -3,6 +3,7 @@ import json
 from datetime import date, timedelta
 
 import pandas as pd
+import pytz
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,7 @@ from django.contrib.auth.views import LoginView
 from django.db.models import Q, Sum
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from .forms import (ApprovalStatusForm, CashPaymentForm,
@@ -276,8 +278,9 @@ def payment_common_statistic(request):
         payment_for_del.delete()
         return redirect('payment_common_statistic')
 
-    if form.is_valid():
-        date_filter = form.cleaned_data.get("date")
+    elif request.method == 'POST' and form.is_valid():
+
+        date_filter = form.cleaned_data.get("date_filter")
         payment_type = form.cleaned_data.get("payment_type")
         category = form.cleaned_data.get("category")
         contractor_name = form.cleaned_data.get("contractor_name")
@@ -285,20 +288,16 @@ def payment_common_statistic(request):
 
         if date_filter:
             payments = payments.filter(
-                Q(pub_date__icontains=date_filter)).order_by('id')
-
+                Q(pub_date__date=date_filter)).order_by('id')
         if category:
             payments = payments.filter(
                 Q(category__name=category)).order_by('id')
-
         if contractor_name:
             payments = Payments.objects.filter(
                 Q(contractor_name=contractor_name)).order_by('id')
-
         if payment_type:
             payments = payments.filter(
                 Q(payment_method=payment_type)).order_by('id')
-
         if status_of_payment:
             payments = payments.filter(
                 Q(status_of_payment__icontains=status_of_payment)

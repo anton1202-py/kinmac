@@ -1,13 +1,10 @@
 from datetime import datetime
 
+import pytz
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField, JSONField
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db import models
 
-from .validators import (StripToNumbers, format_phone_number,
-                         validate_credit_card)
+from .validators import StripToNumbers
 
 
 class Projects(models.Model):

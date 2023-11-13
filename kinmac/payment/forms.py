@@ -161,7 +161,7 @@ class ApprovalStatusForm(ModelForm):
 
 class FilterPayWithCheckingForm(forms.Form):
     """Форма отвечает за фильтрацию записей на странице со списком заявок"""
-    date = forms.DateField(
+    date_filter = forms.DateField(
         input_formats=['%Y-%m-%d'],
         required=False,
         widget=forms.DateInput(attrs={
