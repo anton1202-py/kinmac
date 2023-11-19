@@ -45,7 +45,7 @@ def add_data_stock_api():
         cursor = connection.cursor()
 
         cursor.executemany(
-           '''INSERT INTO database_stocksapi (pub_date, last_change_date,
+            '''INSERT INTO database_stocksapi (pub_date, last_change_date,
                    warehouse_name,
                    supplier_article,
                    nm_id,
@@ -63,7 +63,7 @@ def add_data_stock_api():
                    is_supply,
                    is_realization,
                    sccode) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-           common_data_stock)
+            common_data_stock)
     except (Exception, Error) as error:
         print("Ошибка при работе с PostgreSQL", error)
     finally:
@@ -117,7 +117,7 @@ def add_data_sales():
         check_data_sales.append(i['gNumber'])
         check_data_sales.append(i['sticker'])
         check_data_sales.append(i['srid'])
-        common_data_sales.append(check_data_sales)   
+        common_data_sales.append(check_data_sales)
 
     try:
         # Подключение к существующей базе данных
@@ -131,7 +131,7 @@ def add_data_sales():
         cursor = connection.cursor()
 
         cursor.executemany(
-           '''INSERT INTO database_sales (pub_date,
+            '''INSERT INTO database_sales (pub_date,
                 sales_date,
                 last_change_date,
                 supplier_article,
@@ -161,7 +161,7 @@ def add_data_sales():
                 g_number,
                 sticker,
                 srid) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-           common_data_sales)
+            common_data_sales)
     except (Exception, Error) as error:
         print("Ошибка при работе с PostgreSQL", error)
     finally:
@@ -308,17 +308,17 @@ def add_stock_data_site():
     now = datetime.now()
     control_date = now.strftime("%Y-%m-%d %H:%M:%S")
     PATH = 'celery_tasks/Аналитика МП.xlsx'
-    URL = 'https://card.wb.ru/cards/detail?regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
+    URL = 'https://card.wb.ru/cards/detail?appType=2&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
 
     excel_data = pd.read_excel(PATH)
-    data = pd.DataFrame(excel_data, columns = ['Номенк WB', 'Арт'])
+    data = pd.DataFrame(excel_data, columns=['Номенк WB', 'Арт'])
     nomenclatura_list = data['Номенк WB'].to_list()
     article_list = data['Арт'].to_list()
 
     article_dict = {}
 
     for i in range(len(nomenclatura_list)):
-         article_dict[nomenclatura_list[i]] = article_list[i]
+        article_dict[nomenclatura_list[i]] = article_list[i]
 
     iter_amount = len(article_dict.keys()) // 15
 
@@ -379,19 +379,19 @@ def add_stock_data_site():
                                   )
                 data_for_database.append(inner_data_set)
             raw_data_for_database = (pub_date,
-                                  seller_article,
-                                  nomenclatura_wb,
-                                  'Итого по складам',
-                                  amount,
-                                  price_u,
-                                  basic_sale,
-                                  basic_price_u,
-                                  sale,
-                                  sale_price_u,
-                                  name,
-                                  promotions,
-                                  review_rating,
-                                  feedbacks)
+                                     seller_article,
+                                     nomenclatura_wb,
+                                     'Итого по складам',
+                                     amount,
+                                     price_u,
+                                     basic_sale,
+                                     basic_price_u,
+                                     sale,
+                                     sale_price_u,
+                                     name,
+                                     promotions,
+                                     review_rating,
+                                     feedbacks)
             data_for_database.append(raw_data_for_database)
             sleep(1)
     try:
@@ -432,8 +432,6 @@ def add_stock_data_site():
             print("Соединение с PostgreSQL закрыто")
 
 
-
-#add_data_stock_api()
-#add_data_sales()
-#add_stock_data_site()
-
+# add_data_stock_api()
+# add_data_sales()
+# add_stock_data_site()
