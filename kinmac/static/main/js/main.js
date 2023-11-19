@@ -2,7 +2,7 @@
 var paymentsForm = document.forms['payments'];
 if (paymentsForm) {
     if (paymentsForm.elements[8]) {
-        const select1 = paymentsForm.elements[8];
+        const select1 = paymentsForm.elements[10];
         select1.onchange = function(){ 
             let options = select1.options; 
             let index = select1.selectedIndex; 

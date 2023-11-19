@@ -50,7 +50,7 @@ body {
     width: 100vw;
     height: 100vh;
     font-family: poppins, sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     user-select: none;
     overflow-x: hidden;
     background: var(--color-background);
