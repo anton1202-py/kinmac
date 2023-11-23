@@ -335,12 +335,6 @@ class CashPayment(models.Model):
         verbose_name='Номер оплаты',
         on_delete=models.PROTECT,
     )
-    # contractor_name = models.CharField(
-    #     verbose_name='Получатель платежа',
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    # )
     cash_payment_payment_data = models.TextField(
         verbose_name='Данные для оплаты',
         blank=True,
@@ -353,6 +347,12 @@ class ApprovedFunction(models.Model):
         User,
         verbose_name='Имя пользователя',
         on_delete=models.PROTECT,
+    )
+    user_name = models.CharField(
+        verbose_name='Username',
+        max_length=50,
+        blank=True,
+        null=True,
     )
     first_name = models.CharField(
         verbose_name='Имя сотрудника',
@@ -375,9 +375,19 @@ class ApprovedFunction(models.Model):
     rating_for_approval = models.PositiveSmallIntegerField(
         verbose_name='Рейтинг для согласования',
     )
+    chat_id_tg = models.CharField(
+        verbose_name='Chat_id из Телеграм',
+        max_length=15,
+        blank=True,
+        null=True,
+    )
+
+    def save(self, *args, **kwargs):
+        self.user_name = self.username.username
+        super(ApprovedFunction, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.job_title}, {self.last_name} {self.first_name}, {self.rating_for_approval}'
+        return str(self.username.id)
 
     class Meta:
         verbose_name = 'Рейтинг для согласования'

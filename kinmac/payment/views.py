@@ -1,6 +1,9 @@
+import asyncio
 import datetime
+import threading
 from datetime import date
 
+from asgiref.sync import sync_to_async
 from django.db.models import Q, Sum
 from django.shortcuts import redirect, render
 from django.views.generic import UpdateView
@@ -18,6 +21,7 @@ now = now_time.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def payment_create(request):
+    from telegram_working.start_tg_approve import start_tg_working
 
     error = ''
     approval_users = ApprovedFunction.objects.filter(
@@ -35,8 +39,6 @@ def payment_create(request):
         form_transfer_to_card = TransferToCardForm(request.POST)
         form_cash_payment = CashPaymentForm(request.POST)
 
-        print(request.POST)
-
         if form.is_valid():
             # Заполнение статуса заявки
             if request.POST['contractor_name']:
@@ -44,7 +46,6 @@ def payment_create(request):
                     id=request.POST['contractor_name']).name
             elif request.POST['contractor_name_new']:
                 contractor_name_data = request.POST['contractor_name_new']
-            print('contractor_name_data', contractor_name_data)
 
             if request.POST['contractor_name_new']:
                 if Contractors.objects.filter(
@@ -170,7 +171,12 @@ def payment_create(request):
             else:
                 error4 = form_cash_payment.errors
                 print(error4)
-
+        rating = (ApprovedFunction.objects.get(
+            username=request.user.id).rating_for_approval)
+        job_title = ApprovedFunction.objects.get(
+            username=request.user.id).job_title
+        # ApprovedFunction.objects.get(username)
+        start_tg_working(payment.pk, request.user.username, rating, job_title)
     else:
         form = PaymentsForm()
         form_pay_account = PayWithCheckingAccountForm()
@@ -277,6 +283,7 @@ def payment_common_statistic(request):
             pay.payment_coefficient = 1.02
 
         if request.FILES:
+            print("request.FILES['file_of_payment']", request.FILES['file_of_payment'])
             pay.file_of_payment = request.FILES['file_of_payment']
         pay.accountant = f'{request.user.last_name} {request.user.first_name}'
         pay.save()
