@@ -387,7 +387,7 @@ class ApprovedFunction(models.Model):
         super(ApprovedFunction, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.username.id)
+        return str(self.user_name)
 
     class Meta:
         verbose_name = 'Рейтинг для согласования'

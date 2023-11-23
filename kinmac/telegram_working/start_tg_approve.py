@@ -4,7 +4,7 @@ import tracemalloc
 import telegram
 from dotenv import load_dotenv
 from payment.models import (ApprovalStatus, ApprovedFunction, CashPayment,
-                            Contractors, PayerOrganization, Payments,
+                            Contractors, PayerOrganization, Payers, Payments,
                             PayWithCard, PayWithCheckingAccount,
                             TransferToCard)
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -97,7 +97,8 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating, creator_j
     """
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    accountant = ApprovedFunction.objects.get(job_title=4)
+    accountant_job = Payers.objects.get(name='Бухгалтер')
+    accountant = ApprovedFunction.objects.get(job_title=accountant_job.pk)
     creator = ApprovedFunction.objects.get(user_name=payment_creator)
     payment = Payments.objects.get(id=payment_id)
     if payment.payment_method.pk == 1:
