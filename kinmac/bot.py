@@ -162,6 +162,7 @@ def button_click(update, context):
             print(len(str(button)), button, len(list_str), len(payer.name))
             keyboard.append(button)
         reply_markup = InlineKeyboardMarkup(keyboard)
+        print(reply_markup)
         message = f'Выберите платильщика'
         bot.send_message(
             chat_id=f'{int(pay_user.chat_id_tg)}', text=message, reply_markup=reply_markup)
