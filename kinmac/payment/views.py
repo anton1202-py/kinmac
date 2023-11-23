@@ -176,7 +176,7 @@ def payment_create(request):
         job_title = ApprovedFunction.objects.get(
             username=request.user.id).job_title
         # ApprovedFunction.objects.get(username)
-        start_tg_working(payment.pk, request.user.username, rating, job_title)
+        start_tg_working(payment.pk, request.user.username, rating)
     else:
         form = PaymentsForm()
         form_pay_account = PayWithCheckingAccountForm()

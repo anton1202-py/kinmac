@@ -78,7 +78,7 @@ def reject_reason(update, context):
 
     
 
-def command_approve(payment_id, user_id, payment_creator, creator_job_title):
+def command_approve(payment_id, user_id, payment_creator):
     ApprovalStatus.objects.filter(
         payment=Payments.objects.get(id=payment_id),
         user=ApprovedFunction.objects.get(
@@ -90,9 +90,9 @@ def command_approve(payment_id, user_id, payment_creator, creator_job_title):
         status_of_payment=f'Согласовано {approval_user.last_name} {approval_user.first_name}'
         )
     if approval_user.rating_for_approval < 10:
-        start_tg_working(payment_id, payment_creator, (approval_user.rating_for_approval+1), creator_job_title)
+        start_tg_working(payment_id, payment_creator, (approval_user.rating_for_approval+1))
     elif approval_user.rating_for_approval == 10:
-        start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval, creator_job_title)
+        start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval)
 
 
 
@@ -136,10 +136,9 @@ def button_click(update, context):
     payment_id = reaponse_data[1]
     user_id = reaponse_data[2]
     payment_creator = reaponse_data[3]
-    creator_job_title = reaponse_data[4]
 
     if 'Согласовать' in query.data:
-        command_approve(payment_id, user_id, payment_creator, creator_job_title)
+        command_approve(payment_id, user_id, payment_creator)
     elif 'Отклонить' in query.data:
         query.edit_message_text(
             text=f"Напишите причину отклонения заявки {payment_id} ОТВЕТОМ на это сообщение.\n * Техническая информация {payment_id}.{user_id}.{payment_creator} *")
@@ -156,7 +155,7 @@ def button_click(update, context):
             payers_info[payer.pk] = payer.name
             payers_names.append(payer.name)
             payers_id.append(payer.pk)
-            data_for_button = f'короткая кнопка' 
+            data_for_button = f'Сохранить_платёж {payment_id} {user_id} {payment_creator} {payer.pk}' 
             button = [InlineKeyboardButton(callback_data=data_for_button, text=payer.name)]
             print(len(str(button)), button, len(payer.name))
             keyboard.append(button)
@@ -165,11 +164,10 @@ def button_click(update, context):
         message = f'Выберите платильщика'
         bot.send_message(
             chat_id=f'{int(pay_user.chat_id_tg)}', text=message, reply_markup=reply_markup, parse_mode='Markdown')
-        #command_pay(payment_id, user_id, payment_creator, creator_job_title)
 
 
     elif 'Сохранить_платёж' in query.data:
-        payer_pk = reaponse_data[5]
+        payer_pk = reaponse_data[4]
         command_pay(payment_id, user_id, payment_creator, payer_pk)
 
 def pay_file_handler(update, context):

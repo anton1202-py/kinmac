@@ -48,7 +48,7 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
     return message
 
 
-def approve_process(payment_id, payment_creator, creator_user_rating, creator_job_title):
+def approve_process(payment_id, payment_creator, creator_user_rating):
     """
     Функция отвечает за процесс согласования заявки.
     """
@@ -66,9 +66,9 @@ def approve_process(payment_id, payment_creator, creator_user_rating, creator_jo
         if creator_user_rating in rating_all_users and creator_user_rating > 0:
             for user in users:
                 if user.rating_for_approval == creator_user_rating:
-                    keyboard = [[InlineKeyboardButton("Согласовать", callback_data=f'Согласовать {payment_id} {user} {payment_creator} {creator_job_title}'),
-                        InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {user} {payment_creator} {creator_job_title}'),
-                        InlineKeyboardButton("Оплатить", callback_data=f'Оплатить {payment_id} {user} {payment_creator} {creator_job_title}')]]
+                    keyboard = [[InlineKeyboardButton("Согласовать", callback_data=f'Согласовать {payment_id} {user} {payment_creator}'),
+                        InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {user} {payment_creator}'),
+                        InlineKeyboardButton("Оплатить", callback_data=f'Оплатить {payment_id} {user} {payment_creator}')]]
 
                     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -87,10 +87,10 @@ def approve_process(payment_id, payment_creator, creator_user_rating, creator_jo
                     break
         else:
             approve_process(payment_id, payment_creator,
-                            (creator_user_rating+1), creator_job_title)
+                            (creator_user_rating+1))
 
 
-def start_tg_working(payment_id, payment_creator, creator_user_rating, creator_job_title):
+def start_tg_working(payment_id, payment_creator, creator_user_rating):
     """
     Функция запускает процесс согласования.
     Отвечает за процесс согласования заявки, если рейтинг пользователя = 10.
@@ -111,10 +111,10 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating, creator_j
         pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
 
     if creator_user_rating < 10:
-        approve_process(payment_id, payment_creator, creator_user_rating, creator_job_title)
+        approve_process(payment_id, payment_creator, creator_user_rating)
     else:
-        keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator} {creator_job_title}'),
-                    InlineKeyboardButton("Оплатить", callback_data=f'Оплатить {payment_id} {accountant} {payment_creator} {creator_job_title}')]]
+        keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator}'),
+                    InlineKeyboardButton("Оплатить", callback_data=f'Оплатить {payment_id} {accountant} {payment_creator}')]]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
         message = message_constructor(accountant, creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
