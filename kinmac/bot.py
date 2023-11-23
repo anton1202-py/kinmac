@@ -163,7 +163,7 @@ def button_click(update, context):
         print(reply_markup)
         message = f'Выберите платильщика'
         bot.send_message(
-            chat_id=f'{int(pay_user.chat_id_tg)}', text=message, reply_markup=reply_markup)
+            chat_id=f'{int(pay_user.chat_id_tg)}', text=message, reply_markup=reply_markup, parse_mode='Markdown')
         #command_pay(payment_id, user_id, payment_creator, creator_job_title)
 
 
