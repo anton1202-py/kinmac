@@ -157,7 +157,7 @@ def button_click(update, context):
             payers_names.append(payer.name)
             payers_id.append(payer.pk)
             button = [InlineKeyboardButton(payer.name, callback_data=f'Сохранить_платёж {payment_id} {user_id} {payment_creator} {creator_job_title} {payer.pk}')]
-            list_str = f'Сохранить_платёж {payment_id} {user_id} {payment_creator} {creator_job_title} {payer.pk}'
+            list_str = f'С_платёж {payment_id} {user_id} {payment_creator} {creator_job_title} {payer.pk}'
             print(list_str)
             print(len(str(button)), button, len(list_str), len(payer.name))
             keyboard.append(button)
