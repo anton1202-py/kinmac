@@ -121,8 +121,11 @@ def command_pay(payment_id, user_id, payment_creator, payer_company):
             chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
     else:
         message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
+        message_for_payer = f'Заявка {payment_id} оплачена'
         bot.send_message(
             chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
+        bot.send_message(
+            chat_id=f'{int(pay_user.chat_id_tg)}', text=message_for_payer)
 
 
 def button_click(update, context):
