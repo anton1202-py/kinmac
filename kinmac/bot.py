@@ -72,9 +72,9 @@ def reject_reason(update, context):
             create_user = ApprovedFunction.objects.get(
                 user_name=payment_creator)
             
-            message = f'{create_user.first_name}, пользователь {reject_user.last_name} {reject_user.first_name} отклонил вашу заявку [{payment_id}](http://5.9.57.39/payment/{payment_id}/detail). Причина: {chat}'
+            message = f'{create_user.first_name}, пользователь {reject_user.last_name} {reject_user.first_name} отклонил вашу заявку {payment_id}. Причина: {chat}'
             bot.send_message(
-                chat_id=f'{int(create_user.chat_id_tg)}', text=message, parse_mode='Markdown')
+                chat_id=f'{int(create_user.chat_id_tg)}', text=message)
 
     
 
@@ -120,9 +120,9 @@ def command_pay(payment_id, user_id, payment_creator, payer_company):
         bot.send_message(
             chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
     else:
-        message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку [{payment_id}](http://5.9.57.39/payment/{payment_id}/detail)'
+        message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
         bot.send_message(
-            chat_id=f'{int(creator_user.chat_id_tg)}', text=message, parse_mode='Markdown')
+            chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
 
 
 def button_click(update, context):

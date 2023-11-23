@@ -23,7 +23,7 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 def message_constructor(user, creator_user, payment_id, payment, payment_method, pay_with_method):
     message = f'''
-        {user.first_name}, пользователь {creator_user.last_name} {creator_user.first_name} создал новую заявку [{payment_id}](http://5.9.57.39/payment/{payment_id}/detail):
+        {user.first_name}, пользователь {creator_user.last_name} {creator_user.first_name} создал новую заявку {payment_id}:
             Название проекта: *{payment.project.name}*
             Название категории: *{payment.category.name}*
             Сумма платежа: *{payment.payment_sum}*
