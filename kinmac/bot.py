@@ -156,7 +156,8 @@ def button_click(update, context):
             payers_info[payer.pk] = payer.name
             payers_names.append(payer.name)
             payers_id.append(payer.pk)
-            button = [InlineKeyboardButton(callback_data=f'Сохранить_платёж {payment_id} {user_id} {payment_creator} {creator_job_title} {payer.pk}', text=payer.name)]
+            data_for_button = f'короткая кнопка' 
+            button = [InlineKeyboardButton(callback_data=data_for_button, text=payer.name)]
             print(len(str(button)), button, len(payer.name))
             keyboard.append(button)
         reply_markup = InlineKeyboardMarkup(keyboard)
