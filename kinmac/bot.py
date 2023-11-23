@@ -157,10 +157,8 @@ def button_click(update, context):
             payers_id.append(payer.pk)
             data_for_button = f'Сохранить_платёж {payment_id} {user_id} {payment_creator} {payer.pk}' 
             button = [InlineKeyboardButton(callback_data=data_for_button, text=payer.name)]
-            print(len(str(button)), button, len(payer.name))
             keyboard.append(button)
         reply_markup = InlineKeyboardMarkup(keyboard)
-        print(reply_markup)
         message = f'Выберите платильщика'
         bot.send_message(
             chat_id=f'{int(pay_user.chat_id_tg)}', text=message, reply_markup=reply_markup, parse_mode='Markdown')
