@@ -40,7 +40,6 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
     
     if payment_method == 1:
         file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
-        message = message + f"Cчет: [Скачать файл](http://5.9.57.39/media/{pay_with_method.file_of_bill})"
     if payment_method == 2:
         message = message + f"Ссылка на платёж: *{pay_with_method.link_to_payment}*"
     if payment_method == 3:
@@ -90,9 +89,11 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
 
                     message = message_constructor(user, creator_user, payment_id, payment, payment.payment_method.pk, pay_with_method)
                     if payment.payment_method.pk == 1:
-                        file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
+                        #file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
+                        print(os.getcwd())
+                        file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
                         with open(file_path, 'rb') as f:
-                            bot.send_document(chat_id=int(user.chat_id_tg), document=f, caption=message)
+                            bot.send_document(chat_id=int(user.chat_id_tg), document=f, caption=message, parse_mode='Markdown')
                     else:
                         bot.send_message(
                             chat_id=int(user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
