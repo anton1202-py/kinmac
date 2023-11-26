@@ -93,7 +93,11 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                         print(os.getcwd())
                         file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
                         with open(file_path, 'rb') as f:
-                            bot.send_document(chat_id=int(user.chat_id_tg), document=f, caption=message, parse_mode='Markdown')
+                            bot.send_document(chat_id=int(user.chat_id_tg),
+                                document=f,
+                                reply_markup=reply_markup,
+                                caption=message,
+                                parse_mode='Markdown')
                     else:
                         bot.send_message(
                             chat_id=int(user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
