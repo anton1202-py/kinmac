@@ -44,7 +44,7 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
         message = message + f"Ссылка на платёж: *{pay_with_method.link_to_payment}*"
     if payment_method == 3:
         message = message + f'''Карта: *{pay_with_method.card_number}*
-        Телефона: *{pay_with_method.phone_number}*
+        Телефон: *{pay_with_method.phone_number}*
         Получатель по банку: *{pay_with_method.payment_receiver}*
         Банк: *{pay_with_method.bank_for_payment}*
         '''
