@@ -74,7 +74,7 @@ def reject_reason(update, context):
             
             message = f'{create_user.first_name}, пользователь {reject_user.last_name} {reject_user.first_name} отклонил вашу заявку {payment_id}. Причина: {chat}'
             bot.send_message(
-                chat_id=f'{int(create_user.chat_id_tg)}', text=message)
+                chat_id=int(create_user.chat_id_tg), text=message)
 
     
 
@@ -118,14 +118,14 @@ def command_pay(payment_id, user_id, payment_creator, payer_company):
     if pay.send_payment_file == True:
         message = f'Необходимо прислать платёжку к этому платежу. \nПрикрепите файл ОТВЕТОМ к этому сообщению.\n* Техническая информация {payment_id}.{user_id}.{payment_creator} *'
         bot.send_message(
-            chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
+            chat_id=int(creator_user.chat_id_tg), text=message)
     else:
         message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
         message_for_payer = f'Заявка {payment_id} оплачена'
         bot.send_message(
-            chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
+            chat_id=int(creator_user.chat_id_tg), text=message)
         bot.send_message(
-            chat_id=f'{int(pay_user.chat_id_tg)}', text=message_for_payer)
+            chat_id=int(pay_user.chat_id_tg), text=message_for_payer)
 
 
 def button_click(update, context):
@@ -169,7 +169,7 @@ def button_click(update, context):
         reply_markup = InlineKeyboardMarkup(keyboard)
         message = f'Выберите платильщика'
         bot.send_message(
-            chat_id=f'{int(pay_user.chat_id_tg)}', text=message, reply_markup=reply_markup, parse_mode='Markdown')
+            chat_id=int(pay_user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
 
 
     elif 'Сохранить_платёж' in query.data:
@@ -216,7 +216,7 @@ def pay_file_handler(update, context):
             pay.save()
             message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
             bot.send_message(
-                chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
+                chat_id=int(creator_user.chat_id_tg), text=message)
 
 
 def command_start(update, context):

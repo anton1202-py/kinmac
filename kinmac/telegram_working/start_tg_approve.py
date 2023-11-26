@@ -22,6 +22,7 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 
 def message_constructor(user, creator_user, payment_id, payment, payment_method, pay_with_method):
+    """Создает сообщение для пользователя о созданной заявке"""
     payment = Payments.objects.get(id=payment_id)
     add_urgent_message = ''
     add_payment_file_message = ''
@@ -90,7 +91,6 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                     message = message_constructor(user, creator_user, payment_id, payment, payment.payment_method.pk, pay_with_method)
                     if payment.payment_method.pk == 1:
                         #file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
-                        print(os.getcwd())
                         file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
                         with open(file_path, 'rb') as f:
                             bot.send_document(chat_id=int(user.chat_id_tg),
@@ -103,14 +103,14 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                             chat_id=int(user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
                     break
         else:
-            approve_process(payment_id, payment_creator,
-                            (creator_user_rating+1))
+            approve_process(payment_id, payment_creator, (creator_user_rating+1))
 
 
 def start_tg_working(payment_id, payment_creator, creator_user_rating):
     """
     Функция запускает процесс согласования.
     Отвечает за процесс согласования заявки, если рейтинг пользователя = 10.
+    Или заявку создал бухгалтер
     """
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
@@ -127,7 +127,7 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
     elif payment.payment_method.pk == 4:
         pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
 
-    if creator_user_rating < 10:
+    if creator_user_rating < 10 and creator.job_title != 'Бухгалтер':
         approve_process(payment_id, payment_creator, creator_user_rating)
     else:
         keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator}'),
@@ -136,4 +136,4 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
         reply_markup = InlineKeyboardMarkup(keyboard)
         message = message_constructor(accountant, creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
         bot.send_message(
-            chat_id=f'{int(accountant.chat_id_tg)}', text=message, reply_markup=reply_markup, parse_mode='Markdown')
+            chat_id=int(accountant.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
