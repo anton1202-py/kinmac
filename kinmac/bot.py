@@ -187,20 +187,28 @@ def pay_file_handler(update, context):
                 username=user_id)
             creator_user = ApprovedFunction.objects.get(
                 user_name=payment_creator)
-            if message.document or message.photo:
+
+            if message.document:
                 file_id = update.message.document.file_id
                 file_path = bot.get_file(file_id).file_path
                 response = requests.get(file_path)
                 file_content = response.content
                 file = ContentFile(file_content)
                 file.name = f'Платежка для заявки {payment_id} от {now}.pdf'  # Установка имени файла
+            elif message.photo:
+                file_id = update.message.photo[-1].file_id
+                file_path = bot.get_file(file_id).file_path
+                response = requests.get(file_path)
+                file_content = response.content
+                file = ContentFile(file_content)
+                file.name = f'Платежка для заявки {payment_id} от {now}.png'  # Установка имени файла
 
-                pay = Payments.objects.get(id=payment_id)
-                pay.file_of_payment = file
-                pay.save()
-                message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
-                bot.send_message(
-                    chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
+            pay = Payments.objects.get(id=payment_id)
+            pay.file_of_payment = file
+            pay.save()
+            message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
+            bot.send_message(
+                chat_id=f'{int(creator_user.chat_id_tg)}', text=message)
 
 
 def command_start(update, context):

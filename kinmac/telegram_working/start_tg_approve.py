@@ -22,25 +22,32 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 
 def message_constructor(user, creator_user, payment_id, payment, payment_method, pay_with_method):
-    message = f'''
-        {user.first_name}, пользователь {creator_user.last_name} {creator_user.first_name} создал новую заявку {payment_id}:
-            Название проекта: *{payment.project.name}*
-            Название категории: *{payment.category.name}*
-            Сумма платежа: *{payment.payment_sum}*
-            Комментарий к платежу: *{payment.comment}*
-            Организация получателя: *{payment.contractor_name}*
-            Способ оплаты: *{payment.payment_method.method_name}*
+    payment = Payments.objects.get(id=payment_id)
+    add_urgent_message = ''
+    add_payment_file_message = ''
+    file_path = ''
+    if payment.urgent_payment == True:
+        add_urgent_message = '🔥СРОЧНО!\n'
+    if payment.send_payment_file == True:
+        add_payment_file_message = '‼️НУЖНА ПЛАТЕЖКА / ЧЕК\n'
+    message =add_urgent_message +  add_payment_file_message + f'''
+            {payment.project.name}: *{payment.category.name}*
+            За что: *{payment.comment}*
+            Сумма: *{payment.payment_sum}*
+            Кому: *{payment.contractor_name}*
+            Способ: *{payment.payment_method.method_name}*
         '''
     
     if payment_method == 1:
-        message = message + f"Файл счета: [Скачать файл](http://5.9.57.39/media/{pay_with_method.file_of_bill})"
+        file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
+        message = message + f"Cчет: [Скачать файл](http://5.9.57.39/media/{pay_with_method.file_of_bill})"
     if payment_method == 2:
         message = message + f"Ссылка на платёж: *{pay_with_method.link_to_payment}*"
     if payment_method == 3:
-        message = message + f'''Номер карты: *{pay_with_method.card_number}*
-        Номер телефона: *{pay_with_method.phone_number}*
-        Получатель платежа: *{pay_with_method.payment_receiver}*
-        Банк для платежа: *{pay_with_method.bank_for_payment}*
+        message = message + f'''Карта: *{pay_with_method.card_number}*
+        Телефона: *{pay_with_method.phone_number}*
+        Получатель по банку: *{pay_with_method.payment_receiver}*
+        Банк: *{pay_with_method.bank_for_payment}*
         '''
     if payment_method == 4:
         message = message + f"Данные для оплаты: *{pay_with_method.cash_payment_payment_data}*"
@@ -82,8 +89,13 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                         pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
 
                     message = message_constructor(user, creator_user, payment_id, payment, payment.payment_method.pk, pay_with_method)
-                    bot.send_message(
-                        chat_id=f'{int(user.chat_id_tg)}', text=message, reply_markup=reply_markup, parse_mode='Markdown')
+                    if payment.payment_method.pk == 1:
+                        file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
+                        with open(file_path, 'rb') as f:
+                            bot.send_document(chat_id=int(user.chat_id_tg), document=f, caption=message)
+                    else:
+                        bot.send_message(
+                            chat_id=int(user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
                     break
         else:
             approve_process(payment_id, payment_creator,
