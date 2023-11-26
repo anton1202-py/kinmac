@@ -21,7 +21,7 @@ from payment.models import (ApprovalStatus, ApprovedFunction,
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardMarkup)
+                      InputMediaDocument, ReplyKeyboardMarkup)
 from telegram.ext import (CallbackQueryHandler, CommandHandler, Filters,
                           MessageHandler, Updater)
 from telegram_working.start_tg_approve import start_tg_working
@@ -140,8 +140,16 @@ def button_click(update, context):
     if 'Согласовать' in query.data:
         command_approve(payment_id, user_id, payment_creator)
     elif 'Отклонить' in query.data:
-        query.edit_message_text(
-            text=f"Напишите причину отклонения заявки {payment_id} ОТВЕТОМ на это сообщение.\n * Техническая информация {payment_id}.{user_id}.{payment_creator} *")
+        query = update.callback_query
+        message_id = query.message.message_id
+        #file_id = query.message.document.file_id
+        text=f"Напишите причину отклонения заявки {payment_id} ОТВЕТОМ на это сообщение.\n * Техническая информация {payment_id}.{user_id}.{payment_creator} *"
+
+        context.bot.delete_message(chat_id=query.message.chat_id, message_id=message_id)
+        context.bot.send_message(chat_id=query.message.chat_id, text=text)
+
+        # query.edit_message_text(
+        # text=f"Напишите причину отклонения заявки {payment_id} ОТВЕТОМ на это сообщение.\n * Техническая информация {payment_id}.{user_id}.{payment_creator} *")
         
     elif 'Оплатить' in query.data:
         payers = PayerOrganization.objects.all()
