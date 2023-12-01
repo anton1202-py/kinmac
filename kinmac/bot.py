@@ -3,10 +3,13 @@ import json
 import os
 import re
 import tracemalloc
+import urllib.parse
 from datetime import datetime
+from urllib.parse import urlencode
 
 import django
 from django.core.files.base import ContentFile
+from django.urls import reverse
 
 from kinmac.wsgi import *
 
@@ -51,7 +54,16 @@ def command_reject(payment_id, user_id, reason):
             rejection_reason=reason
         )
 
+
 def reject_reason(update, context):
+    chat_id = update.effective_chat.id
+    if 'Создать заявку' in update.message.text:
+        #url=f'http://127.0.0.1:8000/payment/login?chat_id={chat_id}'
+        url = f'http://5.9.57.39/payment/login?chat_id={chat_id}'
+        button_url = InlineKeyboardButton(text='Создать заявку', url=url)
+        keyboard = [[button_url]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text('Нажмите на кнопку, чтобы создать заявку:', reply_markup=reply_markup)
 
     reply = update.message.reply_to_message
     if reply:
@@ -229,7 +241,8 @@ def command_start(update, context):
     idchat = update.message.chat.id
 
     buttons = ReplyKeyboardMarkup([
-        ['/start']
+        ['/start'], ['Создать заявку']
+
     ], resize_keyboard=True)
     try:
         connection = psycopg2.connect(database=os.getenv('DB_NAME'),

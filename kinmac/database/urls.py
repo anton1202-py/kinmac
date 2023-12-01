@@ -48,11 +48,11 @@ urlpatterns = [
           views.DatabaseSalesDeleteView.as_view(),
           name='sales_delete'
           ),
-     path('weekly_sales/',
+    path('weekly_sales/',
           views.weekly_sales_data,
           name='weekly_sales'
           ),
-     path('weekly_sales/<str:barcode>',
+    path('weekly_sales/<str:barcode>',
           views.DatabaseWeeklySalesDetailView.as_view(),
           name='weekly_sales_detail'
           ),

@@ -16,6 +16,10 @@ urlpatterns = [
          views.PaymentUpdateView.as_view(),
          name='payment_update'
          ),
+     path('login/',
+         views.login_by_chat_id,
+         name='payment_login'
+         ),
 ]
 
 if settings.DEBUG:

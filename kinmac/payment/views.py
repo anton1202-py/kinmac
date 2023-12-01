@@ -1,11 +1,11 @@
-import asyncio
 import datetime
-import threading
 from datetime import date
 
-from asgiref.sync import sync_to_async
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.generic import UpdateView
 
 from .forms import (ApprovalStatusForm, CashPaymentForm,
@@ -22,7 +22,6 @@ now = now_time.strftime("%Y-%m-%d %H:%M:%S")
 
 def payment_create(request):
     from telegram_working.start_tg_approve import start_tg_working
-
     error = ''
     approval_users = ApprovedFunction.objects.filter(
         rating_for_approval__range=(1, 10)).values_list('id', flat=True)
@@ -491,3 +490,21 @@ class PaymentUpdateView(UpdateView):
         return self.render_to_response(
             self.get_context_data(form=form, form2=form_2)
         )
+
+
+def login_by_chat_id(request):
+    """
+    Функция залогинивает пользователя по его chat_id телеграма
+    И направляет на страницу создания заявки
+    """
+    chat_id = request.GET.get('chat_id')
+    user = ApprovedFunction.objects.get(chat_id_tg=chat_id).user_name
+    user_obj = User.objects.get(username=user)
+    username = user_obj.username
+    password = user_obj.password
+    user_auth = authenticate(request, username=username, password=password)
+    if user_obj:
+        login(request, user_obj)
+        return redirect('payment_create')
+    else:
+        return redirect('login')
