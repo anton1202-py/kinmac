@@ -112,9 +112,10 @@ def stock_site(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_stock = date.today()  # - timedelta(days=1)
+    control_date_stock_tomorrow = date.today() + timedelta(days=1)
     data = StocksSite.objects.filter(Q(pub_date__range=[
         control_date_stock,
-        control_date_stock]))
+        control_date_stock_tomorrow]))
     form = SelectDateStocksForm(request.POST or None)
     datestart = control_date_stock
     datefinish = control_date_stock
@@ -154,7 +155,9 @@ def database_sales(request):
         return redirect('login')
     control_date_stock = date.today() - timedelta(days=1)
     seller_articles = Articles.objects.all()
-    data = Sales.objects.all()
+    data = Sales.objects.filter(Q(pub_date__range=[
+        control_date_stock,
+        control_date_stock]))
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_stock
