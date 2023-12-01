@@ -1,12 +1,15 @@
 import datetime
+import os
 from datetime import date
 
+import telegram
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import UpdateView
+from dotenv import load_dotenv
 
 from .forms import (ApprovalStatusForm, CashPaymentForm,
                     FilterPayWithCheckingForm, PaymentsForm, PayWithCardForm,
@@ -18,7 +21,10 @@ from .validators import StripToNumbers
 
 now_time = datetime.datetime.now()
 now = now_time.strftime("%Y-%m-%d %H:%M:%S")
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 def payment_create(request):
     from telegram_working.start_tg_approve import start_tg_working
@@ -497,14 +503,22 @@ def login_by_chat_id(request):
     Функция залогинивает пользователя по его chat_id телеграма
     И направляет на страницу создания заявки
     """
-    chat_id = request.GET.get('chat_id')
-    user = ApprovedFunction.objects.get(chat_id_tg=chat_id).user_name
-    user_obj = User.objects.get(username=user)
-    username = user_obj.username
-    password = user_obj.password
-    user_auth = authenticate(request, username=username, password=password)
-    if user_obj:
-        login(request, user_obj)
-        return redirect('payment_create')
-    else:
+    try:
+        chat_id = request.GET.get('chat_id')
+        user = ApprovedFunction.objects.get(chat_id_tg=chat_id).user_name
+        user_obj = User.objects.get(username=user)
+        username = user_obj.username
+        password = user_obj.password
+        user_auth = authenticate(request, username=username, password=password)
+        if user_obj:
+            login(request, user_obj)
+            return redirect('payment_create')
+        else:
+            return redirect('login')
+    except Exception as e:
+        text=f'''Ваш chat_id телеграма не найден в базе данных.
+        Система не смогла вас авторизовать автоматически.
+        Авторизуйтесь по логину и паролю или обратитесь к администратору'''
+        # обработка ошибки и отправка сообщения через бота
+        bot.send_message(chat_id=chat_id, text=text)
         return redirect('login')
