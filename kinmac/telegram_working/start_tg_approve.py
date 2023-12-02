@@ -28,14 +28,14 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
     add_payment_file_message = ''
     file_path = ''
     if payment.urgent_payment == True:
-        add_urgent_message = '🔥СРОЧНО!\n'
+        add_urgent_message = '🔥*СРОЧНО!*\n'
     if payment.send_payment_file == True:
-        add_payment_file_message = '‼️НУЖНА ПЛАТЕЖКА / ЧЕК\n'
+        add_payment_file_message = '*‼️НУЖНА ПЛАТЕЖКА / ЧЕК*\n'
     message =add_urgent_message +  add_payment_file_message + f'''
-            {payment.project.name}: *{payment.category.name}*
-            За что: *{payment.comment}*
-            Сумма: *{payment.payment_sum}*
-            Кому: *{payment.contractor_name}*
+            *{payment.project.name}* - *{payment.category.name}*
+            За что: {payment.comment}
+            Сумма: {payment.payment_sum}
+            Кому: {payment.contractor_name}
             Способ: *{payment.payment_method.method_name}*
         '''
     
@@ -75,7 +75,7 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                 if user.rating_for_approval == creator_user_rating:
                     keyboard = [[InlineKeyboardButton("Согласовать", callback_data=f'Согласовать {payment_id} {user} {payment_creator}'),
                         InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {user} {payment_creator}'),
-                        InlineKeyboardButton("Оплатить", callback_data=f'Оплатить {payment_id} {user} {payment_creator}')]]
+                        InlineKeyboardButton("Оплачено", callback_data=f'Оплатить {payment_id} {user} {payment_creator}')]]
 
                     reply_markup = InlineKeyboardMarkup(keyboard)
 
