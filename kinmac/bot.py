@@ -1,15 +1,10 @@
-import asyncio
-import json
 import os
 import re
-import tracemalloc
-import urllib.parse
 from datetime import datetime
 from urllib.parse import urlencode
 
 import django
 from django.core.files.base import ContentFile
-from django.urls import reverse
 
 from kinmac.wsgi import *
 
@@ -20,13 +15,15 @@ import requests
 import telegram
 from dotenv import load_dotenv
 from payment.models import (ApprovalStatus, ApprovedFunction,
-                            PayerOrganization, Payments)
+                            PayerOrganization, Payments,
+                            TelegramMessageActions)
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      InputMediaDocument, ReplyKeyboardMarkup)
+                      ReplyKeyboardMarkup)
 from telegram.ext import (CallbackQueryHandler, CommandHandler, Filters,
                           MessageHandler, Updater)
+from telegram_working.assistance import save_message_function
 from telegram_working.start_tg_approve import start_tg_working
 
 load_dotenv()
@@ -36,7 +33,9 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+
 def command_reject(payment_id, user_id, reason):
+    """Функция отвечает за обработку команды отклонения заявки"""
     ApprovalStatus.objects.filter(
         payment=Payments.objects.get(id=payment_id),
         user=ApprovedFunction.objects.get(
@@ -53,9 +52,30 @@ def command_reject(payment_id, user_id, reason):
             status_of_payment=f'Отклонено {approval_user.last_name} {approval_user.first_name}',
             rejection_reason=reason
         )
+    messages = TelegramMessageActions.objects.filter(
+        payment=Payments.objects.get(id=payment_id),
+        message_type='create_approve'
+    ).values_list('chat_id', 'message_id', 'message', 'attach')
+
+    for message in messages:
+        chat_id =  message[0]
+        message_id = message[1]
+        current_text = message[2]
+        attach = message[3]
+        words = current_text.split("Статус:")
+        new_text = words[0] + 'Статус: ❌ Отклонено'
+        if attach == True:
+            bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+        else:
+            bot.edit_message_text(text=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
 
 
 def reject_reason(update, context):
+    """
+    Функция обрабатывает текстовые сообщения, которые поступаю в бот.
+    Если они удовлетвоябт условию логики бота, то выполняет с сообщениями
+    дальнейшие действия
+    """
     chat_id = update.effective_chat.id
     if 'Создать заявку' in update.message.text:
         #url=f'http://127.0.0.1:8000/payment/login?chat_id={chat_id}'
@@ -77,20 +97,37 @@ def reject_reason(update, context):
             payment_id = common_data[0]
             user_id = common_data[1]
             payment_creator = common_data[2]
-
+            payment = Payments.objects.get(id=payment_id)
             command_reject(payment_id, user_id, chat)
             reject_user = ApprovedFunction.objects.get(
                 username=user_id)
             create_user = ApprovedFunction.objects.get(
                 user_name=payment_creator)
+            # Удаляем все сообщения связанные с заявкой, кроме message_type=create_approve
+            messages_for_delete = TelegramMessageActions.objects.filter(
+                payment=Payments.objects.get(id=payment_id)).exclude(
+                message_type='create_approve'
+            ).values_list('chat_id', 'message_id')
+            for message_del in messages_for_delete:
+                chat_id =  message_del[0]
+                message_id = message_del[1]
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
             
-            message = f'{create_user.first_name}, пользователь {reject_user.last_name} {reject_user.first_name} отклонил вашу заявку {payment_id}. Причина: {chat}'
-            bot.send_message(
+            # Отрпавляем создателю заявки, что заявка отклонена по какой-то причине
+            message = f'{create_user.first_name}, пользователь {reject_user.last_name} {reject_user.first_name} отклонил вашу заявку {payment_id}.\nПричина: {chat}'
+            message_obj = bot.send_message(
                 chat_id=int(create_user.chat_id_tg), text=message)
+            # Записываем сообщение с причиной в базу данных
+            save_message_function(payment, create_user.chat_id_tg,
+                message_obj.message_id, 'rejected_reason_inform', 
+                create_user.user_name, message, False)
 
-    
 
 def command_approve(payment_id, user_id, payment_creator):
+    """
+    Функция вносит в базу данных изменения связанные с соглаованием
+    заявки.
+    """
     ApprovalStatus.objects.filter(
         payment=Payments.objects.get(id=payment_id),
         user=ApprovedFunction.objects.get(
@@ -107,8 +144,8 @@ def command_approve(payment_id, user_id, payment_creator):
         start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval)
 
 
-
 def command_pay(payment_id, user_id, payment_creator, payer_company):
+    """Функция выполняет действия после нажатия на кнопку ОПЛАЧЕНО"""
     pay_user = ApprovedFunction.objects.get(
         username=user_id)
     creator_user = ApprovedFunction.objects.get(
@@ -129,27 +166,71 @@ def command_pay(payment_id, user_id, payment_creator, payer_company):
     pay.save()
     if pay.send_payment_file == True:
         message = f'Необходимо прислать платёжку к этому платежу. \nПрикрепите файл ОТВЕТОМ к этому сообщению.\n* Техническая информация {payment_id}.{user_id}.{payment_creator} *'
-        bot.send_message(
+        message_file_obj = bot.send_message(
             chat_id=int(creator_user.chat_id_tg), text=message)
+        # Сохраняем сообщение в базу
+        save_message_function(pay, creator_user.chat_id_tg, 
+            message_file_obj.message_id, 'payment_file', 
+            creator_user.user_name, message, False)
     else:
+        # Изменяем текст во всех сообщениях связанных с заявкой
+        messages = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id', 'message', 'attach')
+
+        for message in messages:
+            chat_id =  message[0]
+            message_id = message[1]
+            current_text = message[2]
+            attach = message[3]
+            words = current_text.split("Статус:")
+            new_text = words[0] + 'Статус: ✅ Оплачено'
+            if attach == True:
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(text=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+
+        # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
+        messages_for_delete = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id)).exclude(
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id')
+        for message_del in messages_for_delete:
+            chat_id =  message_del[0]
+            message_id = message_del[1]
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+        # Информирование создателя заявки, что заявка оплачена
         message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
-        message_for_payer = f'Заявка {payment_id} оплачена'
-        bot.send_message(
+        message_obj = bot.send_message(
             chat_id=int(creator_user.chat_id_tg), text=message)
-        bot.send_message(
-            chat_id=int(pay_user.chat_id_tg), text=message_for_payer)
+        save_message_function(pay, creator_user.chat_id_tg, 
+            message_obj.message_id, 'payment_done', creator_user.user_name,
+            message, False)    
 
 
 def button_click(update, context):
-
+    """Обрабатьвает нажатия кнопой в сообщении"""
     query = update.callback_query
     response = query.data
+    chat_id = query.message.chat_id
+    message_id = query.message.message_id
     reaponse_data = response.split()
     payment_id = reaponse_data[1]
     user_id = reaponse_data[2]
     payment_creator = reaponse_data[3]
 
+    payment = Payments.objects.get(id=payment_id)
+    user = ApprovedFunction.objects.get(
+                username=user_id)
+
     if 'Согласовать' in query.data:
+        keyboard = [[
+            InlineKeyboardButton("Отклонить", 
+                callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
         command_approve(payment_id, user_id, payment_creator)
     elif 'Отклонить' in query.data:
         query = update.callback_query
@@ -157,11 +238,11 @@ def button_click(update, context):
         #file_id = query.message.document.file_id
         text=f"Напишите причину отклонения заявки {payment_id} ОТВЕТОМ на это сообщение.\n * Техническая информация {payment_id}.{user_id}.{payment_creator} *"
 
-        context.bot.delete_message(chat_id=query.message.chat_id, message_id=message_id)
-        context.bot.send_message(chat_id=query.message.chat_id, text=text)
-
-        # query.edit_message_text(
-        # text=f"Напишите причину отклонения заявки {payment_id} ОТВЕТОМ на это сообщение.\n * Техническая информация {payment_id}.{user_id}.{payment_creator} *")
+        #context.bot.delete_message(chat_id=query.message.chat_id, message_id=message_id)
+        message_obj = context.bot.send_message(chat_id=query.message.chat_id, text=text)
+        save_message_function(payment, query.message.chat_id,
+            message_obj.message_id, 'reject_reason', 
+            user.user_name, text, False)        
         
     elif 'Оплатить' in query.data:
         payers = PayerOrganization.objects.all()
@@ -171,6 +252,7 @@ def button_click(update, context):
         payers_id = []
         payers_info = {}
         keyboard = []
+        bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=None)
         for payer in payers:
             payers_info[payer.pk] = payer.name
             payers_names.append(payer.name)
@@ -180,16 +262,18 @@ def button_click(update, context):
             keyboard.append(button)
         reply_markup = InlineKeyboardMarkup(keyboard)
         message = f'Выберите платильщика'
-        bot.send_message(
+        message_obj_payer = bot.send_message(
             chat_id=int(pay_user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
-
+        save_message_function(payment, pay_user.chat_id_tg, message_obj_payer.message_id,
+            'payment_organization', pay_user.user_name, message, False)
 
     elif 'Сохранить_платёж' in query.data:
         payer_pk = reaponse_data[4]
         command_pay(payment_id, user_id, payment_creator, payer_pk)
 
-def pay_file_handler(update, context):
 
+def pay_file_handler(update, context):
+    """Функция обрабатывает сообщения от пользователя, если они содержат файл"""
     message = update.message
     reply = update.message.reply_to_message
     if reply:
@@ -222,13 +306,44 @@ def pay_file_handler(update, context):
                 file_content = response.content
                 file = ContentFile(file_content)
                 file.name = f'Платежка для заявки {payment_id} от {now}.png'  # Установка имени файла
-
             pay = Payments.objects.get(id=payment_id)
+            save_message_function(pay, pay_user.chat_id_tg, message.message_id,
+                'payment_done', pay_user.user_name, 'message_with_attach', False)
+
             pay.file_of_payment = file
             pay.save()
             message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
-            bot.send_message(
+            message_obj_done = bot.send_message(
                 chat_id=int(creator_user.chat_id_tg), text=message)
+            save_message_function(pay, creator_user.chat_id_tg, message_obj_done.message_id,
+                'payment_done', creator_user.user_name, message, False)
+
+            messages = TelegramMessageActions.objects.filter(
+                payment=Payments.objects.get(id=payment_id),
+                message_type='create_approve'
+            ).values_list('chat_id', 'message_id', 'message', 'attach')
+
+            for message in messages:
+                chat_id =  message[0]
+                message_id = message[1]
+                current_text = message[2]
+                attach = message[3]
+                words = current_text.split("Статус:")
+                new_text = words[0] + 'Статус: ✅ Оплачено'
+                if attach == True:
+                    bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+                else:
+                    bot.edit_message_text(text=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+
+            # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
+            messages_for_delete = TelegramMessageActions.objects.filter(
+                payment=Payments.objects.get(id=payment_id)).exclude(
+                message_type='create_approve'
+            ).values_list('chat_id', 'message_id')
+            for message_del in messages_for_delete:
+                chat_id =  message_del[0]
+                message_id = message_del[1]
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
 
 
 def command_start(update, context):
@@ -278,7 +393,6 @@ def main():
     updater.dispatcher.add_handler(CallbackQueryHandler(button_click))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, reject_reason))
     updater.dispatcher.add_handler(MessageHandler(Filters.document | Filters.photo | Filters.video, pay_file_handler))
-
     updater.start_polling()
     updater.idle()
 

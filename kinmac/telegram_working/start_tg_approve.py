@@ -3,12 +3,11 @@ import tracemalloc
 
 import telegram
 from dotenv import load_dotenv
-from payment.models import (ApprovalStatus, ApprovedFunction, CashPayment,
-                            Contractors, PayerOrganization, Payers, Payments,
+from payment.models import (ApprovedFunction, CashPayment, Payers, Payments,
                             PayWithCard, PayWithCheckingAccount,
-                            TransferToCard)
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+                            TelegramMessageActions, TransferToCard)
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram_working.assistance import save_message_function
 
 tracemalloc.start()
 
@@ -36,21 +35,31 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
             За что: {payment.comment}
             Сумма: {payment.payment_sum}
             Кому: {payment.contractor_name}
-            Способ: *{payment.payment_method.method_name}*
+            Способ: *{payment.payment_method.method_name}* 
         '''
     
     if payment_method == 1:
         file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
-    if payment_method == 2:
+    elif payment_method == 2:
         message = message + f"Ссылка на платёж: *{pay_with_method.link_to_payment}*"
-    if payment_method == 3:
+    elif payment_method == 3:
         message = message + f'''Карта: *{pay_with_method.card_number}*
         Телефон: *{pay_with_method.phone_number}*
         Получатель по банку: *{pay_with_method.payment_receiver}*
         Банк: *{pay_with_method.bank_for_payment}*
         '''
-    if payment_method == 4:
+    elif payment_method == 4:
         message = message + f"Данные для оплаты: *{pay_with_method.cash_payment_payment_data}*"
+    
+    if payment.status_of_payment == 'На согласовании' or payment.status_of_payment == 'Согласовано Лисов Юрий':
+        payment_status = '🕐 Согласование'
+    elif payment.status_of_payment == 'Согласовано Лисов Александр':
+        payment_status = '💲Оплата'
+    elif payment.status_of_payment == 'Оплачено':
+        payment_status = '✅ Оплачено'
+    elif 'Отклонено' in payment.status_of_payment:
+        payment_status = '❌ Отклонено'
+    message = message + f"""\nСтатус:  {payment_status}"""
     message = message.replace('            ', '').replace('        ', '')
     return message
 
@@ -93,14 +102,23 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                         #file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
                         file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
                         with open(file_path, 'rb') as f:
-                            bot.send_document(chat_id=int(user.chat_id_tg),
+                            message_obj = bot.send_document(chat_id=int(user.chat_id_tg),
                                 document=f,
                                 reply_markup=reply_markup,
                                 caption=message,
                                 parse_mode='Markdown')
+                            save_message_function(payment, user.chat_id_tg,
+                                message_obj.message_id, 'create_approve',
+                                user.user_name, message, True)
                     else:
-                        bot.send_message(
-                            chat_id=int(user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
+                        message_obj = bot.send_message(
+                            chat_id=int(user.chat_id_tg),
+                            text=message,
+                            reply_markup=reply_markup,
+                            parse_mode='Markdown')
+                        save_message_function(payment, user.chat_id_tg,
+                            message_obj.message_id, 'create_approve',
+                            user.user_name, message, False)
                     break
         else:
             approve_process(payment_id, payment_creator, (creator_user_rating+1))
@@ -112,7 +130,6 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
     Отвечает за процесс согласования заявки, если рейтинг пользователя = 10.
     Или заявку создал бухгалтер
     """
-
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     accountant_job = Payers.objects.get(name='Бухгалтер')
     accountant = ApprovedFunction.objects.get(job_title=accountant_job.pk)
@@ -131,9 +148,28 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
         approve_process(payment_id, payment_creator, creator_user_rating)
     else:
         keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator}'),
-                    InlineKeyboardButton("Оплатить", callback_data=f'Оплатить {payment_id} {accountant} {payment_creator}')]]
+                    InlineKeyboardButton("Оплачено", callback_data=f'Оплатить {payment_id} {accountant} {payment_creator}')]]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
         message = message_constructor(accountant, creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
-        bot.send_message(
-            chat_id=int(accountant.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
+        if payment.payment_method.pk == 1:
+            file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
+            with open(file_path, 'rb') as f:
+                message_obj = bot.send_document(
+                    chat_id=int(accountant.chat_id_tg),
+                    document=f,
+                    reply_markup=reply_markup,
+                    caption=message,
+                    parse_mode='Markdown')
+                save_message_function(payment, accountant.chat_id_tg,
+                    message_obj.message_id, 'create_approve',
+                    accountant.user_name, message, True)
+        else:
+            message_obj = bot.send_message(
+                chat_id=int(accountant.chat_id_tg),
+                reply_markup=reply_markup,
+                text=message,
+                parse_mode='Markdown')
+            save_message_function(payment, accountant.chat_id_tg,
+                message_obj.message_id, 'create_approve',
+                accountant.user_name, message, False)

@@ -246,7 +246,7 @@ class PayWithCheckingAccount(models.Model):
     payment_id = models.ForeignKey(
         Payments,
         verbose_name='Номер оплаты',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     # contractor_name = models.CharField(
     # verbose_name='Название организации получателя',
@@ -281,7 +281,7 @@ class PayWithCard(models.Model):
     payment_id = models.ForeignKey(
         Payments,
         verbose_name='Номер оплаты',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     # contractor_name = models.CharField(
     #     verbose_name='Получатель платежа',
@@ -302,7 +302,7 @@ class TransferToCard(models.Model):
     payment_id = models.ForeignKey(
         Payments,
         verbose_name='Номер оплаты',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     card_number = models.CharField(
         verbose_name='Номер карты',
@@ -333,7 +333,7 @@ class CashPayment(models.Model):
     payment_id = models.ForeignKey(
         Payments,
         verbose_name='Номер оплаты',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     cash_payment_payment_data = models.TextField(
         verbose_name='Данные для оплаты',
@@ -392,3 +392,54 @@ class ApprovedFunction(models.Model):
     class Meta:
         verbose_name = 'Рейтинг для согласования'
         verbose_name_plural = 'Рейтинг для согласования'
+
+
+class TelegramMessageActions(models.Model):
+    """
+    Модель, которая содержит message_id сообщений бота.
+    Что позволит редактировать сообщения в зависимости от статуса заявки
+    """
+    payment = models.ForeignKey(
+        Payments,
+        verbose_name='Номер заявки на оплату',
+        on_delete=models.CASCADE,
+    )
+    chat_id = models.CharField(
+        verbose_name='chat_id пользователя в телеграм',
+        max_length=20,
+        blank=True,
+        null=True,
+    )
+    message_id = models.CharField(
+        verbose_name='message_id сообщения в чате с ботом',
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    message_type = models.CharField(
+        verbose_name='Тип сообщения от бота',
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    message_author = models.CharField(
+        verbose_name='Автор сообщения',
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    message = models.CharField(
+        verbose_name='Текст сообщения',
+        max_length=400,
+        blank=True,
+        null=True,
+    )
+    attach = models.BooleanField(
+        verbose_name='Документ в сообщении',
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = 'Информация о сообщениях в телеграм'
+        verbose_name_plural = 'Информация о сообщениях в телеграм'
