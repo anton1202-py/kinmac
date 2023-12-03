@@ -312,11 +312,6 @@ def pay_file_handler(update, context):
 
             pay.file_of_payment = file
             pay.save()
-            message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
-            message_obj_done = bot.send_message(
-                chat_id=int(creator_user.chat_id_tg), text=message)
-            save_message_function(pay, creator_user.chat_id_tg, message_obj_done.message_id,
-                'payment_done', creator_user.user_name, message, False)
 
             messages = TelegramMessageActions.objects.filter(
                 payment=Payments.objects.get(id=payment_id),
@@ -344,6 +339,12 @@ def pay_file_handler(update, context):
                 chat_id =  message_del[0]
                 message_id = message_del[1]
                 bot.delete_message(chat_id=chat_id, message_id=message_id)
+            
+            message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
+            message_obj_done = bot.send_message(
+                chat_id=int(creator_user.chat_id_tg), text=message)
+            save_message_function(pay, creator_user.chat_id_tg, message_obj_done.message_id,
+                'payment_done', creator_user.user_name, message, False)
 
 
 def command_start(update, context):
