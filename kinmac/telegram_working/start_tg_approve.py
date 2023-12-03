@@ -99,8 +99,8 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
 
                     message = message_constructor(user, creator_user, payment_id, payment, payment.payment_method.pk, pay_with_method)
                     if payment.payment_method.pk == 1:
-                        file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
-                        #file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
+                        #file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
+                        file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
                         with open(file_path, 'rb') as f:
                             message_obj = bot.send_document(chat_id=int(user.chat_id_tg),
                                 document=f,
