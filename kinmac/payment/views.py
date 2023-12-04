@@ -27,7 +27,7 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 def payment_create(request):
-    from telegram_working.start_tg_approve import start_tg_working
+    from telegram_working.start_tg_approve import send_message_to_creator
     error = ''
     approval_users = ApprovedFunction.objects.filter(
         rating_for_approval__range=(1, 10)).values_list('id', flat=True)
@@ -181,7 +181,7 @@ def payment_create(request):
         job_title = ApprovedFunction.objects.get(
             username=request.user.id).job_title
         # ApprovedFunction.objects.get(username)
-        start_tg_working(payment.pk, request.user.username, rating)
+        send_message_to_creator(payment.pk, request.user.username, rating)
     else:
         form = PaymentsForm()
         form_pay_account = PayWithCheckingAccountForm()

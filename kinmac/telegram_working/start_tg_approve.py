@@ -68,12 +68,10 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
     """
     Функция отвечает за процесс согласования заявки.
     """
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
     users = ApprovedFunction.objects.all()
     creator_user = ApprovedFunction.objects.get(
         user_name=payment_creator)
     payment = Payments.objects.get(id=payment_id)
-    
     
     rating_all_users = ApprovedFunction.objects.all(
     ).values_list('rating_for_approval', flat=True)
@@ -123,6 +121,41 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
         else:
             approve_process(payment_id, payment_creator, (creator_user_rating+1))
 
+def send_message_to_creator(payment_id, payment_creator, creator_user_rating):
+    """Фнукция отрпавялет сообщение создателю с только что созданной заявкой"""
+    payment = Payments.objects.get(id=payment_id)
+    creator = ApprovedFunction.objects.get(user_name=payment_creator)
+    if payment.payment_method.pk == 1:
+        pay_with_method = PayWithCheckingAccount.objects.get(payment_id=payment.pk)
+    elif payment.payment_method.pk == 2:
+        pay_with_method = PayWithCard.objects.get(payment_id=payment.pk)
+    elif payment.payment_method.pk == 3:
+        pay_with_method = TransferToCard.objects.get(payment_id=payment.pk)
+    elif payment.payment_method.pk == 4:
+        pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
+
+    message = message_constructor(payment_creator, payment_creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
+    if payment.payment_method.pk == 1:
+        file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
+        with open(file_path, 'rb') as f:
+            message_obj = bot.send_document(
+                chat_id=int(creator.chat_id_tg),
+                document=f,
+                caption=message,
+                parse_mode='Markdown')
+            save_message_function(payment, creator.chat_id_tg,
+                message_obj.message_id, 'create_approve',
+                creator.user_name, message, True)
+    else:
+        message_obj = bot.send_message(
+            chat_id=int(creator.chat_id_tg),
+            text=message,
+            parse_mode='Markdown')
+        save_message_function(payment, creator.chat_id_tg,
+            message_obj.message_id, 'create_approve',
+            creator.user_name, message, False)
+    start_tg_working(payment_id, payment_creator, creator_user_rating)
+
 
 def start_tg_working(payment_id, payment_creator, creator_user_rating):
     """
@@ -130,7 +163,7 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
     Отвечает за процесс согласования заявки, если рейтинг пользователя = 10.
     Или заявку создал бухгалтер
     """
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    
     accountant_job = Payers.objects.get(name='Бухгалтер')
     accountant = ApprovedFunction.objects.get(job_title=accountant_job.pk)
     creator = ApprovedFunction.objects.get(user_name=payment_creator)

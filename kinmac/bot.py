@@ -63,7 +63,7 @@ def command_reject(payment_id, user_id, reason):
         current_text = message[2]
         attach = message[3]
         words = current_text.split("Статус:")
-        new_text = words[0] + 'Статус: ❌ Отклонено'
+        new_text = words[0] + f'\nСтатус: ❌ Отклонено\nПричина: {reason}'
         if attach == True:
             bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
         else:
@@ -84,6 +84,8 @@ def reject_reason(update, context):
         keyboard = [[button_url]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text('Нажмите на кнопку, чтобы создать заявку:', reply_markup=reply_markup)
+        message_id = update.message.message_id
+        bot.pin_chat_message(chat_id=chat_id, message_id=message_id)
 
     reply = update.message.reply_to_message
     if reply:
@@ -114,9 +116,15 @@ def reject_reason(update, context):
                 bot.delete_message(chat_id=chat_id, message_id=message_id)
             
             # Отрпавляем создателю заявки, что заявка отклонена по какой-то причине
-            message = f'{create_user.first_name}, пользователь {reject_user.last_name} {reject_user.first_name} отклонил вашу заявку {payment_id}.\nПричина: {chat}'
+            message = f'Отклонено.\nПричина: {chat}'
+            message_rej_id = TelegramMessageActions.objects.get(
+                payment=Payments.objects.get(id=payment_id),
+                message_type='create_approve',
+                message_author=payment_creator
+            ).message_id
             message_obj = bot.send_message(
-                chat_id=int(create_user.chat_id_tg), text=message)
+                chat_id=int(create_user.chat_id_tg), text=message, reply_to_message_id=message_rej_id)
+
             # Записываем сообщение с причиной в базу данных
             save_message_function(payment, create_user.chat_id_tg,
                 message_obj.message_id, 'rejected_reason_inform', 
@@ -202,9 +210,13 @@ def command_pay(payment_id, user_id, payment_creator, payer_company):
             bot.delete_message(chat_id=chat_id, message_id=message_id)
 
         # Информирование создателя заявки, что заявка оплачена
-        message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
+        message_id = TelegramMessageActions.objects.get(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve',
+            message_author=payment_creator
+        ).message_id
         message_obj = bot.send_message(
-            chat_id=int(creator_user.chat_id_tg), text=message)
+            chat_id=int(creator_user.chat_id_tg), text='Оплачено', reply_to_message_id=message_id)
         save_message_function(pay, creator_user.chat_id_tg, 
             message_obj.message_id, 'payment_done', creator_user.user_name,
             message, False)    
