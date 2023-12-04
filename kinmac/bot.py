@@ -354,8 +354,18 @@ def pay_file_handler(update, context):
                 message_type='create_approve',
                 message_author=payment_creator
             ).message_id
-            message_obj_done = bot.send_message(
-                chat_id=int(creator_user.chat_id_tg), text='Оплачено', reply_to_message_id=message_id)
+            if Payments.objects.get(id=payment_id).send_payment_file == True:
+                file_path = os.path.join(os.getcwd(), 'media/' f'{Payments.objects.get(id=payment_id).file_of_payment}')
+                with open(file_path, 'rb') as f:
+                    message_obj_done = bot.send_document(
+                        chat_id=int(creator_user.chat_id_tg),
+                        document=f,
+                        caption='Оплачено',
+                        reply_to_message_id=message_id)
+            else:
+                message_obj_done = bot.send_message(
+                    chat_id=int(creator_user.chat_id_tg),
+                    text='Оплачено', reply_to_message_id=message_id)
             save_message_function(pay, creator_user.chat_id_tg, message_obj_done.message_id,
                 'payment_done', creator_user.user_name, message, False)
 
