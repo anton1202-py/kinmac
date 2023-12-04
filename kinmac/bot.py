@@ -352,9 +352,13 @@ def pay_file_handler(update, context):
                 message_id = message_del[1]
                 bot.delete_message(chat_id=chat_id, message_id=message_id)
             
-            message = f'{creator_user.first_name}, пользователь {pay_user.last_name} {pay_user.first_name} оплатил вашу заявку {payment_id}'
+            message_id = TelegramMessageActions.objects.get(
+                payment=Payments.objects.get(id=payment_id),
+                message_type='create_approve',
+                message_author=payment_creator
+            ).message_id
             message_obj_done = bot.send_message(
-                chat_id=int(creator_user.chat_id_tg), text=message)
+                chat_id=int(creator_user.chat_id_tg), text='Оплачено', reply_to_message_id=message_id)
             save_message_function(pay, creator_user.chat_id_tg, message_obj_done.message_id,
                 'payment_done', creator_user.user_name, message, False)
 
