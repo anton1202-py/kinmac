@@ -77,7 +77,10 @@ def reject_reason(update, context):
     дальнейшие действия
     """
     chat_id = update.effective_chat.id
+
     reply = update.message.reply_to_message
+    mess_id = update.message.message_id
+    
     if reply:
         bot_text = reply.text  # Получаем текст сообщения, которое отправил бот
         if 'отклонения' in bot_text:
@@ -90,9 +93,13 @@ def reject_reason(update, context):
             user_id = common_data[1]
             payment_creator = common_data[2]
             payment = Payments.objects.get(id=payment_id)
+            
             command_reject(payment_id, user_id, chat)
             reject_user = ApprovedFunction.objects.get(
                 username=user_id)
+            save_message_function(payment, chat_id,
+                mess_id, 'rejected_reason_inform', 
+                reject_user.user_name, update.message.text, False)
             create_user = ApprovedFunction.objects.get(
                 user_name=payment_creator)
             # Удаляем все сообщения связанные с заявкой, кроме message_type=create_approve
