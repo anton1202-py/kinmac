@@ -77,16 +77,6 @@ def reject_reason(update, context):
     дальнейшие действия
     """
     chat_id = update.effective_chat.id
-    if 'Создать заявку' in update.message.text:
-        #url=f'http://127.0.0.1:8000/payment/login?chat_id={chat_id}'
-        url = f'http://5.9.57.39/payment/login?chat_id={chat_id}'
-        button_url = InlineKeyboardButton(text='Создать заявку', url=url)
-        keyboard = [[button_url]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text('Нажмите на кнопку, чтобы создать заявку:', reply_markup=reply_markup)
-        message_id = update.message.message_id
-        bot.pin_chat_message(chat_id=chat_id, message_id=message_id)
-
     reply = update.message.reply_to_message
     if reply:
         bot_text = reply.text  # Получаем текст сообщения, которое отправил бот
@@ -365,7 +355,7 @@ def pay_file_handler(update, context):
 
 def command_start(update, context):
     """Функция, которая обрабатывает поступающую команду start"""
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    chat_id = update.effective_chat.id
     chat = update.effective_chat
     name = update.message.chat.first_name
     soname = update.message.chat.last_name
@@ -373,7 +363,7 @@ def command_start(update, context):
     idchat = update.message.chat.id
 
     buttons = ReplyKeyboardMarkup([
-        ['/start'], ['Создать заявку']
+        ['/start']
 
     ], resize_keyboard=True)
     try:
@@ -402,6 +392,13 @@ def command_start(update, context):
               'Теперь я буду помогать тебе работать с платежами'),
         reply_markup=buttons
     )
+    url = f'http://5.9.57.39/payment/login?chat_id={chat_id}'
+    button_url = InlineKeyboardButton(text='Создать заявку', url=url)
+    keyboard = [[button_url]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    message_id = update.message.reply_text('Нажмите на кнопку, чтобы создать заявку:', reply_markup=reply_markup).message_id
+    #message_id = update.message.message_id
+    bot.pin_chat_message(chat_id=chat_id, message_id=message_id)
 
 
 def main():

@@ -135,12 +135,15 @@ def send_message_to_creator(payment_id, payment_creator, creator_user_rating):
         pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
 
     message = message_constructor(payment_creator, payment_creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
+    keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {creator} {payment_creator}')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     if payment.payment_method.pk == 1:
         file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
         with open(file_path, 'rb') as f:
             message_obj = bot.send_document(
                 chat_id=int(creator.chat_id_tg),
                 document=f,
+                reply_markup=reply_markup,
                 caption=message,
                 parse_mode='Markdown')
             save_message_function(payment, creator.chat_id_tg,
@@ -150,6 +153,7 @@ def send_message_to_creator(payment_id, payment_creator, creator_user_rating):
         message_obj = bot.send_message(
             chat_id=int(creator.chat_id_tg),
             text=message,
+            reply_markup=reply_markup,
             parse_mode='Markdown')
         save_message_function(payment, creator.chat_id_tg,
             message_obj.message_id, 'create_approve',
