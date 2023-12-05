@@ -131,12 +131,12 @@ class Payments(models.Model):
     )
     project = models.ForeignKey(
         Projects,
-        verbose_name='Название проекта',
+        verbose_name='Проект',
         on_delete=models.PROTECT,
     )
     category = models.ForeignKey(
         Categories,
-        verbose_name='Название категории',
+        verbose_name='Категория',
         on_delete=models.PROTECT,
     )
     payment_method = models.ForeignKey(
@@ -145,16 +145,16 @@ class Payments(models.Model):
         on_delete=models.PROTECT,
     )
     payment_sum = models.FloatField(
-        verbose_name='Сумма платежа',
+        verbose_name='Сумма',
     )
     comment = models.TextField(
-        verbose_name='Комментарий к платежу',
+        verbose_name='За что платим',
         blank=True,
         null=True,
     )
     contractor_name = models.ForeignKey(
         Contractors,
-        verbose_name='Название организации получателя',
+        verbose_name='Кому',
         max_length=100,
         on_delete=models.PROTECT,
         blank=True,

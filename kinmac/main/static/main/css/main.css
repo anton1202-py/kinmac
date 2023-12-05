@@ -737,6 +737,7 @@ table tr:hover {
 	text-shadow: 1px 1px 1px #fff;
 }
 
+
 .main-form-create-payment fieldset{
     border-radius: var(--border-radius-2);
 	-webkit-border-radius: var(--border-radius-2);
