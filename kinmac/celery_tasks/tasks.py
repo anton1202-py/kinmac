@@ -325,7 +325,7 @@ def add_stock_data_site():
         now = datetime.now()
         control_date = now.strftime("%Y-%m-%d %H:%M:%S")
         PATH = 'celery_tasks/Аналитика МП.xlsx'
-        URL = 'https://card.wb.ru/cards/detail?appType=2&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
+        URL = 'https://card.wb.ru/cards/detail?appType=0&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
 
         excel_data = pd.read_excel(PATH)
         data = pd.DataFrame(excel_data, columns=['Номенк WB', 'Арт'])
@@ -454,5 +454,5 @@ def add_stock_data_site():
 
 
 # add_data_stock_api()
-add_data_sales()
+#add_data_sales()
 # add_stock_data_site()
