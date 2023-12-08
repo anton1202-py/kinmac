@@ -366,8 +366,8 @@ def add_stock_data_site():
                 price_u = j['priceU']
                 sale_price_u = j['salePriceU']
                 sale = j['sale']
-                basic_sale = j['extended']['basicSale']
-                basic_price_u = j['extended']['basicPriceU']
+                basic_sale = 0
+                basic_price_u = 0
                 review_rating = j['reviewRating']
                 feedbacks = j['feedbacks']
                 promotions = j['promotions']
