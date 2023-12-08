@@ -15,7 +15,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+CHAT_ID = os.getenv('CHAT_ID')
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
@@ -368,8 +368,8 @@ def add_stock_data_site():
                 price_u = j['priceU']
                 sale_price_u = j['salePriceU']
                 sale = j['sale']
-                basic_sale = j['extended']['basicSale']
-                basic_price_u = j['extended']['basicPriceU']
+                basic_sale = 0
+                basic_price_u = 0
                 review_rating = j['reviewRating']
                 feedbacks = j['feedbacks']
                 promotions = j['promotions']
@@ -456,5 +456,5 @@ def add_stock_data_site():
 
 
 # add_data_stock_api()
-add_data_sales()
-#add_stock_data_site()
+#add_data_sales()
+add_stock_data_site()
