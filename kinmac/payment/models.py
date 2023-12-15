@@ -436,7 +436,7 @@ class TelegramMessageActions(models.Model):
     )
     reply_markup = models.CharField(
         verbose_name='Кнопка из сообщения',
-        max_length=500,
+        max_length=800,
         blank=True,
         null=True,
     )
