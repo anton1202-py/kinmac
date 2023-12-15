@@ -2,7 +2,7 @@ from payment.models import TelegramMessageActions
 
 
 def save_message_function(payment_object, chat_id, message_id,
-                          message_type, message_author, message, attach):
+                          message_type, message_author, message, reply_markup, attach):
     """Функция отвечает за сохранение сообщения в чате с KINMAC ботом в базу данных.
     Входящие переменные:
     payment_object - объект класса Payments. Таблица TelegramMessageActions связана
@@ -24,6 +24,7 @@ def save_message_function(payment_object, chat_id, message_id,
         answer - ответы пользователя на сообщения бота, если они укладываются в сценарий.
     message_author - автор сообщения или кому отправил сообщеине бот.
     message - сохраняемое сообщение.
+    reply_markup - кнопки из сообщения.
     attach - Тип Boolean. Указывает есть в сообщении вложение или нет.
         или нет.
     """
@@ -34,6 +35,23 @@ def save_message_function(payment_object, chat_id, message_id,
         message_type=message_type,
         message_author=message_author,
         message=message,
+        reply_markup=reply_markup,
         attach=attach
     )
     telegram_message_attach.save()
+
+
+def upgrade_message_function(message_id, reply_markup):
+    """Функция отвечает за обновление кнопок в сообщениях.
+    Входящие переменные:
+   
+    message_id - идентификатор сообщений в чате с ботом. У каждого сообщения 
+        свой персональный номер.
+    reply_markup - кнопки из сообщения.
+    attach - Тип Boolean. Указывает есть в сообщении вложение или нет.
+        или нет.
+    """
+    telegram_message_attach = TelegramMessageActions.objects.filter(
+        message_id=message_id
+    )
+    telegram_message_attach.update(reply_markup=reply_markup)

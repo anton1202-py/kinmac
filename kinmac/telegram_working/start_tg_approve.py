@@ -1,3 +1,4 @@
+import json
 import os
 import tracemalloc
 
@@ -107,7 +108,7 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                                 parse_mode='Markdown')
                             save_message_function(payment, user.chat_id_tg,
                                 message_obj.message_id, 'create_approve',
-                                user.user_name, message, True)
+                                user.user_name, message, reply_markup, True)
                     else:
                         message_obj = bot.send_message(
                             chat_id=int(user.chat_id_tg),
@@ -116,7 +117,7 @@ def approve_process(payment_id, payment_creator, creator_user_rating):
                             parse_mode='Markdown')
                         save_message_function(payment, user.chat_id_tg,
                             message_obj.message_id, 'create_approve',
-                            user.user_name, message, False)
+                            user.user_name, message, reply_markup, False)
                     break
         else:
             approve_process(payment_id, payment_creator, (creator_user_rating+1))
@@ -125,39 +126,40 @@ def send_message_to_creator(payment_id, payment_creator, creator_user_rating):
     """Фнукция отрпавялет сообщение создателю с только что созданной заявкой"""
     payment = Payments.objects.get(id=payment_id)
     creator = ApprovedFunction.objects.get(user_name=payment_creator)
-    if payment.payment_method.pk == 1:
-        pay_with_method = PayWithCheckingAccount.objects.get(payment_id=payment.pk)
-    elif payment.payment_method.pk == 2:
-        pay_with_method = PayWithCard.objects.get(payment_id=payment.pk)
-    elif payment.payment_method.pk == 3:
-        pay_with_method = TransferToCard.objects.get(payment_id=payment.pk)
-    elif payment.payment_method.pk == 4:
-        pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
+    if creator_user_rating == 0:
+        if payment.payment_method.pk == 1:
+            pay_with_method = PayWithCheckingAccount.objects.get(payment_id=payment.pk)
+        elif payment.payment_method.pk == 2:
+            pay_with_method = PayWithCard.objects.get(payment_id=payment.pk)
+        elif payment.payment_method.pk == 3:
+            pay_with_method = TransferToCard.objects.get(payment_id=payment.pk)
+        elif payment.payment_method.pk == 4:
+            pay_with_method = CashPayment.objects.get(payment_id=payment.pk)
 
-    message = message_constructor(payment_creator, payment_creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
-    keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {creator} {payment_creator}')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    if payment.payment_method.pk == 1:
-        file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
-        with open(file_path, 'rb') as f:
-            message_obj = bot.send_document(
+        message = message_constructor(payment_creator, payment_creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
+        keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {creator} {payment_creator}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        if payment.payment_method.pk == 1:
+            file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
+            with open(file_path, 'rb') as f:
+                message_obj = bot.send_document(
+                    chat_id=int(creator.chat_id_tg),
+                    document=f,
+                    reply_markup=reply_markup,
+                    caption=message,
+                    parse_mode='Markdown')
+                save_message_function(payment, creator.chat_id_tg,
+                    message_obj.message_id, 'create_approve',
+                    creator.user_name, message, reply_markup, True)
+        else:
+            message_obj = bot.send_message(
                 chat_id=int(creator.chat_id_tg),
-                document=f,
+                text=message,
                 reply_markup=reply_markup,
-                caption=message,
                 parse_mode='Markdown')
             save_message_function(payment, creator.chat_id_tg,
                 message_obj.message_id, 'create_approve',
-                creator.user_name, message, True)
-    else:
-        message_obj = bot.send_message(
-            chat_id=int(creator.chat_id_tg),
-            text=message,
-            reply_markup=reply_markup,
-            parse_mode='Markdown')
-        save_message_function(payment, creator.chat_id_tg,
-            message_obj.message_id, 'create_approve',
-            creator.user_name, message, False)
+                creator.user_name, message, reply_markup, False)
     start_tg_working(payment_id, payment_creator, creator_user_rating)
 
 
@@ -169,7 +171,7 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
     """
     
     accountant_job = Payers.objects.get(name='Бухгалтер')
-    accountant = ApprovedFunction.objects.get(job_title=accountant_job.pk)
+    accountants = ApprovedFunction.objects.filter(job_title=accountant_job.pk)
     creator = ApprovedFunction.objects.get(user_name=payment_creator)
     payment = Payments.objects.get(id=payment_id)
     if payment.payment_method.pk == 1:
@@ -184,29 +186,50 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
     if creator_user_rating < 10 and creator.job_title != 'Бухгалтер':
         approve_process(payment_id, payment_creator, creator_user_rating)
     else:
-        keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator}'),
-                    InlineKeyboardButton("Оплачено", callback_data=f'Оплатить {payment_id} {accountant} {payment_creator}')]]
 
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        message = message_constructor(accountant, creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
-        if payment.payment_method.pk == 1:
-            file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
-            with open(file_path, 'rb') as f:
-                message_obj = bot.send_document(
+        messages = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id', 'message', 'reply_markup', 'attach')
+
+        for message in messages:
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
+            current_text = message[2]
+            reply_markup = json.loads(message[3].replace("'", "\""))
+            attach = message[4]
+            words = current_text.split("Статус:")
+            new_text = words[0] + 'Статус: 💲Оплата'
+            if attach == True:
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, essage_id=message_id_cicle, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+
+        for accountant in accountants:
+            keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator}'),
+                        InlineKeyboardButton("В работе", callback_data=f'Вработе {payment_id} {accountant} {payment_creator}'),
+                        InlineKeyboardButton("Оплачено", callback_data=f'Оплатить {payment_id} {accountant} {payment_creator}')]]
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            message = message_constructor(accountant, creator, payment_id, payment, payment.payment_method.pk, pay_with_method)
+            if payment.payment_method.pk == 1:
+                file_path = os.path.join(os.getcwd(), 'media/' f'{pay_with_method.file_of_bill}')
+                with open(file_path, 'rb') as f:
+                    message_obj = bot.send_document(
+                        chat_id=int(accountant.chat_id_tg),
+                        document=f,
+                        reply_markup=reply_markup,
+                        caption=message,
+                        parse_mode='Markdown')
+                    save_message_function(payment, accountant.chat_id_tg,
+                        message_obj.message_id, 'create_approve',
+                        accountant.user_name, message, reply_markup, True)
+            else:
+                message_obj = bot.send_message(
                     chat_id=int(accountant.chat_id_tg),
-                    document=f,
                     reply_markup=reply_markup,
-                    caption=message,
+                    text=message,
                     parse_mode='Markdown')
                 save_message_function(payment, accountant.chat_id_tg,
                     message_obj.message_id, 'create_approve',
-                    accountant.user_name, message, True)
-        else:
-            message_obj = bot.send_message(
-                chat_id=int(accountant.chat_id_tg),
-                reply_markup=reply_markup,
-                text=message,
-                parse_mode='Markdown')
-            save_message_function(payment, accountant.chat_id_tg,
-                message_obj.message_id, 'create_approve',
-                accountant.user_name, message, False)
+                    accountant.user_name, message, reply_markup, False)

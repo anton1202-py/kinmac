@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from datetime import datetime
@@ -23,7 +24,8 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup)
 from telegram.ext import (CallbackQueryHandler, CommandHandler, Filters,
                           MessageHandler, Updater)
-from telegram_working.assistance import save_message_function
+from telegram_working.assistance import (save_message_function,
+                                         upgrade_message_function)
 from telegram_working.start_tg_approve import start_tg_working
 
 load_dotenv()
@@ -58,16 +60,16 @@ def command_reject(payment_id, user_id, reason):
     ).values_list('chat_id', 'message_id', 'message', 'attach')
 
     for message in messages:
-        chat_id =  message[0]
-        message_id = message[1]
+        chat_id_cicle =  message[0]
+        message_id_cicle = message[1]
         current_text = message[2]
         attach = message[3]
         words = current_text.split("Статус:")
         new_text = words[0] + f'\nСтатус: ❌ Отклонено\nПричина: {reason}'
         if attach == True:
-            bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+            bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
         else:
-            bot.edit_message_text(text=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+            bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
 
 
 def reject_reason(update, context):
@@ -97,7 +99,7 @@ def reject_reason(update, context):
             username=user_id)
         save_message_function(payment, chat_id,
             mess_id, 'rejected_reason_inform', 
-            reject_user.user_name, update.message.text, False)
+            reject_user.user_name, update.message.text, '', False)
         create_user = ApprovedFunction.objects.get(
             user_name=payment_creator)
         # Удаляем все сообщения связанные с заявкой, кроме message_type=create_approve
@@ -122,7 +124,7 @@ def reject_reason(update, context):
         # Записываем сообщение с причиной в базу данных
         save_message_function(payment, create_user.chat_id_tg,
             message_obj.message_id, 'rejected_reason_inform', 
-            create_user.user_name, message, False)
+            create_user.user_name, message, '', False)
 
 def command_approve(payment_id, user_id, payment_creator):
     """
@@ -179,7 +181,7 @@ def command_pay(context, payment_id, user_id, payment_creator, payer_company):
         # Сохраняем сообщение в базу
         save_message_function(pay, pay_user.chat_id_tg, 
             message_file_obj.message_id, 'payment_file', 
-            pay_user.user_name, message, False)
+            pay_user.user_name, message, '', False)
     else:
         # Изменяем текст во всех сообщениях связанных с заявкой
         messages = TelegramMessageActions.objects.filter(
@@ -188,16 +190,16 @@ def command_pay(context, payment_id, user_id, payment_creator, payer_company):
         ).values_list('chat_id', 'message_id', 'message', 'attach')
 
         for message in messages:
-            chat_id =  message[0]
-            message_id = message[1]
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
             current_text = message[2]
             attach = message[3]
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: ✅ Оплачено'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
 
         # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
         messages_for_delete = TelegramMessageActions.objects.filter(
@@ -219,7 +221,7 @@ def command_pay(context, payment_id, user_id, payment_creator, payer_company):
             chat_id=int(creator_user.chat_id_tg), text='Оплачено', reply_to_message_id=message_id)
         save_message_function(pay, creator_user.chat_id_tg, 
             message_obj.message_id, 'payment_done', creator_user.user_name,
-            message, False)    
+            message, '', False)    
 
 
 def button_click(update, context):
@@ -243,6 +245,7 @@ def button_click(update, context):
                 callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
+        upgrade_message_function(message_id, reply_markup)
         command_approve(payment_id, user_id, payment_creator)
     elif 'Отклонить' in query.data:
         query = update.callback_query
@@ -259,13 +262,10 @@ def button_click(update, context):
         context.chat_data['payment_id'] = payment_id
         context.chat_data['user_id'] = user_id
         context.chat_data['payment_creator'] = payment_creator
-        
-        
-        
-        
+
         save_message_function(payment, query.message.chat_id,
             message_obj.message_id, 'reject_reason', 
-            user.user_name, text, False)        
+            user.user_name, text, '', False)        
         
     elif 'Оплатить' in query.data:
         payers = PayerOrganization.objects.all()
@@ -275,7 +275,7 @@ def button_click(update, context):
         payers_id = []
         payers_info = {}
         keyboard = []
-        bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=None)
+        bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id)
         for payer in payers:
             payers_info[payer.pk] = payer.name
             payers_names.append(payer.name)
@@ -288,8 +288,59 @@ def button_click(update, context):
         message_obj_payer = bot.send_message(
             chat_id=int(pay_user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
         save_message_function(payment, pay_user.chat_id_tg, message_obj_payer.message_id,
-            'payment_organization', pay_user.user_name, message, False)
+            'payment_organization', pay_user.user_name, message, reply_markup, False)
 
+    elif 'Вработе' in query.data:
+        payer_user = ApprovedFunction.objects.get(
+                username=user_id)
+        pay_user_lastname = payer_user.last_name
+        pay_user_firstname = payer_user.first_name
+        
+        # Изменяем текст во всех сообщениях связанных с заявкой
+        messages = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id', 'message', 'reply_markup', 'attach')
+
+        for message in messages:
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
+            
+            current_text = message[2]
+            reply_markup = json.loads(message[3].replace("'", "\""))
+            attach = message[4]
+            words = current_text.split("Статус:")
+            new_text = words[0] + f'‼️‼️ Статус: В работе у {pay_user_firstname} {pay_user_lastname}'
+            if attach == True:
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+        # После нажатия на кнопку В Работе, у нажавшего меняются кнопки
+        keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}'),
+                        InlineKeyboardButton("Вернуть в очередь", callback_data=f'О_тменить_В_работе {payment_id} {user_id} {payment_creator}'),
+                        InlineKeyboardButton("Оплачено", callback_data=f'Оплатить {payment_id} {user_id} {payment_creator}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
+    
+    elif 'О_тменить_В_работе' in query.data:
+        messages = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id', 'message', 'reply_markup', 'attach')
+
+        for message in messages:
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
+            current_text = message[2]
+            reply_markup = json.loads(message[3].replace("'", "\""))
+            attach = message[4]
+            words = current_text.split("Статус:")
+            new_text = words[0] + 'Статус: 💲Оплата'
+            if attach == True:
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, essage_id=message_id_cicle, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+    
     elif 'Сохранить_платёж' in query.data:
         payer_pk = reaponse_data[4]
         command_pay(context, payment_id, user_id, payment_creator, payer_pk)
@@ -328,7 +379,7 @@ def pay_file_handler(update, context):
             file.name = f'Платежка для заявки {payment_id} от {now}.png'  # Установка имени файла
         pay = Payments.objects.get(id=payment_id)
         save_message_function(pay, pay_user.chat_id_tg, message.message_id,
-            'payment_done', pay_user.user_name, 'message_with_attach', False)
+            'payment_done', pay_user.user_name, 'message_with_attach', '', False)
         pay.file_of_payment = file
         pay.save()
         messages = TelegramMessageActions.objects.filter(
@@ -336,16 +387,16 @@ def pay_file_handler(update, context):
             message_type='create_approve'
         ).values_list('chat_id', 'message_id', 'message', 'attach')
         for message in messages:
-            chat_id =  message[0]
-            message_id = message[1]
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
             current_text = message[2]
             attach = message[3]
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: ✅ Оплачено'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id, message_id=message_id, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
         # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
         messages_for_delete = TelegramMessageActions.objects.filter(
             payment=Payments.objects.get(id=payment_id)).exclude(
@@ -377,7 +428,7 @@ def pay_file_handler(update, context):
                 chat_id=int(creator_user.chat_id_tg),
                 text='Оплачено', reply_to_message_id=message_id)
         save_message_function(pay, creator_user.chat_id_tg, message_obj_done.message_id,
-            'payment_done', creator_user.user_name, message, False)
+            'payment_done', creator_user.user_name, message, '', False)
 
 
 def command_start(update, context):

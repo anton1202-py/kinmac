@@ -434,6 +434,13 @@ class TelegramMessageActions(models.Model):
         blank=True,
         null=True,
     )
+    reply_markup = models.CharField(
+        verbose_name='Кнопка из сообщения',
+        max_length=500,
+        blank=True,
+        null=True,
+    )
+
     attach = models.BooleanField(
         verbose_name='Документ в сообщении',
         blank=True,
