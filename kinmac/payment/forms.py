@@ -12,7 +12,7 @@ from .validators import StripToNumbers, format_phone_number
 class PaymentsForm(ModelForm):
     class Meta:
         model = Payments
-        fields = ['pub_date', 'creator', 'project', 'payer_organization', 'category', 'payment_method', 'payment_sum',
+        fields = ['creator', 'project', 'payer_organization', 'category', 'payment_method', 'payment_sum',
                   'comment', 'send_payment_file', 'contractor_name', 'file_of_payment', 'accountant',
                   'urgent_payment', 'status_of_payment', 'date_of_payment', 'accountant', 'file_of_payment', 'payment_coefficient']
         project = forms.ChoiceField(choices=Projects.objects.all())
