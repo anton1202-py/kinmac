@@ -114,7 +114,6 @@ class Payments(models.Model):
     pub_date = models.DateTimeField(
         verbose_name='Дата создания заявки',
         auto_now_add=True,
-        format='%Y-%m-%d %H:%M:%S',
     )
     creator = models.CharField(
         verbose_name='Создатель заявки',
