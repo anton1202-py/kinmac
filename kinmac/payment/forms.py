@@ -27,6 +27,9 @@ class PaymentsForm(ModelForm):
         urgent_payment = forms.CheckboxSelectMultiple()
         payment_coefficient = forms.FloatField(required=False)
         widgets = {
+            'pub_date': forms.TextInput(attrs={
+                'disabled': 'disabled'
+            }),
             'project': Select(attrs={
                 'class': 'input-field',
             }),
