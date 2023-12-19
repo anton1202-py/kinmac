@@ -201,7 +201,7 @@ def start_tg_working(payment_id, payment_creator, creator_user_rating):
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: 💲Оплата'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, essage_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
             else:
                 bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
 
