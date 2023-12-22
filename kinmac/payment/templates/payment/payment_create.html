@@ -9,7 +9,7 @@
         
         <h1>Добавить заявку</h1>
         <div class="main-form-create-payment">
-            <form method="post" name="payments" enctype="multipart/form-data">
+            <form method="post" name="payments" enctype="multipart/form-data" id="id_create_payment_form">
                 {% csrf_token %}
                 <fieldset>
                     <label for="project"><span>{{form.project.label}}</span>{{ form.project }}</label>

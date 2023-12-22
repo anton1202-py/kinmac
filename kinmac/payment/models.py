@@ -315,6 +315,7 @@ class TransferToCard(models.Model):
         # validators=[RegexValidator(r'^\d{1,10}$')],
         max_length=12,
         blank=True,  # optional
+        null=True,
     )
     payment_receiver = models.CharField(
         verbose_name='Получатель платежа',

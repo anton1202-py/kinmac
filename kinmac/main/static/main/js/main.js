@@ -1,6 +1,12 @@
 // =========== ВЫВЕДЕНИЕ ФОРМ В ЗАВИСИМОСТИ ОТ ВЫБОРА ==========
 var paymentsForm = document.forms['payments'];
 if (paymentsForm) {
+
+  const input = document.getElementById('id_payment_sum');
+
+  input.addEventListener('input', function() {
+    this.value = this.value.replace(/[^\d]/g, '');
+  });
     if (paymentsForm.elements[8]) {
         const select1 = paymentsForm.elements[10];
         select1.onchange = function(){ 
@@ -16,8 +22,18 @@ if (paymentsForm) {
                 document.getElementById('pay_with_card').style.display = "";} 
             else { 
                 document.getElementById('pay_with_card').style.display = "none";} 
-            if(options[index].textContent === 'Перевод на карту'){ 
-                document.getElementById('transfer_to_card').style.display = "";} 
+            if(options[index].textContent === 'Перевод на карту'){              
+                document.getElementById('transfer_to_card').style.display = "";
+                const card_number = document.getElementById('id_card_number');
+                const phone_number = document.getElementById('id_phone_number');
+              
+                document.getElementById('id_create_payment_form').addEventListener('submit', function(event) {
+                  // Проверяем, заполнено ли хотя бы одно из полей
+                  if (card_number.value === '' && phone_number.value === '') {
+                    alert('Необходимо заполнить хотя бы одно из полей Номер телефона или Номер карты!');
+                    event.preventDefault(); // Останавливаем отправку формы
+                  }
+                });} 
             else { 
                 document.getElementById('transfer_to_card').style.display = "none"; 
                 document.getElementById('id_phone_number').removeAttribute('required'); 
