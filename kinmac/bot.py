@@ -112,7 +112,7 @@ def reject_reason(update, context):
             message_id = message_del[1]
             bot.delete_message(chat_id=chat_id, message_id=message_id)
         
-        # Отрпавляем создателю заявки, что заявка отклонена по какой-то причине
+        # Отправляем создателю заявки, что заявка отклонена по какой-то причине
         message = f'Отклонено.\nПричина: {chat}'
         message_rej_id = TelegramMessageActions.objects.get(
             payment=Payments.objects.get(id=payment_id),
@@ -221,7 +221,7 @@ def command_pay(context, payment_id, user_id, payment_creator, payer_company):
             chat_id=int(creator_user.chat_id_tg), text='Оплачено', reply_to_message_id=message_id)
         save_message_function(pay, creator_user.chat_id_tg, 
             message_obj.message_id, 'payment_done', creator_user.user_name,
-            message, '', False)    
+            message, '', False)
 
 
 def button_click(update, context):
@@ -233,14 +233,11 @@ def button_click(update, context):
     reaponse_data = response.split()
     payment_id = reaponse_data[1]
     user_id = reaponse_data[2]
-    print('user_id', user_id)
     payment_creator = reaponse_data[3]
-    print('payment_creator', payment_creator)
     payment = Payments.objects.get(pk=payment_id)
     user = ApprovedFunction.objects.get(
                 username=user_id)
     
-
     if 'Согласовать' in query.data:
         keyboard = [[
             InlineKeyboardButton("Отклонить", 

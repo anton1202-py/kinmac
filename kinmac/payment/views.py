@@ -10,7 +10,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import UpdateView
 from dotenv import load_dotenv
-from telegram_working.assistance import upgrade_message_function
+from telegram_working.assistance import (save_message_function,
+                                         upgrade_message_function)
 from telegram_working.start_tg_approve import start_tg_working
 
 from .forms import (ApprovalStatusForm, CashPaymentForm,
@@ -118,7 +119,6 @@ def payment_create(request):
             form = PaymentsForm()
         else:
             error = form.errors
-            print(error)
 
         if request.POST['payment_method'] == '1':
             form_pay_account = PayWithCheckingAccountForm(
@@ -133,7 +133,6 @@ def payment_create(request):
                 form_pay_account = PayWithCheckingAccountForm()
             else:
                 error1 = form_pay_account.errors
-                print(error1)
 
         elif request.POST['payment_method'] == '2':
             if form_pay_with_card.is_valid():
@@ -145,7 +144,6 @@ def payment_create(request):
                 form_pay_with_card = PayWithCardForm()
             else:
                 error2 = form_pay_with_card.errors
-                print(error2)
 
         elif request.POST['payment_method'] == '3':
             if form_transfer_to_card.is_valid():
@@ -159,10 +157,8 @@ def payment_create(request):
                 )
                 transfer_to_card.save()
                 error = form_transfer_to_card.errors
-                print(error)
             else:
                 error3 = form_transfer_to_card.errors
-                print(error3)
 
         elif request.POST['payment_method'] == '4':
             if form_cash_payment.is_valid():
@@ -176,7 +172,6 @@ def payment_create(request):
                 form_cash_payment = CashPaymentForm()
             else:
                 error4 = form_cash_payment.errors
-                print(error4)
         rating = (ApprovedFunction.objects.get(
             username=request.user.id).rating_for_approval)
         job_title = ApprovedFunction.objects.get(
@@ -253,55 +248,51 @@ def payment_common_statistic(request):
         payments.filter(id=request.POST['approval']).update(
             status_of_payment=f'Согласовано {request.user.last_name} {request.user.first_name}'
         )
-
+        # ========== БЛОК ДЛЯ РАБОТЫ С БОТОМ ПРИ СОГЛАСОВАНИИ ЧЕРЕЗ САЙТ ========= #
         payment_creator = Payments.objects.get(id=request.POST['approval']).creator
 
-        print('payment_creator', payment_creator)
         payment_creator_split = payment_creator.split()
         payment_creator_lastname = payment_creator_split[0]
         payment_creator_firstname = payment_creator_split[1]
+
         payment_creator = ApprovedFunction.objects.get(
             first_name=payment_creator_firstname,
             last_name=payment_creator_lastname).user_name
 
         user_id = request.user.id
+        payment_id = request.POST['approval']
         approval_user = ApprovedFunction.objects.get(
             user_name=request.user.username)
+        chat_id = approval_user.chat_id_tg
         keyboard = [[
             telegram.InlineKeyboardButton("Отклонить", 
-                callback_data=f'Отклонить {request.POST["approval"]} {user_id} {payment_creator}')]]
+                callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}')]]
         reply_markup = telegram.InlineKeyboardMarkup(keyboard)
+
+        message_id = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id),
+            message_author=approval_user.user_name
+        ).values_list('message_id')[0][0]
+        
         bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
         upgrade_message_function(message_id, reply_markup)
 
         creator_user_rating = ApprovedFunction.objects.get(
             first_name=payment_creator_firstname,
             last_name=payment_creator_lastname).rating_for_approval
-        start_tg_working(request.POST['approval'], payment_creator, creator_user_rating)
 
-        # messages = TelegramMessageActions.objects.filter(
-        #     payment=Payments.objects.get(id=request.POST['approval']),
-        #     message_type='create_approve'
-        # ).values_list('chat_id', 'message_id', 'message', 'attach')
-
-        # for message in messages:
-        #     chat_id_cicle =  message[0]
-        #     message_id_cicle = message[1]
-        #     current_text = message[2]
-        #     attach = message[3]
-        #     words = current_text.split("Статус:")
-        #     new_text = words[0] + f'\nСтатус: ❌ Отклонено\nПричина: {request.POST["popup-input-name"]}'
-        #     if attach == True:
-        #         bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
-        #     else:
-        #         bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
-        
+        if approval_user.rating_for_approval < 10:
+            start_tg_working(payment_id, payment_creator, (approval_user.rating_for_approval+1))
+        elif approval_user.rating_for_approval == 10:
+            start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval)      
+        # ========== КОНЕЦ БЛОКА ДЛЯ РАБОТЫ С БОТОМ ПРИ СОГЛАСОВАНИИ ЧЕРЕЗ САЙТ ========= #
 
         return redirect('payment_common_statistic')
 
     elif request.method == 'POST' and 'reject_payment' in request.POST.keys():
+        payment_id = request.POST['reject_payment']
         ApprovalStatus.objects.filter(
-            payment=Payments.objects.get(id=request.POST['reject_payment']),
+            payment=Payments.objects.get(id=payment_id),
             user=ApprovedFunction.objects.get(
                 username=request.user.id)
         ).update(
@@ -309,18 +300,55 @@ def payment_common_statistic(request):
             rejection_reason=request.POST['popup-input-name']
         )
 
-        payments.filter(id=request.POST['reject_payment']).update(
+        payments.filter(id=payment_id).update(
             accountant='',
             date_of_payment=None,
             status_of_payment=f'Отклонено {request.user.last_name} {request.user.first_name}',
             rejection_reason=request.POST['popup-input-name']
         )
+        # ========== БЛОК ДЛЯ РАБОТЫ С БОТОМ ПРИ ОТКЛОНЕНИИ ЧЕРЕЗ САЙТ ========= #
+        
+        # Удаляем все сообщения связанные с заявкой, кроме message_type=create_approve
+        messages_for_delete = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id)).exclude(
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id')
+        for message_del in messages_for_delete:
+            chat_id =  message_del[0]
+            message_id = message_del[1]
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
 
+        payment_obj = Payments.objects.get(id=payment_id)
+        payment_creator = Payments.objects.get(id=payment_id).creator
+
+        payment_creator_split = payment_creator.split()
+        payment_creator_lastname = payment_creator_split[0]
+        payment_creator_firstname = payment_creator_split[1]
+
+        payment_creator = ApprovedFunction.objects.get(
+            first_name=payment_creator_firstname,
+            last_name=payment_creator_lastname)
+
+        # Отправляем создателю заявки, что заявка отклонена по какой-то причине
+        message = f'Отклонено.\nПричина: {request.POST["popup-input-name"]}'
+        message_rej_id = TelegramMessageActions.objects.get(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve',
+            message_author=payment_creator.user_name
+        ).message_id
+
+        message_obj = bot.send_message(
+            chat_id=int(payment_creator.chat_id_tg), text=message, reply_to_message_id=message_rej_id)
+        # Записываем сообщение с причиной в базу данных
+        save_message_function(payment_obj, payment_creator.chat_id_tg,
+            message_obj.message_id, 'rejected_reason_inform', 
+            payment_creator.user_name, message, '', False)
+        
         messages = TelegramMessageActions.objects.filter(
-            payment=Payments.objects.get(id=request.POST['reject_payment']),
+            payment=Payments.objects.get(id=payment_id),
             message_type='create_approve'
         ).values_list('chat_id', 'message_id', 'message', 'attach')
-        print(request.POST["popup-input-name"])
+
         for message in messages:
             chat_id_cicle =  message[0]
             message_id_cicle = message[1]
@@ -332,12 +360,13 @@ def payment_common_statistic(request):
                 bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
             else:
                 bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+        # ========== КОНЕЦ БЛОКА ДЛЯ РАБОТЫ С БОТОМ ПРИ ОТКЛОНЕНИИ ЧЕРЕЗ САЙТ ========= #
 
         return redirect('payment_common_statistic')
 
     elif request.method == 'POST' and 'pay_payment' in request.POST.keys():
         pay = Payments.objects.get(id=request.POST['pay_payment'])
-
+        payment_id = request.POST['pay_payment']
         pay.status_of_payment = 'Оплачено'
         pay.date_of_payment = now
         pay.payer_organization = PayerOrganization.objects.get(
@@ -351,10 +380,20 @@ def payment_common_statistic(request):
             pay.payment_coefficient = 1.02
 
         if request.FILES:
-            print("request.FILES['file_of_payment']", request.FILES['file_of_payment'])
             pay.file_of_payment = request.FILES['file_of_payment']
         pay.accountant = f'{request.user.last_name} {request.user.first_name}'
         pay.save()
+
+        payment_obj = Payments.objects.get(id=payment_id)
+        payment_creator = Payments.objects.get(id=payment_id).creator
+
+        payment_creator_split = payment_creator.split()
+        payment_creator_lastname = payment_creator_split[0]
+        payment_creator_firstname = payment_creator_split[1]
+
+        payment_creator = ApprovedFunction.objects.get(
+            first_name=payment_creator_firstname,
+            last_name=payment_creator_lastname)
 
         messages = TelegramMessageActions.objects.filter(
             payment=Payments.objects.get(id=request.POST['pay_payment']),
@@ -373,6 +412,36 @@ def payment_common_statistic(request):
             else:
                 bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
         
+        # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
+        messages_for_delete = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id)).exclude(
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id')
+        for message_del in messages_for_delete:
+            chat_id =  message_del[0]
+            message_id = message_del[1]
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+        # Информирование создателя заявки, что заявка оплачена
+        message_id = TelegramMessageActions.objects.get(
+            payment=Payments.objects.get(id=payment_id),
+            message_type='create_approve',
+            message_author=payment_creator.user_name
+        ).message_id
+        if Payments.objects.get(id=payment_id).send_payment_file == True:
+            file_path = os.path.join(os.getcwd(), 'media/' f'{Payments.objects.get(id=payment_id).file_of_payment}')
+            with open(file_path, 'rb') as f:
+                message_obj_done = bot.send_document(
+                    chat_id=int(payment_creator.chat_id_tg),
+                    document=f,
+                    caption='Оплачено',
+                    reply_to_message_id=message_id)
+        else:
+            message_obj_done = bot.send_message(
+                chat_id=int(payment_creator.chat_id_tg),
+                text='Оплачено', reply_to_message_id=message_id)
+        save_message_function(pay, payment_creator.chat_id_tg, message_obj_done.message_id,
+            'payment_done', payment_creator.user_name, message, '', False)
 
         return redirect('payment_common_statistic')
 
@@ -563,9 +632,6 @@ class PaymentUpdateView(UpdateView):
                 if form.is_valid() and form_class.is_valid():
                     return self.form_valid(form, form_class)
                 else:
-                    # print(form_class.errors)
-                    # messages.error(request, "Error")
-                    # print('Формы НЕ валидны')
                     return self.form_invalid(form, form_class)
 
     def form_valid(self, form, form_2):
