@@ -10,13 +10,16 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import UpdateView
 from dotenv import load_dotenv
+from telegram_working.assistance import upgrade_message_function
+from telegram_working.start_tg_approve import start_tg_working
 
 from .forms import (ApprovalStatusForm, CashPaymentForm,
                     FilterPayWithCheckingForm, PaymentsForm, PayWithCardForm,
                     PayWithCheckingAccountForm, TransferToCardForm)
 from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      Contractors, PayerOrganization, Payments, PayWithCard,
-                     PayWithCheckingAccount, TransferToCard)
+                     PayWithCheckingAccount, TelegramMessageActions,
+                     TransferToCard)
 from .validators import StripToNumbers
 
 now_time = datetime.datetime.now()
@@ -63,8 +66,6 @@ def payment_create(request):
                     )
                     contractor.save()
 
-            # print('Contractors.objects.get(name=contractor_name_data)', Contractors.objects.get(
-            #    name=contractor_name_data))
             payment = Payments(
                 creator=f'{request.user.last_name} {request.user.first_name}',
                 project=form.cleaned_data['project'],
@@ -252,6 +253,50 @@ def payment_common_statistic(request):
         payments.filter(id=request.POST['approval']).update(
             status_of_payment=f'Согласовано {request.user.last_name} {request.user.first_name}'
         )
+
+        payment_creator = Payments.objects.get(id=request.POST['approval']).creator
+
+        print('payment_creator', payment_creator)
+        payment_creator_split = payment_creator.split()
+        payment_creator_lastname = payment_creator_split[0]
+        payment_creator_firstname = payment_creator_split[1]
+        payment_creator = ApprovedFunction.objects.get(
+            first_name=payment_creator_firstname,
+            last_name=payment_creator_lastname).user_name
+
+        user_id = request.user.id
+        approval_user = ApprovedFunction.objects.get(
+            user_name=request.user.username)
+        keyboard = [[
+            telegram.InlineKeyboardButton("Отклонить", 
+                callback_data=f'Отклонить {request.POST["approval"]} {user_id} {payment_creator}')]]
+        reply_markup = telegram.InlineKeyboardMarkup(keyboard)
+        bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
+        upgrade_message_function(message_id, reply_markup)
+
+        creator_user_rating = ApprovedFunction.objects.get(
+            first_name=payment_creator_firstname,
+            last_name=payment_creator_lastname).rating_for_approval
+        start_tg_working(request.POST['approval'], payment_creator, creator_user_rating)
+
+        # messages = TelegramMessageActions.objects.filter(
+        #     payment=Payments.objects.get(id=request.POST['approval']),
+        #     message_type='create_approve'
+        # ).values_list('chat_id', 'message_id', 'message', 'attach')
+
+        # for message in messages:
+        #     chat_id_cicle =  message[0]
+        #     message_id_cicle = message[1]
+        #     current_text = message[2]
+        #     attach = message[3]
+        #     words = current_text.split("Статус:")
+        #     new_text = words[0] + f'\nСтатус: ❌ Отклонено\nПричина: {request.POST["popup-input-name"]}'
+        #     if attach == True:
+        #         bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+        #     else:
+        #         bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+        
+
         return redirect('payment_common_statistic')
 
     elif request.method == 'POST' and 'reject_payment' in request.POST.keys():
@@ -270,6 +315,24 @@ def payment_common_statistic(request):
             status_of_payment=f'Отклонено {request.user.last_name} {request.user.first_name}',
             rejection_reason=request.POST['popup-input-name']
         )
+
+        messages = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=request.POST['reject_payment']),
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id', 'message', 'attach')
+        print(request.POST["popup-input-name"])
+        for message in messages:
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
+            current_text = message[2]
+            attach = message[3]
+            words = current_text.split("Статус:")
+            new_text = words[0] + f'\nСтатус: ❌ Отклонено\nПричина: {request.POST["popup-input-name"]}'
+            if attach == True:
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+
         return redirect('payment_common_statistic')
 
     elif request.method == 'POST' and 'pay_payment' in request.POST.keys():
@@ -292,6 +355,24 @@ def payment_common_statistic(request):
             pay.file_of_payment = request.FILES['file_of_payment']
         pay.accountant = f'{request.user.last_name} {request.user.first_name}'
         pay.save()
+
+        messages = TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=request.POST['pay_payment']),
+            message_type='create_approve'
+        ).values_list('chat_id', 'message_id', 'message', 'attach')
+
+        for message in messages:
+            chat_id_cicle =  message[0]
+            message_id_cicle = message[1]
+            current_text = message[2]
+            attach = message[3]
+            words = current_text.split("Статус:")
+            new_text = words[0] + 'Статус: ✅ Оплачено'
+            if attach == True:
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+        
 
         return redirect('payment_common_statistic')
 

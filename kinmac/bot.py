@@ -233,7 +233,9 @@ def button_click(update, context):
     reaponse_data = response.split()
     payment_id = reaponse_data[1]
     user_id = reaponse_data[2]
+    print('user_id', user_id)
     payment_creator = reaponse_data[3]
+    print('payment_creator', payment_creator)
     payment = Payments.objects.get(pk=payment_id)
     user = ApprovedFunction.objects.get(
                 username=user_id)
