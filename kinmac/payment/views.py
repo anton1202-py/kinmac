@@ -23,8 +23,7 @@ from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      TransferToCard)
 from .validators import StripToNumbers
 
-now_time = datetime.datetime.now()
-now = now_time.strftime("%Y-%m-%d %H:%M:%S")
+now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
@@ -282,9 +281,9 @@ def payment_common_statistic(request):
             last_name=payment_creator_lastname).rating_for_approval
 
         if approval_user.rating_for_approval < 10:
-            start_tg_working(payment_id, payment_creator, (approval_user.rating_for_approval+1))
+            start_tg_working(payment_id, payment_creator, (approval_user.rating_for_approval+1), '', '')
         elif approval_user.rating_for_approval == 10:
-            start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval)      
+            start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval, '', '')      
         # ========== КОНЕЦ БЛОКА ДЛЯ РАБОТЫ С БОТОМ ПРИ СОГЛАСОВАНИИ ЧЕРЕЗ САЙТ ========= #
 
         return redirect('payment_common_statistic')
@@ -368,7 +367,7 @@ def payment_common_statistic(request):
         pay = Payments.objects.get(id=request.POST['pay_payment'])
         payment_id = request.POST['pay_payment']
         pay.status_of_payment = 'Оплачено'
-        pay.date_of_payment = now
+        pay.date_of_payment = now_time
         pay.payer_organization = PayerOrganization.objects.get(
             id=request.POST['payer_organization'])
 

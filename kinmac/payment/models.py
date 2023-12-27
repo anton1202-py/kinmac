@@ -247,12 +247,6 @@ class PayWithCheckingAccount(models.Model):
         verbose_name='Номер оплаты',
         on_delete=models.CASCADE,
     )
-    # contractor_name = models.CharField(
-    # verbose_name='Название организации получателя',
-    # max_length=100,
-    # blank=True,
-    # null=True,
-    # )
     contractor_bill_number = models.CharField(
         verbose_name='Номер счета организации получателя',
         max_length=20,
@@ -450,3 +444,23 @@ class TelegramMessageActions(models.Model):
     class Meta:
         verbose_name = 'Информация о сообщениях в телеграм'
         verbose_name_plural = 'Информация о сообщениях в телеграм'
+
+
+class TelegramApproveButtonMessage(models.Model):
+    """
+    Модель отвечает за возможность оставлять комментарий после согласования 
+    """
+    approve = models.ForeignKey(
+        ApprovedFunction,
+        verbose_name='Согласующий пользователь',
+        on_delete=models.CASCADE,
+    )
+    button_name = models.CharField(
+        verbose_name='Текст кнопки',
+        max_length=800,
+        blank=True,
+        null=True,
+    )
+    class Meta:
+        verbose_name = 'Возможность оставлять комментарий'
+        verbose_name_plural = 'Возможность оставлять комментарий'
