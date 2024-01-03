@@ -89,14 +89,18 @@
                         <td>{{ el.date_of_payment }}</td>
                         <td>
                             <div class="action_icons">
-                                <form action="" method="POST">
-                                    {% csrf_token %}
-                                    {% if request.user.username in usernames and 'Оплачено' not in el.status_of_payment %}
-                                        <button type="Submit" name="approval" value="{{ el.id }}" id="popup-approve-button">
+                                {% if request.user.username in usernames and 'Оплачено' not in el.status_of_payment %}
+                                    <!-- <button type="Submit" onclick="PopupApproveOpen()" name="approval" value="{{ el.id }}" id="popup-approve-button">
+                                        <b title="Согласовать">OK</b>
+                                    </button> -->
+                                    <form action="{% url 'payment_common_statistic' %}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="Submit" name="approval" value="{{ el.id }}" onclick="PopupApproveOpen()" class="popup-approve-button">
                                             <b title="Согласовать">OK</b>
                                         </button>
-                                    {% endif %}
-                                </form>
+                                    </form>
+                                {% endif %}
+
                                 {% if 'Оплачено' not in el.status_of_payment %}
                                     <button type="Submit" name="to_pay" id="popup-pay-button">
                                         <span class="material-symbols-outlined" id="pay-icon-button" title="Оплатить">
@@ -220,20 +224,42 @@
                     <span class="material-symbols-sharp" onclick="closePopupApprove()" id="popup-icon_close">close</span>
                     <br>
                     <label for="popup-input">Комментарий к платежу:</label>
+                    <input type="hidden" name="approval_id" value="">
                     <textarea class="form-control" type="text" id="popup-input" name="popup-input-name"></textarea>
-                    <button class="custom-button" type="submit" id="approve_payment_id" name="approve_payment">Сохранить</button>
+                    <button class="custom-button" type="submit" id="approve_payment_id" value="" name="approval">Сохранить</button>
                 </form>
             </div> 
         </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
         <script>
-            
             const fileInput = document.getElementById('id_file_of_payment');
             const filePlace = document.getElementById('input-file-list-create');
-      
             fileInput.addEventListener('change', (event) => {
             const fileName = event.target.files[0].name;
             filePlace.textContent = fileName;
         });
+
+            $(document).ready(function() {
+                $('.popup-approve-button').click(function(event) {
+                    event.preventDefault();
+                    var buttonId = this.closest('tr'); 
+                    neseccary_id = buttonId.cells[0].innerText;                
+                    $.ajax({
+                        url: '{% url "get_button_value" %}',
+                        success: function(data) {
+                        if (data.button === 'Не оставлять комментарий') {
+                            $('#popup-approve-container').show();
+                            $('#popup-approve-container button[name="approval"]').val(neseccary_id);
+                        }
+                        }
+                    });
+                });
+            });
+
         </script>
     </div>    
         

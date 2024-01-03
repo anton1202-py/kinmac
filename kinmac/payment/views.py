@@ -6,6 +6,7 @@ import telegram
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import UpdateView
@@ -19,8 +20,8 @@ from .forms import (ApprovalStatusForm, CashPaymentForm,
                     PayWithCheckingAccountForm, TransferToCardForm)
 from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      Contractors, PayerOrganization, Payments, PayWithCard,
-                     PayWithCheckingAccount, TelegramMessageActions,
-                     TransferToCard)
+                     PayWithCheckingAccount, TelegramApproveButtonMessage,
+                     TelegramMessageActions, TransferToCard)
 from .validators import StripToNumbers
 
 now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -217,6 +218,23 @@ def approval_person(payment_username):
             return f"На оплате у бухгалтера"
 
 
+def get_button_value(request):
+    """
+    Отдает данные JQUERY когда вызывается форма написания комментария
+    при согласовании заявки.
+    """
+    print(request.user.id)
+    approve_user = ApprovedFunction.objects.get(
+        username = request.user.id
+    )
+    buttons = TelegramApproveButtonMessage.objects.get(
+        approve=approve_user.pk
+    )
+    button_value = buttons.button_name
+    print(button_value)
+    return JsonResponse({'button': button_value})
+
+
 def payment_common_statistic(request):
     """Функция отвечает за отображение списка заявок на платёж"""
     if str(request.user) == 'AnonymousUser':
@@ -238,7 +256,11 @@ def payment_common_statistic(request):
     amount_sum = payments.aggregate(total_amount=Sum('payment_sum'))[
         'total_amount']
 
+    #if request.method == 'POST' and 'approval' in request.POST.keys():
     if request.method == 'POST' and 'approval' in request.POST.keys():
+        print(request.POST)
+
+        comment_for_payment = request.POST['popup-input-name']
         ApprovalStatus.objects.filter(
             payment=Payments.objects.get(id=request.POST['approval']),
             user=ApprovedFunction.objects.get(
@@ -268,11 +290,16 @@ def payment_common_statistic(request):
                 callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}')]]
         reply_markup = telegram.InlineKeyboardMarkup(keyboard)
 
+        print('payment_id', payment_id)
+        print(TelegramMessageActions.objects.filter(
+            payment=Payments.objects.get(id=payment_id),
+            message_author=approval_user.user_name
+        ).values_list('message_id'))
         message_id = TelegramMessageActions.objects.filter(
             payment=Payments.objects.get(id=payment_id),
             message_author=approval_user.user_name
         ).values_list('message_id')[0][0]
-        
+
         bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
         upgrade_message_function(message_id, reply_markup)
 
@@ -281,9 +308,17 @@ def payment_common_statistic(request):
             last_name=payment_creator_lastname).rating_for_approval
 
         if approval_user.rating_for_approval < 10:
-            start_tg_working(payment_id, payment_creator, (approval_user.rating_for_approval+1), '', '')
+            start_tg_working(payment_id,
+                             payment_creator,
+                             (approval_user.rating_for_approval+1),
+                             comment_for_payment,
+                             approval_user.user_name)
         elif approval_user.rating_for_approval == 10:
-            start_tg_working(payment_id, payment_creator, approval_user.rating_for_approval, '', '')      
+            start_tg_working(payment_id,
+                             payment_creator,
+                             approval_user.rating_for_approval,
+                             comment_for_payment,
+                             approval_user.user_name)      
         # ========== КОНЕЦ БЛОКА ДЛЯ РАБОТЫ С БОТОМ ПРИ СОГЛАСОВАНИИ ЧЕРЕЗ САЙТ ========= #
 
         return redirect('payment_common_statistic')

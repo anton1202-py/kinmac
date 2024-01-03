@@ -16,11 +16,13 @@ urlpatterns = [
          views.PaymentUpdateView.as_view(),
          name='payment_update'
          ),
-     path('login/',
+    path('login/',
          views.login_by_chat_id,
          name='payment_login'
          ),
+    path('get-button-value/', views.get_button_value, name='get_button_value'),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
