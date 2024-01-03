@@ -835,6 +835,11 @@ table tr:hover {
     position: absolute;
 }
 
+#popup-approve-container {
+    z-index: 1;
+    position: absolute;
+}
+
 #popup-pay-container {
     z-index: 1;
     position: absolute;
@@ -842,6 +847,7 @@ table tr:hover {
 
 #popup-container .reject_payment_class {
     background-color: #f2f2f2;
+    z-index: 1;
     padding: 20px;
     border-radius: var(--border-radius-1);
     box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
@@ -853,8 +859,18 @@ table tr:hover {
     border-radius: var(--border-radius-1);
     box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
 }
+#popup-approve-container .approve_payment_class {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
 
 .popup-pay-container-class {
+    max-width: 450px;
+}
+
+.popup-approve-container-class {
     max-width: 450px;
 }
 
@@ -947,6 +963,10 @@ table tr:hover {
 }
 
 #reject_payment_id {
+    margin-top: 20px;
+}
+
+#approve_payment_id {
     margin-top: 20px;
 }
 

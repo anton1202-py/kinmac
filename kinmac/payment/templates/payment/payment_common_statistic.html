@@ -92,7 +92,7 @@
                                 <form action="" method="POST">
                                     {% csrf_token %}
                                     {% if request.user.username in usernames and 'Оплачено' not in el.status_of_payment %}
-                                        <button type="Submit" name="approval" value="{{ el.id }}">
+                                        <button type="Submit" name="approval" value="{{ el.id }}" id="popup-approve-button">
                                             <b title="Согласовать">OK</b>
                                         </button>
                                     {% endif %}
@@ -184,7 +184,7 @@
         <div id="popup-container" style="display:none;">        
             <form method="post" class="reject_payment_class" name="form_reject_payment_name" enctype="multipart/form-data">
                 {% csrf_token %} 
-                <span class="material-symbols-sharp" onclick="closePopup()" id="popup-icon_close">close</span>
+                <span class="material-symbols-sharp" onclick="closePopupReject()" id="popup-icon_close">close</span>
                 <br>
                 <label for="popup-input">Введите причины, по которой отклонили заявку:</label>
                 <textarea class="form-control" type="text" id="popup-input" name="popup-input-name"></textarea>
@@ -196,7 +196,7 @@
             <div class="popup-pay-container-class" >   
                 <form method="POST" class="pay_payment_class" name="form_pay_payment_name" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <span class="material-symbols-sharp" onclick="closePopup()" id="popup-icon_close">close</span>
+                    <span class="material-symbols-sharp" onclick="closePayPopup()" id="popup-icon_close">close</span>
                     <br>
                     <fieldset>
                         <label for="project"><span>{{main_form.payer_organization.label}}</span>{{ main_form.payer_organization }}</label>
@@ -209,6 +209,19 @@
                         </div>
                     </fieldset>
                     <button class="custom-button" type="submit" id="pay_payment_id" name="pay_payment">Сохранить</button>
+                </form>
+            </div> 
+        </div>
+
+        <div id="popup-approve-container" style="display:none;">    
+            <div class="popup-approve-container-class" >   
+                <form method="post" class="approve_payment_class" name="form_approve_payment_name" enctype="multipart/form-data">
+                    {% csrf_token %} 
+                    <span class="material-symbols-sharp" onclick="closePopupApprove()" id="popup-icon_close">close</span>
+                    <br>
+                    <label for="popup-input">Комментарий к платежу:</label>
+                    <textarea class="form-control" type="text" id="popup-input" name="popup-input-name"></textarea>
+                    <button class="custom-button" type="submit" id="approve_payment_id" name="approve_payment">Сохранить</button>
                 </form>
             </div> 
         </div>

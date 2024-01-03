@@ -65,13 +65,37 @@ if (popupButtons && popupContainer){
         document.getElementById('reject_payment_id').value = firstCellValue
       })
     });
-function closePopup() {
+function closePopupReject() {
   document.getElementById("popup-container").style.display = "none";
 }
 } else {
   console.error('Элементы popup-button и popup-container не найдены на странице');
 }
 
+
+//  =========== РАБОТА С POP UP ОКНОМ ПО СОГЛАСОВАНИИ ЗАЯВКИ =========
+// Получаем элементы кнопки и pop up окна
+var popupApproveButtons = document.querySelectorAll('[id="popup-approve-button"]');
+var popupApproveContainer = document.getElementById('popup-approve-container');
+
+// При клике на кнопку открываем pop up окно
+if (popupApproveButtons && popupApproveContainer){
+  popupApproveButtons.forEach(function(button) {
+      button.addEventListener('click', function()  {
+        popupApproveContainer.style.display = '';
+        var row = this.closest('tr');
+        var rowIndex = Array.from(row.parentNode.children).indexOf(row) + 1
+        var firstCellValue = row.cells[0].innerText
+        // Присваиваю нажимаемой кнопке значение ID с первого столбца таблицы
+        document.getElementById('approve_payment_id').value = firstCellValue
+      })
+    });
+function closePopupApprove() {
+  document.getElementById("popup-approve-container").style.display = "none";
+}
+} else {
+  console.error('Элементы popup-button и popup-container не найдены на странице');
+}
 
 //  =========== РАБОТА С POP UP ОКНОМ ПО ОПЛАТЕ ЗАЯВКИ =========
 // Получаем элементы кнопки и pop up окна
@@ -95,7 +119,7 @@ if (popupPayButtons && popupPayContainer){
         document.getElementById('pay_payment_id').value = firstCellValue
       })
     });
-function closePopup() {
+function closePayPopup() {
   document.getElementById("popup-pay-container").style.display = "none";
 }
 } else {

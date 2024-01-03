@@ -309,13 +309,18 @@ def payment_common_statistic(request):
         
         # Удаляем все сообщения связанные с заявкой, кроме message_type=create_approve
         messages_for_delete = TelegramMessageActions.objects.filter(
-            payment=Payments.objects.get(id=payment_id)).exclude(
-            message_type='create_approve'
-        ).values_list('chat_id', 'message_id')
+            Q(payment=Payments.objects.get(id=payment_id)) | Q(
+                    message_type='comment_button'
+                    )).exclude(
+                message_type='create_approve'
+            ).values_list('chat_id', 'message_id')
         for message_del in messages_for_delete:
             chat_id =  message_del[0]
             message_id = message_del[1]
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except:
+                    print(f'Сообщения {message_id} не найдено')
 
         payment_obj = Payments.objects.get(id=payment_id)
         payment_creator = Payments.objects.get(id=payment_id).creator
@@ -413,13 +418,18 @@ def payment_common_statistic(request):
         
         # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
         messages_for_delete = TelegramMessageActions.objects.filter(
-            payment=Payments.objects.get(id=payment_id)).exclude(
-            message_type='create_approve'
-        ).values_list('chat_id', 'message_id')
+            Q(payment=Payments.objects.get(id=payment_id)) | Q(
+                    message_type='comment_button'
+                    )).exclude(
+                message_type='create_approve'
+            ).values_list('chat_id', 'message_id')
         for message_del in messages_for_delete:
             chat_id =  message_del[0]
             message_id = message_del[1]
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+               bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except:
+                    print(f'Сообщения {message_id} не найдено')
 
         # Информирование создателя заявки, что заявка оплачена
         message_id = TelegramMessageActions.objects.get(
