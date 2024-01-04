@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import (CheckboxInput, ChoiceField, FileInput, ModelForm,
-                          Select, TextInput)
+                          NumberInput, Select, TextInput)
 
 from .models import (ApprovalStatus, CashPayment, Categories, Contractors,
                      PayerOrganization, Payers, PaymentMethod, Payments,
@@ -36,7 +36,7 @@ class PaymentsForm(ModelForm):
             'payer_organization': Select(attrs={
                 'class': 'input-field',
             }),
-            'payment_sum': TextInput(attrs={
+            'payment_sum': NumberInput(attrs={
                 'class': 'input-field',
             }),
             'contractor_name': Select(attrs={
