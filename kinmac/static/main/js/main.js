@@ -2,11 +2,11 @@
 var paymentsForm = document.forms['payments'];
 if (paymentsForm) {
 
-  const input = document.getElementById('id_payment_sum');
+  // const input = document.getElementById('id_payment_sum');
 
-  input.addEventListener('input', function() {
-    this.value = this.value.replace(/[^\d]/g, '');
-  });
+  // input.addEventListener('input', function() {
+  //   this.value = this.value.replace(/[^\d]/g, '');
+  // });
     if (paymentsForm.elements[8]) {
         const select1 = paymentsForm.elements[10];
         select1.onchange = function(){ 
