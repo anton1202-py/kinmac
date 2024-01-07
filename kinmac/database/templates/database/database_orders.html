@@ -1,0 +1,128 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}Статистика заказов{% endblock %}
+
+{% block content %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
+
+        // выбираем на странице все элементы типа textarea и input
+        document.querySelectorAll('textarea, input').forEach(function(e) {
+            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
+            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
+            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
+            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
+            e.addEventListener('input', function() {
+                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
+                window.sessionStorage.setItem(e.name, e.value);
+            })
+        })
+    
+    }); 
+</script>
+    <div class="features">
+         <div class="top-befor-header">
+            <h1>Статистика заказов</h1>
+        </div>
+        <div class='filter-data'>
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <label for="datestart">
+                    <span>От</span><br>
+                    <input type="date" name="datestart" id="datestart">
+                </label>
+                <label for="datefinish">
+                    <span>До</span><br>
+                    <input type="date" name="datefinish" id="datefinish">
+                </label>
+                
+                <label for="article_filter">
+                    <span>Артикул продавца</span><br>
+                    <input type="text" name="article_filter" id="article_filter">
+                </label>
+
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
+        <div class='import-excel'>
+            <br>
+            {#<form action="" id="export" name="export_xls" method="GET">#}
+            {#    {% csrf_token %}#}
+            {#    <button type="submit" name="export" class="custom-button-change">#}
+            {#        Импортировать в Excel#}
+            {#    </button>#}
+            {#</form>#}
+        </div>
+        <div class="table_wrapper">
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                <tr>
+                    <th>Дата заказа</th>
+                    <th>Дата обновления</th>
+                    <th>Склад отгрузки</th>
+                    <th>Страна</th>
+                    <th>Округ</th>
+                    <th>Регион</th>
+                    <th>Артикул продавца</th>
+                    <th>Артикул WB</th>
+                    <th>Баркод</th>
+                    <th>Категория</th>
+                    <th>Предмет</th>
+                    <th>Бренд</th>
+                    <th>Размер товара</th>
+                    <th>Номер поставки</th>
+                    <th>Договор поставки</th>
+                    <th>Договор реализации</th>
+                    <th>Цена без скидок</th>
+                    <th>Скидка продавца</th>
+                    <th>Скидка постоянного покупателя</th>
+                    <th>Фактическая цена</th>
+                    <th>Цена со скидкой</th>
+                    <th>Отмена заказа</th>
+                    <th>Дата и время отмены</th>
+                    <th>Тип заказа</th>
+                    <th>Идентификатор стикера</th>
+                    <th>Номер заказа</th>
+                    <th>Уникальный идентификатор заказа</th>
+                </tr>
+                {% for el in data %}   
+                <tr>
+                    <td>{{ el.order_date }}</td>
+                    <td>{{ el.last_change_date }}</td>
+                    <td>{{ el.warehouse_name }}</td>
+                    <td>{{ el.country_name }}</td>
+
+                    <td>{{ el.oblast_okrug_name }}</td>
+                    <td>{{ el.region_name }}</td>
+                    <td>{{ el.supplier_article }}</td>
+                    <td>{{ el.nmid }}</td>
+                    <td>{{ el.barcode }}</td>
+
+                    <td>{{ el.category }}</td>
+                    <td>{{ el.subject }}</td>
+                    <td>{{ el.brand }}</td>
+                    <td>{{ el.tech_size }}</td>
+                    <td>{{ el.income_id }}</td>
+                    <td>{{ el.is_supply }}</td>
+                    <td>{{ el.is_realization }}</td>
+
+                    <td>{{ el.total_price }}</td>
+                    <td>{{ el.discount_percent }}</td>
+                    <td>{{ el.spp }}</td>
+                    <td>{{ el.finish_price }}</td>
+                    <td>{{ el.price_with_disc }}</td>
+                    <td>{{ el.is_cancel }}</td>
+                    <td>{{ el.cancel_date }}</td>
+                    <td>{{ el.order_type }}</td>
+                    <td>{{ el.sticker }}</td>
+                    <td>{{ el.g_number }}</td>
+                    <td>{{ el.srid }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>    
+{% endblock %}

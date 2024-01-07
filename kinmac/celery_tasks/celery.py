@@ -15,6 +15,14 @@ app.conf.beat_schedule = {
         "task": "celery_tasks.tasks.add_data_sales",
         "schedule": crontab(hour=6, minute=13)
     },
+    "add_data_deliveries": {
+        "task": "celery_tasks.tasks.delivery_statistic",
+        "schedule": crontab(hour=6, minute=15)
+    },
+    "add_data_orders": {
+        "task": "celery_tasks.tasks.orders_statistic",
+        "schedule": crontab(hour=6, minute=17)
+    },
     "add_stock_data_site1": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=1, minute=0)

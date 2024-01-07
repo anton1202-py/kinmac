@@ -13,7 +13,7 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
                     SelectDateStocksForm)
-from .models import Articles, Sales, StocksApi, StocksSite
+from .models import Articles, Deliveries, Orders, Sales, StocksApi, StocksSite
 
 
 def database_home(request):
@@ -182,6 +182,74 @@ def database_sales(request):
         'seller_articles': seller_articles.all().values(),
     }
     return render(request, 'database/database_sales.html', context)
+
+
+def database_deliveries(request):
+    """Отображение страницы База данных поставок"""
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    control_date_delivery = date.today() - timedelta(days=30)
+    data = Deliveries.objects.filter(Q(delivery_date__range=[
+        control_date_delivery,
+        date.today()])).order_by('delivery_date')
+
+    form = SelectDateForm(request.POST or None)
+    datestart = control_date_delivery
+    datefinish = date.today()
+
+    if form.is_valid():
+        datestart = form.cleaned_data.get("datestart")
+        datefinish = form.cleaned_data.get("datefinish")
+        article_filter = form.cleaned_data.get("article_filter")
+        if datestart:
+            data = Deliveries.objects.filter(
+                Q(delivery_date__gte=datestart)).order_by('delivery_date')
+        if datefinish:
+            data = Deliveries.objects.filter(
+                Q(delivery_date__lte=datefinish)).order_by('delivery_date')
+        if article_filter:
+            data = Deliveries.objects.filter(
+                Q(supplier_article=article_filter))
+        return redirect('deliveries')
+    context = {
+        'form': form,
+        'data': data,
+    }
+    return render(request, 'database/database_deliveries.html', context)
+
+
+def database_orders(request):
+    """Отображение страницы База данных заказов"""
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    control_date_orders = date.today() - timedelta(days=30)
+    data = Orders.objects.filter(Q(order_date__range=[
+        control_date_orders,
+        date.today()])).order_by('order_date')
+
+    form = SelectDateForm(request.POST or None)
+    datestart = control_date_orders
+    datefinish = date.today()
+
+    if form.is_valid():
+        datestart = form.cleaned_data.get("datestart")
+        datefinish = form.cleaned_data.get("datefinish")
+        article_filter = form.cleaned_data.get("article_filter")
+        if datestart:
+            data = Orders.objects.filter(
+                Q(order_date__gte=datestart)).order_by('order_date')
+        if datefinish:
+            data = Orders.objects.filter(
+                Q(order_date__lte=datefinish)).order_by('order_date')
+        if article_filter:
+            data = Orders.objects.filter(
+                Q(supplier_article=article_filter))
+        return redirect('deliveries')
+    context = {
+        'form': form,
+        'data': data,
+    }
+    return render(request, 'database/database_orders.html', context)
 
 
 def weekly_sales_data(request):

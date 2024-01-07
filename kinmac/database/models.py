@@ -418,3 +418,201 @@ class Sales(models.Model):
     class Meta:
         verbose_name = 'Продажи'
         verbose_name_plural = 'Продажи'
+
+
+class Deliveries(models.Model):
+    """Описывает таблицу поставок"""
+    income_id = models.CharField(
+        verbose_name='ID поставки',
+        max_length=15,
+        null=True,
+    )
+    number = models.CharField(
+        verbose_name='Номер УПД',
+        max_length=15,
+        null=True,
+        blank=True,
+    )
+    delivery_date = models.DateTimeField(
+        verbose_name='Дата поставки',
+        null=True,
+    )
+    last_change_date = models.DateTimeField(
+        verbose_name='Дата обновления информации в сервисе',
+        null=True,
+    )
+    supplier_article = models.CharField(
+        verbose_name='Артикул продавца',
+        max_length=50,
+    )
+    tech_size = models.CharField(
+        verbose_name='Размер товара',
+        max_length=10,
+        null=True,
+    )
+    barcode = models.PositiveBigIntegerField(
+        verbose_name='Баркод',
+        null=True,
+    )
+    quantity = models.IntegerField(
+        verbose_name='Количество',
+        null=True,
+    )
+    total_price = models.CharField(
+        verbose_name='Цена из УПД',
+        max_length=50,
+        null=True,
+    )
+    date_close = models.DateTimeField(
+        verbose_name='Дата принятия (закрытия) в WB',
+        null=True,
+    )
+    warehouse_name = models.CharField(
+        verbose_name='Название склада',
+        max_length=50,
+        null=True,
+    )
+    nmid = models.CharField(
+        verbose_name='Артикул WB',
+        max_length=50,
+        null=True,
+    )
+    status = models.CharField(
+        verbose_name='Текущий статус поставки',
+        max_length=50,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = 'Поставки'
+        verbose_name_plural = 'Поставки'
+
+
+class Orders(models.Model):
+    """Описывает таблицу заказов"""
+    order_date = models.DateTimeField(
+        verbose_name='Дата и время заказа',
+        null=True,
+    )
+    last_change_date = models.DateTimeField(
+        verbose_name='Дата и время обновления информации в сервисе',
+        null=True,
+    )
+    warehouse_name = models.CharField(
+        verbose_name='Склад отгрузки',
+        max_length=50,
+        null=True,
+    )
+    country_name = models.CharField(
+        verbose_name='Страна',
+        max_length=100,
+        null=True,
+    )
+    oblast_okrug_name = models.CharField(
+        verbose_name='Округ',
+        max_length=200,
+        null=True,
+    )
+    region_name = models.CharField(
+        verbose_name='Регион',
+        max_length=100,
+        null=True,
+    )
+    supplier_article = models.CharField(
+        verbose_name='Артикул продавца',
+        max_length=75,
+    )
+    nmid = models.IntegerField(
+        verbose_name='Артикул WB',
+        null=True,
+    )
+    barcode = models.CharField(
+        verbose_name='Баркод',
+        max_length=30,
+        null=True,
+    )
+    category = models.CharField(
+        verbose_name='Категория',
+        max_length=50,
+        null=True,
+    )
+    subject = models.CharField(
+        verbose_name='Предмет',
+        max_length=50,
+        null=True,
+    )
+    brand = models.CharField(
+        verbose_name='Бренд',
+        max_length=50,
+        null=True,
+    )
+    tech_size = models.CharField(
+        verbose_name='Размер товара',
+        max_length=30,
+        null=True,
+    )
+    income_id = models.IntegerField(
+        verbose_name='Номер поставки',
+        null=True,
+    )
+    is_supply = models.BooleanField(
+        verbose_name='Договор поставки',
+        null=True,
+    )
+    is_realization = models.BooleanField(
+        verbose_name='Договор реализации',
+        null=True,
+    )
+    total_price = models.FloatField(
+        verbose_name='Цена без скидок',
+        null=True,
+    )
+    discount_percent = models.SmallIntegerField(
+        verbose_name='Скидка продавца',
+        null=True,
+    )
+    spp = models.FloatField(
+        verbose_name='Скидка постоянного покупателя',
+        null=True,
+    )
+    finish_price = models.FloatField(
+        verbose_name='Фактическая цена с учетом всех скидок',
+        null=True,
+    )
+    # Цена со скидкой продавца (= totalPrice * (1 - discountPercent/100))
+    price_with_disc = models.FloatField(
+        verbose_name='Цена со скидкой продавца',
+        null=True,
+    )
+    is_cancel = models.BooleanField(
+        verbose_name='Отмена заказа. true - заказ отменен',
+        null=True,
+    )
+    cancel_date = models.DateTimeField(
+        verbose_name='Дата и время отмены заказа',
+        null=True,
+    )
+    order_type = models.CharField(
+        verbose_name='Тип заказа',
+        max_length=80,
+        null=True,
+    )
+    sticker = models.CharField(
+        verbose_name='Идентификатор стикера',
+        max_length=80,
+        null=True,
+    )
+    g_number = models.CharField(
+        verbose_name='Номер заказа',
+        max_length=50,
+        null=True,
+    )
+    srid = models.CharField(
+        verbose_name='Уникальный идентификатор заказа',
+        max_length=80,
+        null=True,
+    )
+    
+    class Meta:
+        verbose_name = 'Заказы'
+        verbose_name_plural = 'Заказы'

@@ -74,6 +74,18 @@
             <h3>Продажи</h3>
         </a>
 
+        {% url 'deliveries' as url_deliveries %}
+        <a href="{{ url_deliveries }}" {% if request.path == url_deliveries %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">local_shipping</span>
+            <h3>Поставки</h3>
+        </a>
+
+        {% url 'orders' as url_orders %}
+        <a href="{{ url_orders }}" {% if request.path == url_orders %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">orders</span>
+            <h3>Заказы</h3>
+        </a>
+
         {% url 'weekly_sales' as url_weekly_sales %}
         <a href="{{ url_weekly_sales }}" {% if request.path == url_weekly_sales %}class="active"{% endif %}>
             <span class="material-symbols-sharp">pan_tool_alt</span>

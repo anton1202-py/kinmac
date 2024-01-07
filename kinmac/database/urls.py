@@ -48,6 +48,14 @@ urlpatterns = [
           views.DatabaseSalesDeleteView.as_view(),
           name='sales_delete'
           ),
+    path('deliveries/',
+          views.database_deliveries,
+          name='deliveries'
+          ),
+    path('orders/',
+          views.database_orders,
+          name='orders'
+          ),
     path('weekly_sales/',
           views.weekly_sales_data,
           name='weekly_sales'

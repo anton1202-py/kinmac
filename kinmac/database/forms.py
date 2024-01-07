@@ -73,11 +73,13 @@ class LoginUserForm(AuthenticationForm):
 class SelectDateForm(forms.Form):
     datestart = forms.DateField(
         input_formats=['%Y-%m-%d'],
+        required=False,
         widget=forms.DateInput(attrs={
             'class': 'choose-date',
         }))
     datefinish = forms.DateField(
         input_formats=['%Y-%m-%d'],
+        required=False,
         widget=forms.DateInput(attrs={
             'class': 'choose-date',
         }))
