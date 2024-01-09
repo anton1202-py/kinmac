@@ -470,7 +470,7 @@ def add_stock_data_site():
 def delivery_statistic():
     """Добавляет данные по поставкам в базу данных"""
     try:
-        control_date_delivery = date.today() - timedelta(days=30)
+        control_date_delivery = date.today() - timedelta(days=2)
         url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/incomes?dateFrom={control_date_delivery}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
