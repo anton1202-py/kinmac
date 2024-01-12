@@ -39,7 +39,10 @@ def excel_creating_mod(data):
     # Заполняем лист данными
     for row, item in enumerate(data, start=2):
         print(item.pub_date)
-        date_create = datetime.datetime.strptime(f'{item.pub_date}', '%Y-%m-%d %H:%M:%S')
+        try:
+            date_create = datetime.datetime.strptime(f'{item.pub_date}', '%Y-%m-%d %H:%M:%S.%f')
+        except:
+            date_create = datetime.datetime.strptime(f'{item.pub_date}', '%Y-%m-%d %H:%M:%S')
         ws.cell(row=row, column=1, value=date_create.strftime('%d.%m.%Y'))
         ws.cell(row=row, column=2, value=item.payment_sum)
         if item.comment:
@@ -55,7 +58,10 @@ def excel_creating_mod(data):
         ws.cell(row=row, column=7, value=str(item.category.name))
         ws.cell(row=row, column=8, value=str(item.payment_method.method_name))
         if item.date_of_payment:
-            date_pay = datetime.datetime.strptime(f'{item.date_of_payment}', '%Y-%m-%d %H:%M:%S')
+            try:
+                date_pay = datetime.datetime.strptime(f'{item.date_of_payment}', '%Y-%m-%d %H:%M:%S')
+            except:
+                date_pay = datetime.datetime.strptime(f'{item.date_of_payment}', '%Y-%m-%d %H:%M:%S.%f')
             ws.cell(row=row, column=9, value=date_pay.strftime('%d.%m.%Y'))
         else:
             ws.cell(row=row, column=9, value='')
