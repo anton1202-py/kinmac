@@ -53,7 +53,10 @@ def excel_creating_mod(data):
             ws.cell(row=row, column=4, value=str(item.payer_organization.name))
         else:
              ws.cell(row=row, column=4, value='')
-        ws.cell(row=row, column=5, value=str(item.contractor_name.name))
+        if item.contractor_name:
+            ws.cell(row=row, column=5, value=str(item.contractor_name.name))
+        else:
+             ws.cell(row=row, column=5, value='')
         ws.cell(row=row, column=6, value=str(item.project.name))
         ws.cell(row=row, column=7, value=str(item.category.name))
         ws.cell(row=row, column=8, value=str(item.payment_method.method_name))
