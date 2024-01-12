@@ -39,7 +39,7 @@ def excel_creating_mod(data):
     # Заполняем лист данными
     for row, item in enumerate(data, start=2):
         print(item.pub_date)
-        date_create = datetime.datetime.strptime(f'{item.pub_date}', '%Y-%m-%d %H:%M:%S.%f')
+        date_create = datetime.datetime.strptime(f'{item.pub_date}', '%Y-%m-%d %H:%M:%S')
         ws.cell(row=row, column=1, value=date_create.strftime('%d.%m.%Y'))
         ws.cell(row=row, column=2, value=item.payment_sum)
         if item.comment:
