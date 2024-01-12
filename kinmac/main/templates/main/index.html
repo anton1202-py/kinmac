@@ -103,6 +103,11 @@
             <span class="material-symbols-sharp">monitoring</span>
             <h3>Статистика оплат по счету</h3>
         </a>
+        {% url 'payment_working_statistic' as url_working_statistic %}
+        <a href="{{ url_working_statistic }}" {% if request.path == url_working_statistic %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">leaderboard</span>
+            <h3>Рабочая талица</h3>
+        </a>
         {% endif %}
         </div>
     </aside>

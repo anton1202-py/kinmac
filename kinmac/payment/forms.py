@@ -176,8 +176,12 @@ class FilterPayWithCheckingForm(forms.Form):
     contractor_name = forms.ModelChoiceField(
         queryset=Contractors.objects.all(),
         required=False,)
-    status_of_payment = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'input-field',
-        }))
+    status_of_payment = forms.ChoiceField(
+        choices=[
+            ('', '---------'),
+            ('Согласовано', 'Согласовано'),
+            ('На согласовании', 'На согласовании'),
+            ('Оплачено', 'Оплачено'),
+            ('Отклонено', 'Отклонено')
+        ],
+        required=False,)

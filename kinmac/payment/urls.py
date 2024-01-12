@@ -8,6 +8,8 @@ urlpatterns = [
     path('payment_create', views.payment_create, name='payment_create'),
     path('payment_common_statistic', views.payment_common_statistic,
          name='payment_common_statistic'),
+    path('payment_working_statistic', views.payment_working_statistic,
+         name='payment_working_statistic'),
     path('<int:pk>/detail',
          views.PaymentDetailView.as_view(),
          name='payment_detail'

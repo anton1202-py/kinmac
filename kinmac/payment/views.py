@@ -2,15 +2,18 @@ import datetime
 import os
 from datetime import date
 
+import pandas as pd
 import telegram
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
-from django.http import JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import UpdateView
 from dotenv import load_dotenv
+from openpyxl import Workbook
 from telegram_working.assistance import (save_message_function,
                                          upgrade_message_function)
 from telegram_working.start_tg_approve import start_tg_working
@@ -22,6 +25,7 @@ from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      Contractors, PayerOrganization, Payments, PayWithCard,
                      PayWithCheckingAccount, TelegramApproveButtonMessage,
                      TelegramMessageActions, TransferToCard)
+from .supplement import excel_creating_mod
 from .validators import StripToNumbers
 
 now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -531,7 +535,7 @@ def payment_common_statistic(request):
             ).order_by('id')
         amount_sum = payments.aggregate(total_amount=Sum('payment_sum'))[
             'total_amount']
-
+    
     context = {
         'amount_sum': amount_sum,
         'datestart': datestart,
@@ -547,6 +551,95 @@ def payment_common_statistic(request):
     }
     return render(request, 'payment/payment_common_statistic.html', context)
 
+
+def payment_working_statistic(request):
+    """Функция отвечает за отображение краткой таблицы со статистикой"""
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    payments = Payments.objects.all().order_by('id')
+    approval_users = ApprovedFunction.objects.filter(
+        rating_for_approval__range=(1, 10))
+
+    usernames = [str(user.username) for user in approval_users]
+    approval_status = ApprovalStatus.objects.all()
+
+    pay_account = PayWithCheckingAccount.objects.all()
+    form = FilterPayWithCheckingForm(request.POST or None)
+    main_form = PaymentsForm(request.POST, request.FILES)
+    pay_check = PayWithCheckingAccountForm(request.POST, request.FILES)
+
+    datefinish = date.today()
+    datestart = date(datefinish.year, datefinish.month, 1)
+    amount_sum = payments.aggregate(total_amount=Sum('payment_sum'))[
+        'total_amount']
+    
+    if request.method == 'POST' and form.is_valid():
+        date_filter = form.cleaned_data.get("date_filter")
+        payment_type = form.cleaned_data.get("payment_type")
+        category = form.cleaned_data.get("category")
+        contractor_name = form.cleaned_data.get("contractor_name")
+        status_of_payment = form.cleaned_data.get("status_of_payment")
+        if date_filter:
+            payments = payments.filter(
+                Q(pub_date__date=date_filter)).order_by('id')
+        if category:
+            payments = payments.filter(
+                Q(category__name=category)).order_by('id')
+        if contractor_name:
+            payments = Payments.objects.filter(
+                Q(contractor_name=contractor_name)).order_by('id')
+        if payment_type:
+            payments = payments.filter(
+                Q(payment_method=payment_type)).order_by('id')
+        if status_of_payment:
+            payments = payments.filter(
+                Q(status_of_payment__icontains=status_of_payment)
+            ).order_by('id')
+        amount_sum = payments.aggregate(total_amount=Sum('payment_sum'))[
+            'total_amount']
+    if request.method == 'POST' and request.POST.get('export')=='create_file' and form.is_valid():
+       
+        date_filter = form.cleaned_data.get("date_filter")
+        payment_type = form.cleaned_data.get("payment_type")
+        category = form.cleaned_data.get("category")
+        contractor_name = form.cleaned_data.get("contractor_name")
+        status_of_payment = form.cleaned_data.get("status_of_payment")
+        print(request.POST)
+
+        if date_filter:
+            payments = payments.filter(
+                Q(pub_date__date=date_filter)).order_by('id')
+        if category:
+            payments = payments.filter(
+                Q(category__name=category)).order_by('id')
+        if contractor_name:
+            payments = Payments.objects.filter(
+                Q(contractor_name=contractor_name)).order_by('id')
+        if payment_type:
+            payments = payments.filter(
+                Q(payment_method=payment_type)).order_by('id')
+        if status_of_payment:
+            payments = payments.filter(
+                Q(status_of_payment__icontains=status_of_payment)
+            ).order_by('id')
+
+        
+        return excel_creating_mod(payments)
+    
+    context = {
+        'amount_sum': amount_sum,
+        'datestart': datestart,
+        'datefinish': datefinish,
+        'approval_users': approval_users,
+        'approval_status': approval_status,
+        'usernames': usernames,
+        'form': form,
+        'payments': payments,
+        'pay_account': pay_account,
+        'main_form': main_form,
+        'pay_check': pay_check,
+    }
+    return render(request, 'payment/payment_working_statistic.html', context)
 
 class PaymentDetailView(UpdateView):
     model = Payments

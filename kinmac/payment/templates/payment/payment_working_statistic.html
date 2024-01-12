@@ -1,0 +1,110 @@
+{% extends 'main/index.html' %}
+
+
+{% block title%}Рабочая таблица{% endblock %}
+
+{% block content%}
+
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js">
+    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
+
+        // выбираем на странице все элементы типа textarea и input
+        document.querySelectorAll('textarea, input').forEach(function(e) {
+            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
+            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
+            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
+            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
+            e.addEventListener('input', function() {
+                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
+                window.sessionStorage.setItem(e.name, e.value);
+            })
+        })
+    
+    }); 
+</script>
+    <div class="features">
+        <div>
+        <h1>Рабочая таблица</h1>
+        <div class='filter-data'>
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+
+                <label for="datestart">
+                    <span>Дата</span><br>
+                    <input type="date" name="date_filter" id="datestart">
+                </label>
+                <label for="id_payment_type">
+                    <span>Тип оплаты</span><br>
+                    {{ form.payment_type }}
+                </label>
+                <label for="id_category">
+                    <span>Категория</span><br>
+                    {{ form.category }}
+                </label>
+                <label for="contractor_name">
+                    <span>Контрагент</span><br>
+                    {{ form.contractor_name }}
+                </label>
+                <label for="status_of_payment">
+                    <span>Статус</span><br>
+                    {{ form.status_of_payment }}
+                </label>
+
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+                <div class="inner-form-data-button">
+                    <br>
+                    <button type="submit" name="export" value="create_file" class="custom-button-change">
+                        Импортировать в Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+
+            
+
+    </div>
+        <div class="table_wrapper">
+            <p>С <b>{{ datestart }}</b> до <b>{{ datefinish }}</b> произведено оплат на <b>{{ amount_sum }}</b> рублей</p>
+            <table name="mytable" class="working_table" style="white-space: nowrap">
+                <tr>
+                    <th>ID</th>
+                    <th>Дата</th>
+                    <th>Сумма</th>
+                    <th>Комментарий</th>
+                    <th>Проект</th>
+                    <th>Категория</th>
+                    <th>Организация</th>
+                    <th>Контрагент</th>
+                    <th>Способ платежа</th>
+                    <th style="display: none;">Статус</th>
+                    <th>Оплачено</th>
+                </tr>
+                {% for el in payments %}
+                    <tr>
+                        <td><a href="{% url 'payment_detail' el.id %}">{{ el.id }}</a></td>
+                        
+                        <td>
+                            <div class="common-statistic-table-urgent-and-date">
+                                {{ el.pub_date|date:"d.m.Y" }}
+                            </div>
+                        </td>
+                        <td>{{ el.payment_sum }}</td>
+                        <td>{{ el.comment }}</td>
+                        <td>{{ el.project }}</td>
+                        <td>{{ el.category }}</td>
+                        <td>{{ el.payer_organization }}</td>
+                        <td>{{ el.contractor_name }}</td>
+                        <td>{{ el.payment_method }}</td>
+                        <td style="display: none;">{{ el.status_of_payment }}</td>
+                        <td>{{ el.date_of_payment|date:"d.m.Y" }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>    
+        
+{% endblock %} 
