@@ -616,3 +616,274 @@ class Orders(models.Model):
     class Meta:
         verbose_name = 'Заказы'
         verbose_name_plural = 'Заказы'
+
+
+class SalesReportOnSales(models.Model):
+    """Отчет о продажах по реализации"""
+    realizationreport_id = models.IntegerField(
+        verbose_name='Номер отчета',
+        null=True,
+    )
+    date_from = models.DateTimeField(
+        verbose_name='Дата начала отчётного периода',
+        null=True,
+    )
+    date_to	= models.DateTimeField(
+        verbose_name='Дата конца отчётного периода',
+        null=True,
+    )
+    create_dt = models.DateTimeField(
+        verbose_name='Дата формирования отчёта',
+        null=True,
+    )
+    currency_name = models.CharField(
+        verbose_name='Валюта отчёта',
+        max_length=50,
+        null=True,
+    )
+    suppliercontract_code = models.CharField(
+        verbose_name='Договор',
+        max_length=50,
+        null=True,
+    )
+    rrd_id = models.IntegerField(
+        verbose_name='Номер строки',
+        null=True,
+    )
+    gi_id = models.IntegerField(
+        verbose_name='Номер поставки',
+        null=True,
+    )
+    subject_name = 	models.CharField(
+        verbose_name='Предмет',
+        max_length=50,
+        null=True,
+    )
+    nm_id = models.IntegerField(
+        verbose_name='Артикул WB',
+        null=True,
+    )
+    brand_name = models.CharField(
+        verbose_name='Бренд',
+        max_length=50,
+        null=True,
+    )
+    sa_name = models.CharField(
+        verbose_name='Артикул продавца',
+        max_length=50,
+        null=True,
+    )
+    ts_name	= models.CharField(
+        verbose_name='Размер',
+        max_length=50,
+        null=True,
+    )
+    barcode = models.CharField(
+        verbose_name='Баркод',
+        max_length=20,
+        null=True,
+    )
+    doc_type_name = models.CharField(
+        verbose_name='Тип документа',
+        max_length=50,
+        null=True,
+    )
+    quantity = models.IntegerField(
+        verbose_name='Количество',
+        null=True,
+    )
+    retail_price = models.FloatField(
+        verbose_name='Цена розничная',
+        null=True,
+    )
+    retail_amount = models.FloatField(
+        verbose_name='Сумма продаж (возвратов)',
+        null=True,
+    )
+    sale_percent = models.IntegerField(
+        verbose_name='Согласованная скидка',
+        null=True,
+    )
+    commission_percent = models.FloatField(
+        verbose_name='Процент комиссии',
+        null=True,
+    )
+    office_name	= models.CharField(
+        verbose_name='Склад',
+        max_length=80,
+        null=True,
+    )
+    supplier_oper_name = models.CharField(
+        verbose_name='Обоснование для оплаты',
+        max_length=200,
+        null=True,
+    )	
+    order_dt = models.DateTimeField(
+        verbose_name='Дата заказа',
+        null=True,
+    )
+    sale_dt	= models.DateTimeField(
+        verbose_name='Дата продажи',
+        null=True,
+    )
+    rr_dt	= models.DateTimeField(
+        verbose_name='Дата операции',
+        null=True,
+    )
+    shk_id = models.IntegerField(
+        verbose_name='Штрихкод',
+        null=True,
+    )
+    retail_price_withdisc_rub = models.FloatField(
+        verbose_name='Цена розничная с учетом согласованной скидки',
+        null=True,
+    )
+    delivery_amount = models.IntegerField(
+        verbose_name='Количество доставок',
+        null=True,
+    )
+    return_amount = models.IntegerField(
+        verbose_name='Количество возвратов',
+        null=True,
+    )
+    delivery_rub = models.FloatField(
+        verbose_name='Стоимость логистики',
+        null=True,
+    )
+    gi_box_type_name = models.CharField(
+        verbose_name='Тип коробов',
+        max_length=75,
+    )
+    product_discount_for_report = models.FloatField(
+        verbose_name='Согласованный продуктовый дисконт',
+        null=True,
+    )
+    supplier_promo = models.FloatField(
+        verbose_name='Промокод',
+        null=True,
+    )
+    rid	= models.IntegerField(
+        verbose_name='Уникальный идентификатор заказа',
+        null=True,
+    )
+    ppvz_spp_prc = models.FloatField(
+        verbose_name='Скидка постоянного покупателя',
+        null=True,
+    )
+    ppvz_kvw_prc_base = models.FloatField(
+        verbose_name='Размер кВВ без НДС, % базовый',
+        null=True,
+    )
+    ppvz_kvw_prc = models.FloatField(
+        verbose_name='Итоговый кВВ без НДС, %',
+        null=True,
+    )
+    sup_rating_prc_up = models.FloatField(
+        verbose_name='Размер снижения кВВ из-за рейтинга',
+        null=True,
+    )
+    is_kgvp_v2 = models.FloatField(
+        verbose_name='Размер снижения кВВ из-за акции',
+        null=True,
+    )
+    ppvz_sales_commission = models.FloatField(
+        verbose_name='Вознаграждение с продаж до вычета услуг поверенного, без НДС',
+        null=True,
+    )
+    ppvz_for_pay = models.FloatField(
+        verbose_name='К перечислению продавцу за реализованный товар',
+        null=True,
+    )
+    ppvz_reward	= models.FloatField(
+        verbose_name='Возмещение за выдачу и возврат товаров на ПВЗ',
+        null=True,
+    )
+    acquiring_fee = models.FloatField(
+        verbose_name='Возмещение издержек по эквайрингу',
+        null=True,
+    )
+    acquiring_bank = models.CharField(
+        verbose_name='Наименование банка-эквайера',
+        max_length=100,
+    )
+    ppvz_vw	= models.FloatField(
+        verbose_name='Вознаграждение WB без НДС',
+        null=True,
+    )
+    ppvz_vw_nds	= models.FloatField(
+        verbose_name='НДС с вознаграждения WB',
+        null=True,
+    )
+    ppvz_office_id = models.IntegerField(
+        verbose_name='Номер офиса',
+        null=True,
+    )
+    ppvz_office_name = models.CharField(
+        verbose_name='Наименование офиса доставки',
+        max_length=80,
+        null=True,
+    )
+    ppvz_supplier_id = models.IntegerField(
+        verbose_name='Номер партнера',
+        null=True,
+    )
+    ppvz_supplier_name = models.CharField(
+        verbose_name='Партнер',
+        max_length=80,
+        null=True,
+    )
+    ppvz_inn = models.CharField(
+        verbose_name='ИНН партнера',
+        max_length=30,
+        null=True,
+    )
+    declaration_number = models.CharField(
+        verbose_name='Номер таможенной декларации',
+        max_length=50,
+        null=True,
+    )
+    bonus_type_name	= models.CharField(
+        verbose_name='Обоснование штрафов и доплат',
+        max_length=200,
+        null=True,
+    )
+    sticker_id = models.CharField(
+        verbose_name='Цифровое значение стикера',
+        max_length=80,
+        null=True,
+    )
+    site_country = models.CharField(
+        verbose_name='Страна продажи',
+        max_length=80,
+        null=True,
+    )
+    penalty	= models.FloatField(
+        verbose_name='Штрафы',
+        null=True,
+    )
+    additional_payment = models.FloatField(
+        verbose_name='Доплаты',
+        null=True,
+    )
+    rebill_logistic_cost = models.FloatField(
+        verbose_name='Возмещение издержек по перевозке',
+        null=True,
+    )
+    rebill_logistic_org	= models.CharField(
+        verbose_name='Организатор перевозки',
+        max_length=150,
+        null=True,
+    )
+    kiz = models.CharField(
+        verbose_name='Код маркировки',
+        max_length=50,
+        null=True,
+    )
+    srid = models.CharField(
+        verbose_name='Уникальный идентификатор заказа.',
+        max_length=50,
+        null=True,
+    )
+    class Meta:
+        verbose_name = 'Отчет о продажах по реализации'
+        verbose_name_plural = 'Отчет о продажах по реализации'
