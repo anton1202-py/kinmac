@@ -629,16 +629,7 @@ def sales_report_statistic():
         response_report = requests.get(url_delivery, headers=APIKEY)
         data_report = json.loads(response_report.text)
 
-        connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
-                                      dbname=os.getenv('DB_NAME'),
-                                      password=os.getenv('POSTGRES_PASSWORD'),
-                                      host=os.getenv('DB_HOST'),
-                                      port=os.getenv('DB_PORT'))
-        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # Курсор для выполнения операций с базой данных
-        cursor = connection.cursor()
-        #try:
-        cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
+        
 
         data_key_dict = {
                 'realizationreport_id': 'integer',
@@ -718,6 +709,17 @@ def sales_report_statistic():
         # Подключение к существующей базе данных
         
                 try:
+
+                    connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
+                                      dbname=os.getenv('DB_NAME'),
+                                      password=os.getenv('POSTGRES_PASSWORD'),
+                                      host=os.getenv('DB_HOST'),
+                                      port=os.getenv('DB_PORT'))
+                    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+                    # Курсор для выполнения операций с базой данных
+                    cursor = connection.cursor()
+                    #try:
+                    cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
                     cursor.executemany(
                         '''INSERT INTO database_salesreportonSales (
                             realizationreport_id,
@@ -783,13 +785,14 @@ def sales_report_statistic():
                             srid
                             ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
                         check_data_reports)
+                    if connection:
+                        cursor.close()
+                        connection.close()
+                        print("Соединение с PostgreSQL закрыто")
                 except Exception as k:
                     #connection.rollback()
                     print("User with this email already exists")
-        if connection:
-            cursor.close()
-            connection.close()
-            print("Соединение с PostgreSQL закрыто")
+        
 
 
     except Exception as e:
