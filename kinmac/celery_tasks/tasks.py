@@ -622,15 +622,24 @@ def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     try:
         start_date = date.today() - timedelta(days=61)
-        finish_date = date.today() - timedelta(days=30)
+        finish_date = date.today() - timedelta(days=61)
         url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={finish_date}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
         response_report = requests.get(url_delivery, headers=APIKEY)
         data_report = json.loads(response_report.text)
 
+        connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
+                                      dbname=os.getenv('DB_NAME'),
+                                      password=os.getenv('POSTGRES_PASSWORD'),
+                                      host=os.getenv('DB_HOST'),
+                                      port=os.getenv('DB_PORT'))
+        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        # Курсор для выполнения операций с базой данных
+        cursor = connection.cursor()
+        #try:
+        cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
         
-
         data_key_dict = {
                 'realizationreport_id': 'integer',
                 'date_from': 'text',
@@ -705,94 +714,82 @@ def sales_report_statistic():
                         check_data_reports.append('')
                     else:
                         check_data_reports.append(0)
-            #common_data_reports.append(check_data_reports)
+            common_data_reports.append(check_data_reports)
         # Подключение к существующей базе данных
         
-                try:
-
-                    connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
-                                      dbname=os.getenv('DB_NAME'),
-                                      password=os.getenv('POSTGRES_PASSWORD'),
-                                      host=os.getenv('DB_HOST'),
-                                      port=os.getenv('DB_PORT'))
-                    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-                    # Курсор для выполнения операций с базой данных
-                    cursor = connection.cursor()
-                    #try:
-                    cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
-                    cursor.executemany(
-                        '''INSERT INTO database_salesreportonSales (
-                            realizationreport_id,
-                            date_from,
-                            date_to,
-                            create_dt,
-                            currency_name,
-                            suppliercontract_code,
-                            rrd_id,
-                            gi_id,
-                            subject_name,
-                            nm_id,
-                            brand_name,
-                            sa_name,
-                            ts_name,
-                            barcode,
-                            doc_type_name,
-                            quantity,
-                            retail_price,
-                            retail_amount,
-                            sale_percent,
-                            commission_percent,
-                            office_name,
-                            supplier_oper_name,
-                            order_dt,
-                            sale_dt,
-                            rr_dt,
-                            shk_id,
-                            retail_price_withdisc_rub,
-                            delivery_amount,
-                            return_amount,
-                            delivery_rub,
-                            gi_box_type_name,
-                            product_discount_for_report,
-                            supplier_promo,
-                            rid,
-                            ppvz_spp_prc,
-                            ppvz_kvw_prc_base,
-                            ppvz_kvw_prc,
-                            sup_rating_prc_up,
-                            is_kgvp_v2,
-                            ppvz_sales_commission,
-                            ppvz_for_pay,
-                            ppvz_reward,
-                            acquiring_fee,
-                            acquiring_bank,
-                            ppvz_vw,
-                            ppvz_vw_nds,
-                            ppvz_office_id,
-                            ppvz_office_name,
-                            ppvz_supplier_id,
-                            ppvz_supplier_name,
-                            ppvz_inn,
-                            declaration_number,
-                            bonus_type_name,
-                            sticker_id,
-                            site_country,
-                            penalty,
-                            additional_payment,
-                            rebill_logistic_cost,
-                            rebill_logistic_org,
-                            kiz,
-                            srid
-                            ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-                        check_data_reports)
-                    if connection:
-                        cursor.close()
-                        connection.close()
-                        print("Соединение с PostgreSQL закрыто")
-                except Exception as k:
-                    #connection.rollback()
-                    print("User with this email already exists")
-        
+        try:
+            cursor.executemany(
+                '''INSERT INTO database_salesreportonSales (
+                    realizationreport_id,
+                    date_from,
+                    date_to,
+                    create_dt,
+                    currency_name,
+                    suppliercontract_code,
+                    rrd_id,
+                    gi_id,
+                    subject_name,
+                    nm_id,
+                    brand_name,
+                    sa_name,
+                    ts_name,
+                    barcode,
+                    doc_type_name,
+                    quantity,
+                    retail_price,
+                    retail_amount,
+                    sale_percent,
+                    commission_percent,
+                    office_name,
+                    supplier_oper_name,
+                    order_dt,
+                    sale_dt,
+                    rr_dt,
+                    shk_id,
+                    retail_price_withdisc_rub,
+                    delivery_amount,
+                    return_amount,
+                    delivery_rub,
+                    gi_box_type_name,
+                    product_discount_for_report,
+                    supplier_promo,
+                    rid,
+                    ppvz_spp_prc,
+                    ppvz_kvw_prc_base,
+                    ppvz_kvw_prc,
+                    sup_rating_prc_up,
+                    is_kgvp_v2,
+                    ppvz_sales_commission,
+                    ppvz_for_pay,
+                    ppvz_reward,
+                    acquiring_fee,
+                    acquiring_bank,
+                    ppvz_vw,
+                    ppvz_vw_nds,
+                    ppvz_office_id,
+                    ppvz_office_name,
+                    ppvz_supplier_id,
+                    ppvz_supplier_name,
+                    ppvz_inn,
+                    declaration_number,
+                    bonus_type_name,
+                    sticker_id,
+                    site_country,
+                    penalty,
+                    additional_payment,
+                    rebill_logistic_cost,
+                    rebill_logistic_org,
+                    kiz,
+                    srid
+                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
+                common_data_reports)
+        except psycopg2.IntegrityError:
+            #connection.rollback()
+            print("User with this email already exists")
+        if connection:
+            cursor.close()
+            connection.close()
+            print("Соединение с PostgreSQL закрыто")
 
 
     except Exception as e:
