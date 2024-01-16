@@ -23,6 +23,10 @@ app.conf.beat_schedule = {
         "task": "celery_tasks.tasks.orders_statistic",
         "schedule": crontab(hour=6, minute=17)
     },
+    "add_data_reports": {
+        "task": "celery_tasks.tasks.sales_report_statistic",
+        "schedule": crontab(hour=22, minute=0)
+    },
     "add_stock_data_site1": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=1, minute=0)

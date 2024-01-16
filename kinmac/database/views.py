@@ -13,7 +13,8 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
                     SelectDateStocksForm)
-from .models import Articles, Deliveries, Orders, Sales, StocksApi, StocksSite
+from .models import (Articles, Deliveries, Orders, Sales, SalesReportOnSales,
+                     StocksApi, StocksSite)
 
 
 def database_home(request):
@@ -252,6 +253,41 @@ def database_orders(request):
     return render(request, 'database/database_orders.html', context)
 
 
+def sales_report(request):
+    """Отображение страницы База данных заказов"""
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    control_date_orders = date.today() - timedelta(days=30)
+    data = SalesReportOnSales.objects.filter(Q(date_from__range=[
+        control_date_orders,
+        date.today()])).order_by('realizationreport_id')
+
+    form = SelectDateForm(request.POST or None)
+    datestart = control_date_orders
+    datefinish = date.today()
+
+    if form.is_valid():
+        datestart = form.cleaned_data.get("datestart")
+        datefinish = form.cleaned_data.get("datefinish")
+        article_filter = form.cleaned_data.get("article_filter")
+        if datestart:
+            data = Orders.objects.filter(
+                Q(date_from__gte=datestart)).order_by('order_date')
+        if datefinish:
+            data = Orders.objects.filter(
+                Q(date_from__lte=datefinish)).order_by('order_date')
+        if article_filter:
+            data = Orders.objects.filter(
+                Q(sa_name=article_filter))
+        return redirect('deliveries')
+    context = {
+        'form': form,
+        'data': data,
+    }
+    return render(request, 'database/database_sales_report.html', context)
+
+
+
 def weekly_sales_data(request):
     """Функция отвечает за отображение данных недельных продаж"""
 
@@ -268,8 +304,6 @@ def weekly_sales_data(request):
     ).values('week').annotate(
         count=Count('supplier_article')
     ).order_by('week')
-
-    print(articles_amount)
 
     sales_data = Sales.objects.filter(finished_price__gte=0).annotate(
         week=ExtractWeek('pub_date'),

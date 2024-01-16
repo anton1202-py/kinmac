@@ -620,7 +620,7 @@ class Orders(models.Model):
 
 class SalesReportOnSales(models.Model):
     """Отчет о продажах по реализации"""
-    realizationreport_id = models.IntegerField(
+    realizationreport_id = models.BigIntegerField(
         verbose_name='Номер отчета',
         null=True,
     )
@@ -646,11 +646,11 @@ class SalesReportOnSales(models.Model):
         max_length=50,
         null=True,
     )
-    rrd_id = models.IntegerField(
+    rrd_id = models.BigIntegerField(
         verbose_name='Номер строки',
         null=True,
     )
-    gi_id = models.IntegerField(
+    gi_id = models.BigIntegerField(
         verbose_name='Номер поставки',
         null=True,
     )
@@ -688,7 +688,7 @@ class SalesReportOnSales(models.Model):
         max_length=50,
         null=True,
     )
-    quantity = models.IntegerField(
+    quantity = models.BigIntegerField(
         verbose_name='Количество',
         null=True,
     )
@@ -700,7 +700,7 @@ class SalesReportOnSales(models.Model):
         verbose_name='Сумма продаж (возвратов)',
         null=True,
     )
-    sale_percent = models.IntegerField(
+    sale_percent = models.BigIntegerField(
         verbose_name='Согласованная скидка',
         null=True,
     )
@@ -726,11 +726,11 @@ class SalesReportOnSales(models.Model):
         verbose_name='Дата продажи',
         null=True,
     )
-    rr_dt	= models.DateTimeField(
+    rr_dt = models.DateTimeField(
         verbose_name='Дата операции',
         null=True,
     )
-    shk_id = models.IntegerField(
+    shk_id = models.BigIntegerField(
         verbose_name='Штрихкод',
         null=True,
     )
@@ -738,11 +738,11 @@ class SalesReportOnSales(models.Model):
         verbose_name='Цена розничная с учетом согласованной скидки',
         null=True,
     )
-    delivery_amount = models.IntegerField(
+    delivery_amount = models.BigIntegerField(
         verbose_name='Количество доставок',
         null=True,
     )
-    return_amount = models.IntegerField(
+    return_amount = models.BigIntegerField(
         verbose_name='Количество возвратов',
         null=True,
     )
@@ -762,7 +762,7 @@ class SalesReportOnSales(models.Model):
         verbose_name='Промокод',
         null=True,
     )
-    rid	= models.IntegerField(
+    rid	= models.BigIntegerField(
         verbose_name='Уникальный идентификатор заказа',
         null=True,
     )
@@ -814,7 +814,7 @@ class SalesReportOnSales(models.Model):
         verbose_name='НДС с вознаграждения WB',
         null=True,
     )
-    ppvz_office_id = models.IntegerField(
+    ppvz_office_id = models.BigIntegerField(
         verbose_name='Номер офиса',
         null=True,
     )
@@ -823,7 +823,7 @@ class SalesReportOnSales(models.Model):
         max_length=80,
         null=True,
     )
-    ppvz_supplier_id = models.IntegerField(
+    ppvz_supplier_id = models.BigIntegerField(
         verbose_name='Номер партнера',
         null=True,
     )
@@ -880,7 +880,7 @@ class SalesReportOnSales(models.Model):
         null=True,
     )
     srid = models.CharField(
-        verbose_name='Уникальный идентификатор заказа.',
+        verbose_name='Уникальный идентификатор заказа',
         max_length=50,
         null=True,
     )

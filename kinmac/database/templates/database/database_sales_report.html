@@ -1,0 +1,191 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}Отчет о продажах по реализации{% endblock %}
+
+{% block content %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
+
+        // выбираем на странице все элементы типа textarea и input
+        document.querySelectorAll('textarea, input').forEach(function(e) {
+            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
+            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
+            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
+            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
+            e.addEventListener('input', function() {
+                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
+                window.sessionStorage.setItem(e.name, e.value);
+            })
+        })
+    
+    }); 
+</script>
+    <div class="features">
+         <div class="top-befor-header">
+            <h1>Отчет о продажах по реализации</h1>
+        </div>
+        <div class='filter-data'>
+            <form action="" class="filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <p>От</p>
+                    <input type="date"  name="datestart" class="choose-date" required="" id="datestart">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>До</p>
+                    <input type="date"  name="datefinish" class="choose-date" required="" id="datefinish">
+                </div><br>
+                <div class="inner-form-data">
+                    <p>Артикул для фильтра</p>
+                    <input type="text"  name="article_filter" class="choose-date" id="article_filter">
+                </div><br>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+        </div>
+        <div class='import-excel'>
+            <br>
+            {#<form action="" id="export" name="export_xls" method="GET">#}
+            {#    {% csrf_token %}#}
+            {#    <button type="submit" name="export" class="custom-button-change">#}
+            {#        Импортировать в Excel#}
+            {#    </button>#}
+            {#</form>#}
+        </div>
+        <div class="table_wrapper">
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                <tr>
+                    <th>Номер отчета</th>
+                    <th>Дата начала отчётного периода</th>
+                    <th>Дата конца отчётного периода</th>
+                    <th>Дата формирования отчёта</th>
+                    <th>Валюта отчёта</th>
+                    <th>Договор</th>
+                    <th>Номер строки</th>
+                    <th>Номер поставки</th>
+                    <th>Предмет</th>
+                    <th>Артикул WB</th>
+                    <th>Бренд</th>
+                    <th>Артикул продавца</th>
+                    <th>Размер</th>
+                    <th>Баркод</th>
+                    <th>Тип документа</th>
+                    <th>Количество</th>
+                    <th>Цена розничная</th>
+                    <th>Сумма продаж (возвратов)</th>
+                    <th>Согласованная скидка</th>
+                    <th>Процент комиссии</th>
+                    <th>Склад</th>
+                    <th>Обоснование для оплаты</th>
+                    <th>Дата заказа</th>
+                    <th>Дата продажи</th>
+                    <th>Дата операции</th>
+                    <th>Штрихкод</th>
+                    <th>Цена розничная с учетом согласованной скидки</th>
+                    <th>Количество доставок</th>
+                    <th>Количество возвратов</th>
+                    <th>Стоимость логистики</th>
+                    <th>Тип коробов</th>
+                    <th>Согласованный продуктовый дисконт</th>
+                    <th>Промокод</th>
+                    <th>Уникальный идентификатор заказа</th>
+                    <th>Скидка постоянного покупателя</th>
+                    <th>Размер кВВ без НДС, % базовый</th>
+                    <th>Итоговый кВВ без НДС, %</th>
+                    <th>Размер снижения кВВ из-за рейтинга</th>
+                    <th>Размер снижения кВВ из-за акции</th>
+                    <th>Вознаграждение с продаж до вычета услуг поверенного, без НДС</th>
+                    <th>К перечислению продавцу за реализованный товар</th>
+                    <th>Возмещение за выдачу и возврат товаров на ПВЗ</th>
+                    <th>Возмещение издержек по эквайрингу</th>
+                    <th>Наименование банка-эквайера</th>
+                    <th>Вознаграждение WB без НДС</th>
+                    <th>НДС с вознаграждения WB</th>
+                    <th>Номер офиса</th>
+                    <th>Наименование офиса доставки</th>
+                    <th>Номер партнера</th>
+                    <th>Партнер</th>
+                    <th>ИНН партнера</th>
+                    <th>Номер таможенной декларации</th>
+                    <th>Обоснование штрафов и доплат</th>
+                    <th>Цифровое значение стикера</th>
+                    <th>Страна продажи</th>
+                    <th>Штрафы</th>
+                    <th>Доплаты</th>
+                    <th>Возмещение издержек по перевозке</th>
+                    <th>Организатор перевозки</th>
+                    <th>Код маркировки</th>
+                    <th>Уникальный идентификатор заказа</th>
+                </tr>
+                {% for el in data %}   
+                <tr>
+                    <td>{{ el.realizationreport_id }}</td>
+                    <td>{{ el.date_from }}</td>
+                    <td>{{ el.date_to }}</td>
+                    <td>{{ el.create_dt }}</td>
+                    <td>{{ el.currency_name }}</td>
+                    <td>{{ el.suppliercontract_code }}</td>
+                    <td>{{ el.rrd_id }}</td>
+                    <td>{{ el.gi_id }}</td>
+                    <td>{{ el.subject_name }}</td>
+                    <td>{{ el.nm_id }}</td>
+                    <td>{{ el.brand_name }}</td>
+                    <td>{{ el.sa_name }}</td>
+                    <td>{{ el.ts_name }}</td>
+                    <td>{{ el.barcode }}</td>
+                    <td>{{ el.doc_type_name }}</td>
+                    <td>{{ el.quantity }}</td>
+                    <td>{{ el.retail_price }}</td>
+                    <td>{{ el.retail_amount }}</td>
+                    <td>{{ el.sale_percent }}</td>
+                    <td>{{ el.commission_percent }}</td>
+                    <td>{{ el.office_name }}</td>
+                    <td>{{ el.supplier_oper_name }}</td>
+                    <td>{{ el.order_dt }}</td>
+                    <td>{{ el.sale_dt }}</td>
+                    <td>{{ el.rr_dt }}</td>
+                    <td>{{ el.shk_id }}</td>
+                    <td>{{ el.retail_price_withdisc_rub }}</td>
+                    <td>{{ el.delivery_amount }}</td>
+                    <td>{{ el.return_amount }}</td>
+                    <td>{{ el.delivery_rub }}</td>
+                    <td>{{ el.gi_box_type_name }}</td>
+                    <td>{{ el.product_discount_for_report }}</td>
+                    <td>{{ el.supplier_promo }}</td>
+                    <td>{{ el.rid }}</td>
+                    <td>{{ el.ppvz_spp_prc }}</td>
+                    <td>{{ el.ppvz_kvw_prc_base }}</td>
+                    <td>{{ el.ppvz_kvw_prc }}</td>
+                    <td>{{ el.sup_rating_prc_up }}</td>
+                    <td>{{ el.is_kgvp_v2 }}</td>
+                    <td>{{ el.ppvz_sales_commission }}</td>
+                    <td>{{ el.ppvz_for_pay }}</td>
+                    <td>{{ el.ppvz_reward }}</td>
+                    <td>{{ el.acquiring_fee }}</td>
+                    <td>{{ el.acquiring_bank }}</td>
+                    <td>{{ el.ppvz_vw }}</td>
+                    <td>{{ el.ppvz_vw_nds }}</td>
+                    <td>{{ el.ppvz_office_id }}</td>
+                    <td>{{ el.ppvz_office_name }}</td>
+                    <td>{{ el.ppvz_supplier_id }}</td>
+                    <td>{{ el.ppvz_supplier_name }}</td>
+                    <td>{{ el.ppvz_inn }}</td>
+                    <td>{{ el.declaration_number }}</td>
+                    <td>{{ el.bonus_type_name }}</td>
+                    <td>{{ el.sticker_id }}</td>
+                    <td>{{ el.site_country }}</td>
+                    <td>{{ el.penalty }}</td>
+                    <td>{{ el.additional_payment }}</td>
+                    <td>{{ el.rebill_logistic_cost }}</td>
+                    <td>{{ el.rebill_logistic_org }}</td>
+                    <td>{{ el.kiz }}</td>
+                    <td>{{ el.srid }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>    
+{% endblock %}

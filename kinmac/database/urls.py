@@ -56,6 +56,10 @@ urlpatterns = [
           views.database_orders,
           name='orders'
           ),
+    path('sales_report/',
+          views.sales_report,
+          name='sales_report'
+          ),
     path('weekly_sales/',
           views.weekly_sales_data,
           name='weekly_sales'

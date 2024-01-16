@@ -16,7 +16,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
@@ -34,34 +34,91 @@ def error_message(function_name: str, function, error_text: str) -> str:
                      f'<b>Техническая информация</b>:\n {tb_str}')
     return message_error
 
-#@app.task
-def delivery_statistic():
-    """Добавляет данные по поставкам в базу данных"""
+@app.task
+def sales_report_statistic():
+    """Добавляет данные по отчету продаж"""
     try:
-        control_date_delivery = date.today() - timedelta(days=30)
-        url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/incomes?dateFrom={control_date_delivery}"
+        start_date = date.today() - timedelta(days=30)
+        url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={start_date}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
-        response_delivery = requests.get(url_delivery, headers=APIKEY)
-        data_deliveries = json.loads(response_delivery.text)
-        common_data_deliveries = []
-        for i in data_deliveries:
-            check_data_deliveries = []
-            check_data_deliveries.append(i['incomeId'])
-            check_data_deliveries.append(i['number'])
-            check_data_deliveries.append(i['date'])
-            check_data_deliveries.append(i['lastChangeDate'])
-            check_data_deliveries.append(i['supplierArticle'])
-            check_data_deliveries.append(i['techSize'])
-            check_data_deliveries.append(i['barcode'])
-            check_data_deliveries.append(i['quantity'])
-            check_data_deliveries.append(i['totalPrice'])
-            check_data_deliveries.append(i['dateClose'])
-            check_data_deliveries.append(i['warehouseName'])
-            check_data_deliveries.append(i['nmId'])
-            check_data_deliveries.append(i['status'])
-            common_data_deliveries.append(check_data_deliveries)
-
+        response_report = requests.get(url_delivery, headers=APIKEY)
+        data_report = json.loads(response_report.text)
+        data_key_dict = {
+                'realizationreport_id': 'integer',
+                'date_from': 'text',
+                'date_to': 'text',
+                'create_dt': 'text',
+                'currency_name': 'text',
+                'suppliercontract_code': 'text',
+                'rrd_id': 'integer',
+                'gi_id': 'integer',
+                'subject_name': 'text',
+                'nm_id': 'integer',
+                'brand_name': 'text',
+                'sa_name': 'text',
+                'ts_name': 'text',
+                'barcode': 'text',
+                'doc_type_name': 'text',
+                'quantity': 'integer',
+                'retail_price': 'float',
+                'retail_amount': 'float',
+                'sale_percent': 'integer',
+                'commission_percent': 'float',
+                'office_name': 'text',
+                'supplier_oper_name': 'text',
+                'order_dt': 'text',
+                'sale_dt': 'text',
+                'rr_dt': 'text',
+                'shk_id': 'integer',
+                'retail_price_withdisc_rub': 'float',
+                'delivery_amount': 'integer',
+                'return_amount': 'integer',
+                'delivery_rub': 'float',
+                'gi_box_type_name': 'text',
+                'product_discount_for_report': 'float',
+                'supplier_promo': 'float',
+                'rid': 'integer',
+                'ppvz_spp_prc': 'float',
+                'ppvz_kvw_prc_base': 'float',
+                'ppvz_kvw_prc': 'float',
+                'sup_rating_prc_up': 'float',
+                'is_kgvp_v2': 'float',
+                'ppvz_sales_commission': 'float',
+                'ppvz_for_pay': 'float',
+                'ppvz_reward': 'float',
+                'acquiring_fee': 'float',
+                'acquiring_bank': 'text',
+                'ppvz_vw': 'float',
+                'ppvz_vw_nds': 'float',
+                'ppvz_office_id': 'integer',
+                'ppvz_office_name': 'text',
+                'ppvz_supplier_id': 'integer',
+                'ppvz_supplier_name': 'text',
+                'ppvz_inn': 'text',
+                'declaration_number': 'text',
+                'bonus_type_name': 'text',
+                'sticker_id': 'text',
+                'site_country': 'text',
+                'penalty': 'float',
+                'additional_payment': 'float',
+                'rebill_logistic_cost': 'float',
+                'rebill_logistic_org': 'text',
+                'kiz': 'text',
+                'srid': 'text'
+        }
+        common_data_reports = []
+        for i in data_report:
+            check_data_reports = []
+            for key, value in data_key_dict.items():
+                if key in i.keys():
+                    check_data_reports.append(i[key])
+                else:
+                    if value == 'text':
+                        check_data_reports.append('')
+                    else:
+                        check_data_reports.append(0)
+            common_data_reports.append(check_data_reports)
         # Подключение к существующей базе данных
         connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
                                       dbname=os.getenv('DB_NAME'),
@@ -71,118 +128,88 @@ def delivery_statistic():
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         # Курсор для выполнения операций с базой данных
         cursor = connection.cursor()
-        cursor.executemany(
-            '''INSERT INTO database_deliveries (income_id,
-                number,
-                delivery_date,
-                last_change_date,
-                supplier_article,
-                tech_size,
-                barcode,
-                quantity,
-                total_price,
-                date_close,
-                warehouse_name,
-                nmid,
-                status) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-            common_data_deliveries)
+        #try:
+        cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
+        try:
+            cursor.executemany(
+                '''INSERT INTO database_salesreportonSales (
+                    realizationreport_id,
+                    date_from,
+                    date_to,
+                    create_dt,
+                    currency_name,
+                    suppliercontract_code,
+                    rrd_id,
+                    gi_id,
+                    subject_name,
+                    nm_id,
+                    brand_name,
+                    sa_name,
+                    ts_name,
+                    barcode,
+                    doc_type_name,
+                    quantity,
+                    retail_price,
+                    retail_amount,
+                    sale_percent,
+                    commission_percent,
+                    office_name,
+                    supplier_oper_name,
+                    order_dt,
+                    sale_dt,
+                    rr_dt,
+                    shk_id,
+                    retail_price_withdisc_rub,
+                    delivery_amount,
+                    return_amount,
+                    delivery_rub,
+                    gi_box_type_name,
+                    product_discount_for_report,
+                    supplier_promo,
+                    rid,
+                    ppvz_spp_prc,
+                    ppvz_kvw_prc_base,
+                    ppvz_kvw_prc,
+                    sup_rating_prc_up,
+                    is_kgvp_v2,
+                    ppvz_sales_commission,
+                    ppvz_for_pay,
+                    ppvz_reward,
+                    acquiring_fee,
+                    acquiring_bank,
+                    ppvz_vw,
+                    ppvz_vw_nds,
+                    ppvz_office_id,
+                    ppvz_office_name,
+                    ppvz_supplier_id,
+                    ppvz_supplier_name,
+                    ppvz_inn,
+                    declaration_number,
+                    bonus_type_name,
+                    sticker_id,
+                    site_country,
+                    penalty,
+                    additional_payment,
+                    rebill_logistic_cost,
+                    rebill_logistic_org,
+                    kiz,
+                    srid
+                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
+                common_data_reports)
+        except psycopg2.IntegrityError:
+            #connection.rollback()
+            print("User with this email already exists")
         if connection:
             cursor.close()
             connection.close()
             print("Соединение с PostgreSQL закрыто")
+
+
     except Exception as e:
-        # обработка ошибки и отправка сообщения через бота
-        message_text = error_message('delivery_statistic', delivery_statistic, e)
+        #обработка ошибки и отправка сообщения через бота
+        message_text = error_message('sales_report_statistic', sales_report_statistic, e)
         bot.send_message(chat_id=CHAT_ID, text=message_text, parse_mode='HTML')
 
+sales_report_statistic()
 
-def orders_statistic():
-    """Добавляет данные по заказам в базу данных"""
-    try:
-        control_date_order = date.today() - timedelta(days=3)
-        url_order = f"https://statistics-api.wildberries.ru/api/v1/supplier/orders?dateFrom={control_date_order}&flag=0"
-        # Заголовок и сам ключ
-        APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
-        response_order = requests.get(url_order, headers=APIKEY)
-        data_orders = json.loads(response_order.text)
-        common_data_orders = []
-        for i in data_orders:
-            check_data_orders = []
-            check_data_orders.append(i['date'])
-            check_data_orders.append(i['lastChangeDate'])
-            check_data_orders.append(i['warehouseName'])
-            check_data_orders.append(i['countryName'])
-            check_data_orders.append(i['oblastOkrugName'])
-            check_data_orders.append(i['regionName'])
-            check_data_orders.append(i['supplierArticle'])
-            check_data_orders.append(i['nmId'])
-            check_data_orders.append(i['barcode'])
-            check_data_orders.append(i['category'])
-            check_data_orders.append(i['subject'])
-            check_data_orders.append(i['brand'])
-            check_data_orders.append(i['techSize'])
-            check_data_orders.append(i['incomeID'])
-            check_data_orders.append(i['isSupply'])
-            check_data_orders.append(i['isRealization'])
-            check_data_orders.append(i['totalPrice'])
-            check_data_orders.append(i['discountPercent'])
-            check_data_orders.append(i['spp'])
-            check_data_orders.append(i['finishedPrice'])
-            check_data_orders.append(i['priceWithDisc'])
-            check_data_orders.append(i['isCancel'])
-            check_data_orders.append(i['cancelDate'])
-            check_data_orders.append(i['orderType'])
-            check_data_orders.append(i['sticker'])
-            check_data_orders.append(i['gNumber'])
-            check_data_orders.append(i['srid'])
-
-            common_data_orders.append(check_data_orders)
-
-        # Подключение к существующей базе данных
-        connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
-                                      dbname=os.getenv('DB_NAME'),
-                                      password=os.getenv('POSTGRES_PASSWORD'),
-                                      host=os.getenv('DB_HOST'),
-                                      port=os.getenv('DB_PORT'))
-        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # Курсор для выполнения операций с базой данных
-        cursor = connection.cursor()
-        cursor.executemany(
-            '''INSERT INTO database_orders (order_date,
-                last_change_date,
-                warehouse_name,
-                country_name,
-                oblast_okrug_name,
-                region_name,
-                supplier_article,
-                nmid,
-                barcode,
-                category,
-                subject,
-                brand,
-                tech_size,
-                income_id,
-                is_supply,
-                is_realization,
-                total_price,
-                discount_percent,
-                spp,
-                finish_price,
-                price_with_disc,
-                is_cancel,
-                cancel_date,
-                order_type,
-                sticker,
-                g_number,
-                srid) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-            common_data_orders)
-        if connection:
-            cursor.close()
-            connection.close()
-            print("Соединение с PostgreSQL закрыто")
-    except Exception as e:
-        # обработка ошибки и отправка сообщения через бота
-        message_text = error_message('delivery_statistic', orders_statistic, e)
-        bot.send_message(chat_id=CHAT_ID, text=message_text)
-
-orders_statistic()
+#sales_report_statistic_test()
