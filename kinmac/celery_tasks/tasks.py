@@ -783,7 +783,7 @@ def sales_report_statistic():
                             srid
                             ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
                         check_data_reports)
-                except psycopg2.IntegrityError:
+                except Exception as k:
                     #connection.rollback()
                     print("User with this email already exists")
         if connection:
