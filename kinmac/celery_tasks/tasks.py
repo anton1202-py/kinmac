@@ -621,7 +621,7 @@ def orders_statistic():
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     try:
-        start_date = date.today() - timedelta(days=60)
+        start_date = date.today() - timedelta(days=61)
         finish_date = date.today() - timedelta(days=30)
         url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={finish_date}"
         # Заголовок и сам ключ
