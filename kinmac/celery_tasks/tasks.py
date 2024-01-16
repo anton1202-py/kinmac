@@ -621,8 +621,9 @@ def orders_statistic():
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     try:
-        start_date = date.today() - timedelta(days=30)
-        url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={start_date}"
+        start_date = date.today() - timedelta(days=90)
+        finish_date = date.today() - timedelta(days=60)
+        url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={finish_date}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
         response_report = requests.get(url_delivery, headers=APIKEY)
