@@ -257,7 +257,7 @@ def sales_report(request):
     """Отображение страницы База данных заказов"""
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    control_date_orders = date.today() - timedelta(days=90)
+    control_date_orders = date.today() - timedelta(days=10)
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
         date.today()])).order_by('realizationreport_id')

@@ -34,11 +34,11 @@ def error_message(function_name: str, function, error_text: str) -> str:
                      f'<b>Техническая информация</b>:\n {tb_str}')
     return message_error
 
-@app.task
+#@app.task
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     try:
-        start_date = date.today() - timedelta(days=30)
+        start_date = date.today() - timedelta(days=90)
         url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={start_date}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
@@ -118,21 +118,20 @@ def sales_report_statistic():
                         check_data_reports.append('')
                     else:
                         check_data_reports.append(0)
-            common_data_reports.append(check_data_reports)
-        # Подключение к существующей базе данных
-        connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
-                                      dbname=os.getenv('DB_NAME'),
-                                      password=os.getenv('POSTGRES_PASSWORD'),
-                                      host=os.getenv('DB_HOST'),
-                                      port=os.getenv('DB_PORT'))
-        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # Курсор для выполнения операций с базой данных
-        cursor = connection.cursor()
-        #try:
-        cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
-        try:
-            cursor.executemany(
-                '''INSERT INTO database_salesreportonSales (
+            #common_data_reports.append(check_data_reports)
+            # Подключение к существующей базе данных
+            connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
+                                          dbname=os.getenv('DB_NAME'),
+                                          password=os.getenv('POSTGRES_PASSWORD'),
+                                          host=os.getenv('DB_HOST'),
+                                          port=os.getenv('DB_PORT'))
+            connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            # Курсор для выполнения операций с базой данных
+            cursor = connection.cursor()
+
+            cursor.execute(
+                '''
+                INSERT INTO database_salesreportonSales (
                     realizationreport_id,
                     date_from,
                     date_to,
@@ -194,11 +193,12 @@ def sales_report_statistic():
                     rebill_logistic_org,
                     kiz,
                     srid
-                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-                common_data_reports)
-        except psycopg2.IntegrityError:
-            #connection.rollback()
-            print("User with this email already exists")
+                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (rrd_id) DO NOTHING;''',
+                check_data_reports)
+            connection.commit()
+            # except:
+            #     #connection.rollback()
+            #     print("User with this rrd_id already exists")
         if connection:
             cursor.close()
             connection.close()

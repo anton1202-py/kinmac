@@ -621,8 +621,8 @@ def orders_statistic():
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     try:
-        start_date = date.today() - timedelta(days=61)
-        finish_date = date.today() - timedelta(days=61)
+        start_date = date.today() - timedelta(days=30)
+        finish_date = date.today() - timedelta(days=30)
         url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={finish_date}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
@@ -636,10 +636,7 @@ def sales_report_statistic():
                                       port=os.getenv('DB_PORT'))
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         # Курсор для выполнения операций с базой данных
-        cursor = connection.cursor()
-        #try:
-        cursor.execute("CREATE UNIQUE INDEX unique_rrd_id ON database_salesreportonSales (rrd_id)")
-        
+        cursor = connection.cursor()        
         data_key_dict = {
                 'realizationreport_id': 'integer',
                 'date_from': 'text',
@@ -715,11 +712,10 @@ def sales_report_statistic():
                     else:
                         check_data_reports.append(0)
             common_data_reports.append(check_data_reports)
-        # Подключение к существующей базе данных
-        
-        try:
-            cursor.executemany(
-                '''INSERT INTO database_salesreportonSales (
+            # Подключение к существующей базе данных
+            cursor.execute(
+                '''
+                INSERT INTO database_salesreportonSales (
                     realizationreport_id,
                     date_from,
                     date_to,
@@ -781,16 +777,13 @@ def sales_report_statistic():
                     rebill_logistic_org,
                     kiz,
                     srid
-                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-                common_data_reports)
-        except psycopg2.IntegrityError:
-            #connection.rollback()
-            print("User with this email already exists")
+                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (rrd_id) DO NOTHING;''',
+                check_data_reports)
+            connection.commit()
         if connection:
             cursor.close()
             connection.close()
             print("Соединение с PostgreSQL закрыто")
-
 
     except Exception as e:
         #обработка ошибки и отправка сообщения через бота
