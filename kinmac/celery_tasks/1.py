@@ -38,7 +38,7 @@ def error_message(function_name: str, function, error_text: str) -> str:
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     try:
-        start_date = date.today() - timedelta(days=90)
+        start_date = date.today() - timedelta(days=89)
         url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={start_date}"
         # Заголовок и сам ключ
         APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}

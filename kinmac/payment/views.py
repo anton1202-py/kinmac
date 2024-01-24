@@ -411,7 +411,7 @@ def payment_common_statistic(request):
         pay = Payments.objects.get(id=request.POST['pay_payment'])
         payment_id = request.POST['pay_payment']
         pay.status_of_payment = 'Оплачено'
-        pay.date_of_payment = now_time
+        pay.date_of_payment = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         pay.payer_organization = PayerOrganization.objects.get(
             id=request.POST['payer_organization'])
 
