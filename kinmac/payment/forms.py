@@ -1,3 +1,4 @@
+
 from django import forms
 from django.forms import (CheckboxInput, ChoiceField, FileInput, ModelForm,
                           NumberInput, Select, TextInput)
@@ -115,8 +116,10 @@ class TransferToCardForm(ModelForm):
 
     class Meta:
         model = TransferToCard
-        card_number = forms.IntegerField(validators=[StripToNumbers])
-        phone_number = forms.CharField()
+        card_number = forms.IntegerField(
+            validators=[StripToNumbers],
+            required=False,)
+        phone_number = forms.CharField(required=False,)
 
         fields = ['card_number', 'phone_number', 'payment_receiver',
                   'bank_for_payment']

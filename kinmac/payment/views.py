@@ -153,8 +153,7 @@ def payment_create(request):
             if form_transfer_to_card.is_valid():
                 transfer_to_card = TransferToCard(
                     payment_id=Payments.objects.get(id=payment.pk),
-                    card_number=StripToNumbers(
-                        form_transfer_to_card.cleaned_data['card_number']),
+                    card_number=form_transfer_to_card.cleaned_data['card_number'],
                     phone_number=form_transfer_to_card.cleaned_data['phone_number'],
                     payment_receiver=form_transfer_to_card.cleaned_data['payment_receiver'],
                     bank_for_payment=form_transfer_to_card.cleaned_data['bank_for_payment'],
