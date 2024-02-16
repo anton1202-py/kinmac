@@ -29,29 +29,29 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
     add_payment_file_message = ''
     file_path = ''
     if payment.urgent_payment == True:
-        add_urgent_message = '🔥*СРОЧНО!*\n'
+        add_urgent_message = '🔥<b>СРОЧНО!</b>\n'
     if payment.send_payment_file == True:
-        add_payment_file_message = '*‼️НУЖНА ПЛАТЕЖКА / ЧЕК*\n'
+        add_payment_file_message = '<b>‼️НУЖНА ПЛАТЕЖКА / ЧЕК</b>\n'
     message =add_urgent_message +  add_payment_file_message + f'''
-            *{payment.project.name}* - *{payment.category.name}*
+            <b>{payment.project.name}</b> - <b>{payment.category.name}</b>
             За что: {payment.comment}
             Сумма: {payment.payment_sum}
             Кому: {payment.contractor_name}
-            Способ: *{payment.payment_method.method_name}* 
+            Способ: <b>{payment.payment_method.method_name}</b> 
         '''
     
     if payment_method == 1:
         file_path = f'http://5.9.57.39/media/{pay_with_method.file_of_bill}'
     elif payment_method == 2:
-        message = message + f"Ссылка на платёж: *{pay_with_method.link_to_payment}*"
+        message = message + f"Ссылка на платёж: <b>{pay_with_method.link_to_payment}</b>"
     elif payment_method == 3:
-        message = message + f'''Карта: *{pay_with_method.card_number}*
-        Телефон: *{pay_with_method.phone_number}*
-        Получатель по банку: *{pay_with_method.payment_receiver}*
-        Банк: *{pay_with_method.bank_for_payment}*
+        message = message + f'''Карта: <b>{pay_with_method.card_number}</b>
+        Телефон: <b>{pay_with_method.phone_number}</b>
+        Получатель по банку: <b>{pay_with_method.payment_receiver}</b>
+        Банк: <b>{pay_with_method.bank_for_payment}</b>
         '''
     elif payment_method == 4:
-        message = message + f"Данные для оплаты: *{pay_with_method.cash_payment_payment_data}*"
+        message = message + f"Данные для оплаты: <b>{pay_with_method.cash_payment_payment_data}</b>"
 
     if comment_text:
         short_name_dict = {
@@ -61,7 +61,7 @@ def message_constructor(user, creator_user, payment_id, payment, payment_method,
         comment_user = ApprovedFunction.objects.get(
             user_name=comment_username)
         name = f'{comment_user.first_name} {comment_user.last_name}'
-        message = message + f"""\n\nКомментарий от {short_name_dict[name]}: _{comment_text}_\n"""
+        message = message + f"""\n\nКомментарий от {short_name_dict[name]}: <i>{comment_text}</i>\n"""
 
     payment_status = ''
     if payment.status_of_payment == 'На согласовании' or payment.status_of_payment == 'Согласовано Лисов Юрий':
@@ -125,7 +125,7 @@ def approve_process(payment_id: int, payment_creator: str, creator_user_rating: 
                                 document=f,
                                 reply_markup=reply_markup,
                                 caption=message,
-                                parse_mode='Markdown')
+                                parse_mode='HTML')
                             save_message_function(payment, user.chat_id_tg,
                                 message_obj.message_id, 'create_approve',
                                 user.user_name, message, reply_markup, True)
@@ -134,7 +134,7 @@ def approve_process(payment_id: int, payment_creator: str, creator_user_rating: 
                             chat_id=int(user.chat_id_tg),
                             text=message,
                             reply_markup=reply_markup,
-                            parse_mode='Markdown')
+                            parse_mode='HTML')
                         save_message_function(payment, user.chat_id_tg,
                             message_obj.message_id, 'create_approve',
                             user.user_name, message, reply_markup, False)
@@ -167,7 +167,7 @@ def send_message_to_creator(payment_id, payment_creator, creator_user_rating):
                     document=f,
                     reply_markup=reply_markup,
                     caption=message,
-                    parse_mode='Markdown')
+                    parse_mode='HTML')
                 save_message_function(payment, creator.chat_id_tg,
                     message_obj.message_id, 'create_approve',
                     creator.user_name, message, reply_markup, True)
@@ -176,7 +176,7 @@ def send_message_to_creator(payment_id, payment_creator, creator_user_rating):
                 chat_id=int(creator.chat_id_tg),
                 text=message,
                 reply_markup=reply_markup,
-                parse_mode='Markdown')
+                parse_mode='HTML')
             save_message_function(payment, creator.chat_id_tg,
                 message_obj.message_id, 'create_approve',
                 creator.user_name, message, reply_markup, False)
@@ -229,9 +229,9 @@ def start_tg_working(payment_id: int, payment_creator: str, creator_user_rating:
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: 💲Оплата'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='HTML')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='HTML')
 
         for accountant in accountants:
             keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {accountant} {payment_creator}'),
@@ -248,7 +248,7 @@ def start_tg_working(payment_id: int, payment_creator: str, creator_user_rating:
                         document=f,
                         reply_markup=reply_markup,
                         caption=message,
-                        parse_mode='Markdown')
+                        parse_mode='HTML')
                     save_message_function(payment, accountant.chat_id_tg,
                         message_obj.message_id, 'create_approve',
                         accountant.user_name, message, reply_markup, True)
@@ -257,7 +257,7 @@ def start_tg_working(payment_id: int, payment_creator: str, creator_user_rating:
                     chat_id=int(accountant.chat_id_tg),
                     reply_markup=reply_markup,
                     text=message,
-                    parse_mode='Markdown')
+                    parse_mode='HTML')
                 save_message_function(payment, accountant.chat_id_tg,
                     message_obj.message_id, 'create_approve',
                     accountant.user_name, message, reply_markup, False)

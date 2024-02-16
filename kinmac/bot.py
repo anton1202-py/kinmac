@@ -70,9 +70,9 @@ def command_reject(payment_id, user_id, reason):
         words = current_text.split("Статус:")
         new_text = words[0] + f'\nСтатус: ❌ Отклонено\nПричина: {reason}'
         if attach == True:
-            bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+            bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='HTML')
         else:
-            bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+            bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='HTML')
 
 
 def reject_reason(update, context):
@@ -232,9 +232,9 @@ def command_pay(context, payment_id, user_id, payment_creator, payer_company):
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: ✅ Оплачено'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='HTML')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='HTML')
 
         # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
         messages_for_delete = TelegramMessageActions.objects.filter(
@@ -348,7 +348,7 @@ def button_click(update, context):
         reply_markup = InlineKeyboardMarkup(keyboard)
         message = f'Выберите платильщика'
         message_obj_payer = bot.send_message(
-            chat_id=int(pay_user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='Markdown')
+            chat_id=int(pay_user.chat_id_tg), text=message, reply_markup=reply_markup, parse_mode='HTML')
         save_message_function(payment, pay_user.chat_id_tg, message_obj_payer.message_id,
             'payment_organization', pay_user.user_name, message, reply_markup, False)
 
@@ -374,9 +374,9 @@ def button_click(update, context):
             words = current_text.split("Статус:")
             new_text = words[0] + f'‼️‼️ Статус: В работе у {pay_user_firstname} {pay_user_lastname}'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='HTML')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='HTML')
         # После нажатия на кнопку В Работе, у нажавшего меняются кнопки
         keyboard = [[InlineKeyboardButton("Отклонить", callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}'),
                         InlineKeyboardButton("Вернуть в очередь", callback_data=f'О_тменить_В_работе {payment_id} {user_id} {payment_creator}'),
@@ -399,9 +399,9 @@ def button_click(update, context):
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: 💲Оплата'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, essage_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, essage_id=message_id_cicle, parse_mode='HTML')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, reply_markup=reply_markup, message_id=message_id_cicle, parse_mode='HTML')
     
     elif 'Сохранить_платёж' in query.data:
         payer_pk = reaponse_data[4]
@@ -498,9 +498,9 @@ def pay_file_handler(update, context):
             words = current_text.split("Статус:")
             new_text = words[0] + 'Статус: ✅ Оплачено'
             if attach == True:
-                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_caption(caption=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='HTML')
             else:
-                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='Markdown')
+                bot.edit_message_text(text=new_text, chat_id=chat_id_cicle, message_id=message_id_cicle, parse_mode='HTML')
         # Удаляем все сообщения, относящиеся к заявки, кроме тех, у которых message_type='create_approve'
         messages_for_delete = TelegramMessageActions.objects.filter(
             Q(payment=Payments.objects.get(id=payment_id)) | Q(
