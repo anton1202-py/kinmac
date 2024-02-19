@@ -160,6 +160,7 @@ def payment_create(request):
                 )
                 transfer_to_card.save()
                 error = form_transfer_to_card.errors
+                form_transfer_to_card = TransferToCardForm()
             else:
                 error3 = form_transfer_to_card.errors
 

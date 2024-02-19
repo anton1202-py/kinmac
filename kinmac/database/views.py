@@ -316,13 +316,13 @@ def weekly_sales_data(request):
     data = {}
     week_data = []
     for tim in sales_data:
-
         week_year = f"{tim['week']}-{tim['year']}"
         week_data.append(week_year)
-
+        #week_data.append('3-2024')
     unique_week = list(set(week_data))
+    #sorted_list = sorted(unique_week, key=lambda x: (x['name'], x['age']))
     unique_week.sort()
-
+    print(week_data)
     for sale in sales:
         supplier_article = sale['supplier_article']
         barcode = sale['barcode']
