@@ -291,11 +291,13 @@ def sales_report(request):
 def weekly_sales_data(request):
     """Функция отвечает за отображение данных недельных продаж"""
 
-    sales = Sales.objects.filter(finished_price__gte=0).annotate(
+    sales = Sales.objects.filter(finished_price__gte=0,
+        brand='KINMAC').annotate(
         week=ExtractWeek('pub_date'),
         year=ExtractYear('pub_date')
     ).values('supplier_article', 'barcode', 'week', 'year').annotate(
         count=Count(Case(When(finished_price__gte=0, then=1),
+                         
                     output_field=IntegerField()))
     ).order_by('supplier_article', 'barcode', 'year', 'week')
 
@@ -410,25 +412,40 @@ class DatabaseWeeklySalesDetailView(ListView):
                 week=ExtractWeek('pub_date'),
                 year=ExtractYear('pub_date')
         ).values('supplier_article', 'barcode', 'week', 'year').annotate(
-                count=Count(Case(When(finished_price__gte=0, then=1),
-                            output_field=IntegerField()))
+            count=Count(Case(When(finished_price__gte=0, then=1),
+            output_field=IntegerField()))
         ).order_by('supplier_article', 'barcode', 'year', 'week')
-
+        
         sales_data = Sales.objects.filter(
             Q(finished_price__gte=0)).annotate(
                 week=ExtractWeek('pub_date'),
                 year=ExtractYear('pub_date')
         ).values('week', 'year').order_by('year', 'week')
+
+        # Получаем queryset вида [{'warehouse_name': 'Тула', 'week': 43, 'year': 2023, 'week_sales': 2}]
+        warehouses = Sales.objects.filter(
+            Q(barcode=self.kwargs['barcode']),
+            Q(finished_price__gte=0)).annotate(
+                week=ExtractWeek('pub_date'),
+                year=ExtractYear('pub_date')
+        ).values('warehouse_name', 'week', 'year'
+                ).annotate(week_sales=Count('id', filter=Q(sales_date__gte=TruncWeek('sales_date')))
+                ).order_by('warehouse_name')
+        warehouses_list = []
+        # Находим склады с которых были продажи и выводим в один список
+        for warehouse in warehouses:
+            if warehouse['warehouse_name'] not in warehouses_list:
+                warehouses_list.append(warehouse['warehouse_name'])
+        # Сортирую название складов по алфавиту
+        warehouses_list.sort()
+
         data = {}
         week_data = []
         for tim in sales_data:
-
             week_year = f"{tim['week']}-{tim['year']}"
             week_data.append(week_year)
-
         unique_week = list(set(week_data))
         unique_week.sort()
-
         for sale in sales:
             supplier_article = sale['supplier_article']
             barcode = sale['barcode']
@@ -438,15 +455,40 @@ class DatabaseWeeklySalesDetailView(ListView):
             if key not in data:
                 data[key] = {}
             data[key][week_year] = count
-
+        
+        # Формирую новый словарь с данными по складам, что не
+        # съезжали данные по неделям
+        warehouses_data = {}
+        for stock in warehouses:
+            key = stock['warehouse_name']
+            if key not in warehouses_data.keys():
+                warehouses_data[key] = {}
+            #if key in warehouses_data.keys():
+            if  f"{stock['week']}-{stock['year']}" in warehouses_data[key].keys():
+                warehouses_data[key][f"{stock['week']}-{stock['year']}"] += stock['week_sales']
+            else:
+                warehouses_data[key][f"{stock['week']}-{stock['year']}"] = stock['week_sales']
+        
         # Добавляем недостающие недели со значением 0
+        for warehouse_name, amount in warehouses_data.items():
+            for week in unique_week:
+                inner_dict = {}
+                if week not in amount.keys():
+                    print('week', week)
+                    amount[week] = ''
         for article_data in data.values():
             for week in unique_week:
                 if week not in article_data:
                     article_data[week] = 0
+        print('warehouses_data', warehouses_data)
+        print('data', data)
+        print('warehouses', warehouses)
         context.update({
             'data': data,
             'unique_week': unique_week,
+            'sales': sales,
+            'warehouses_data': warehouses_data,
+            'warehouses_list': warehouses_list
         })
         return context
 

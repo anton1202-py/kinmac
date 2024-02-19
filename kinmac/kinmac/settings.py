@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'database',
     'payment',
     'telegram_working',
+    'planning',
 ]
 
 MIDDLEWARE = [

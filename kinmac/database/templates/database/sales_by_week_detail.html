@@ -4,12 +4,13 @@
 {% block title %}Скорость недельных продаж{% endblock %}
 
 {% block content %}
-
+{% load data_filter %}
 
 <div class="features">
     <div class="top-befor-header">
        <h1>Продажи по неделям артикула {{ articles.0.supplier_article }}</h1>
     </div>
+    
     <div class="alert alert-warninng">
       <div class="charts_sales_by_week">
         <div class='chart_sales_by_week'>
@@ -82,7 +83,7 @@
         </div>
       </div>
     </div>
-
+    
     <table name="mytable" class="sortable" style="white-space: nowrap">
       <thead>
         <tr>
@@ -103,6 +104,36 @@
                 {% if date == week  %}
                     <td>{{ amount }}</td>
                 {% endif %}
+              {% endfor %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p>{{warehouses}}</p>
+    <h2>Продажи по складам</h2>
+    <table name="mytable" class="sortable" style="white-space: nowrap">
+      <thead>
+        <tr>
+          <th>Название склада</th>
+          {% for week in unique_week %}
+            <th>{{ week }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for warehouse in warehouses_list %}
+          <tr>
+            <td>{{ warehouse }}</td>
+            {% for week in unique_week %}
+              {% for warehouse_name, amount in warehouses_data.items %}
+                {% for data, quantity in amount.items %}
+              
+                  {% if warehouse == warehouse_name and week == data %}
+                    <td>{{quantity}}</td>
+                  {% endif %}
+                {% endfor %}
               {% endfor %}
             {% endfor %}
           </tr>
