@@ -1,6 +1,6 @@
 import datetime
 import os
-from datetime import date
+from datetime import date, datetime
 
 import pandas as pd
 import telegram
@@ -28,7 +28,6 @@ from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
 from .supplement import excel_creating_mod
 from .validators import StripToNumbers
 
-now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
@@ -262,8 +261,6 @@ def payment_common_statistic(request):
 
     #if request.method == 'POST' and 'approval' in request.POST.keys():
     if request.method == 'POST' and 'approval' in request.POST.keys():
-        print(request.POST)
-
         comment_for_payment = request.POST['popup-input-name']
         ApprovalStatus.objects.filter(
             payment=Payments.objects.get(id=request.POST['approval']),
@@ -294,11 +291,6 @@ def payment_common_statistic(request):
                 callback_data=f'Отклонить {payment_id} {user_id} {payment_creator}')]]
         reply_markup = telegram.InlineKeyboardMarkup(keyboard)
 
-        print('payment_id', payment_id)
-        print(TelegramMessageActions.objects.filter(
-            payment=Payments.objects.get(id=payment_id),
-            message_author=approval_user.user_name
-        ).values_list('message_id'))
         message_id = TelegramMessageActions.objects.filter(
             payment=Payments.objects.get(id=payment_id),
             message_author=approval_user.user_name
@@ -406,12 +398,13 @@ def payment_common_statistic(request):
         # ========== КОНЕЦ БЛОКА ДЛЯ РАБОТЫ С БОТОМ ПРИ ОТКЛОНЕНИИ ЧЕРЕЗ САЙТ ========= #
 
         return redirect('payment_common_statistic')
-
+    
     elif request.method == 'POST' and 'pay_payment' in request.POST.keys():
+        now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         pay = Payments.objects.get(id=request.POST['pay_payment'])
         payment_id = request.POST['pay_payment']
         pay.status_of_payment = 'Оплачено'
-        pay.date_of_payment = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        pay.date_of_payment = now_time
         pay.payer_organization = PayerOrganization.objects.get(
             id=request.POST['payer_organization'])
 
