@@ -36,7 +36,6 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
-now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def command_reject(payment_id, user_id, reason):
@@ -78,7 +77,7 @@ def command_reject(payment_id, user_id, reason):
 def reject_reason(update, context):
     """
     Функция обрабатывает текстовые сообщения, которые поступаю в бот.
-    Если они удовлетвоябт условию логики бота, то выполняет с сообщениями
+    Если они удовлетвояют условию логики бота, то выполняет с сообщениями
     дальнейшие действия
     """
     chat_id = update.effective_chat.id
@@ -184,6 +183,7 @@ def command_approve(payment_id: int, user_id:int, payment_creator: str, comment_
 
 def command_pay(context, payment_id, user_id, payment_creator, payer_company):
     """Функция выполняет действия после нажатия на кнопку ОПЛАЧЕНО"""
+    now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     pay_user = ApprovedFunction.objects.get(
         username=user_id)
     creator_user = ApprovedFunction.objects.get(
@@ -460,6 +460,7 @@ def pay_file_handler(update, context):
                 message_id=last_bot_message_id).message
 
     if 'Необходимо прислать платёжку' in last_bot_message:
+        now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         payment_id = context.chat_data.get('payment_id')
         user_id = context.chat_data.get('user_id')
         payment_creator = context.chat_data.get('payment_creator')
