@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 from datetime import datetime
@@ -36,7 +37,8 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
-
+# Настройка логирования
+logging.basicConfig(filename='bot.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def command_reject(payment_id, user_id, reason):
     """Функция отвечает за обработку команды отклонения заявки"""
