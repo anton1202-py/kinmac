@@ -422,15 +422,13 @@ class TelegramMessageActions(models.Model):
         blank=True,
         null=True,
     )
-    message = models.CharField(
+    message = models.TextField(
         verbose_name='Текст сообщения',
-        max_length=400,
         blank=True,
         null=True,
     )
-    reply_markup = models.CharField(
+    reply_markup = models.TextField(
         verbose_name='Кнопка из сообщения',
-        max_length=800,
         blank=True,
         null=True,
     )
