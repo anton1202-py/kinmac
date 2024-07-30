@@ -8,10 +8,14 @@ import pandas as pd
 import psycopg2
 import requests
 import telegram
+from api_requests.wb_requests import get_report_detail_by_period
 from celery_tasks.celery import app
+from database.models import SalesReportOnSales
 from dotenv import load_dotenv
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+from kinmac.constants_file import TELEGRAM_ADMIN_CHAT_ID, bot, wb_headers
 
 load_dotenv()
 
@@ -620,175 +624,153 @@ def orders_statistic():
 @app.task
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
-    try:
-        start_date = date.today() - timedelta(days=30)
-        finish_date = date.today() - timedelta(days=30)
-        url_delivery = f"https://statistics-api.wildberries.ru/api/v1/supplier/reportDetailByPeriod?dateFrom={start_date}&dateTo={finish_date}"
-        # Заголовок и сам ключ
-        APIKEY = {"Authorization": os.getenv('STATISTIC_WB_TOKEN')}
-        response_report = requests.get(url_delivery, headers=APIKEY)
-        data_report = json.loads(response_report.text)
+    start_date = date.today() - timedelta(days=60)
+    finish_date = date.today() - timedelta(days=1)
+    common_data = get_report_detail_by_period(wb_headers, start_date, finish_date)
+    if common_data:
+        for data in common_data:
+            if SalesReportOnSales.objects.filter(
+                        realizationreport_id=data['realizationreport_id'],
+                        date_from=data['date_from'],
+                        date_to=data['date_to'],
+                        rrd_id=data['rrd_id']).exists():
+                SalesReportOnSales.objects.filter(
+                    realizationreport_id=data['realizationreport_id'],
+                    date_from=data['date_from'],
+                    date_to=data['date_to'],
+                    rrd_id=data['rrd_id']).update(
+                        create_dt=data['create_dt'],
+                        currency_name=data['currency_name'],
+                        suppliercontract_code=data['suppliercontract_code'],
+                        gi_id=data['gi_id'],
+                        subject_name=data['subject_name'],
+                        nm_id=data['nm_id'],
+                        brand_name=data['brand_name'],
+                        sa_name=data['sa_name'],
+                        ts_name=data['ts_name'],
+                        barcode=data['barcode'],
+                        doc_type_name=data['doc_type_name'],
+                        quantity=data['quantity'],
+                        retail_price=data['retail_price'],
+                        retail_amount=data['retail_amount'],
+                        sale_percent=data['sale_percent'],
+                        commission_percent=data['commission_percent'],
+                        office_name=data['office_name'],
+                        supplier_oper_name=data['supplier_oper_name'],
+                        order_dt=data['order_dt'],
+                        sale_dt=data['sale_dt'],
+                        rr_dt=data['rr_dt'],
+                        shk_id=data['shk_id'],
+                        retail_price_withdisc_rub=data['retail_price_withdisc_rub'],
+                        delivery_amount=data['delivery_amount'],
+                        return_amount=data['return_amount'],
+                        delivery_rub=data['delivery_rub'],
+                        gi_box_type_name=data['gi_box_type_name'],
+                        product_discount_for_report=data['product_discount_for_report'],
+                        supplier_promo=data['supplier_promo'],
+                        rid=data['rid'],
+                        ppvz_spp_prc=data['ppvz_spp_prc'],
+                        ppvz_kvw_prc_base=data['ppvz_kvw_prc_base'],
+                        ppvz_kvw_prc=data['ppvz_kvw_prc'],
+                        sup_rating_prc_up=data['sup_rating_prc_up'],
+                        is_kgvp_v2=data['is_kgvp_v2'],
+                        ppvz_sales_commission=data['ppvz_sales_commission'],
+                        ppvz_for_pay=data['ppvz_for_pay'],
+                        ppvz_reward=data['ppvz_reward'],
+                        acquiring_fee=data['acquiring_fee'],
+                        acquiring_bank=data['acquiring_bank'],
+                        ppvz_vw=data['ppvz_vw'],
+                        ppvz_vw_nds=data['ppvz_vw_nds'],
+                        ppvz_office_id=data['ppvz_office_id'],
+                        ppvz_office_name=data['ppvz_office_name'],
+                        ppvz_supplier_id=data['ppvz_supplier_id'],
+                        ppvz_supplier_name=data['ppvz_supplier_name'],
+                        ppvz_inn=data['ppvz_inn'],
+                        declaration_number=data['declaration_number'],
+                        bonus_type_name=data.get('bonus_type_name', ''),
+                        sticker_id=data['sticker_id'],
+                        site_country=data['site_country'],
+                        penalty=data['penalty'],
+                        additional_payment=data['additional_payment'],
+                        rebill_logistic_cost=data.get('rebill_logistic_cost', 0),
+                        rebill_logistic_org=data.get('rebill_logistic_org', ''),
+                        kiz=data.get('kiz', ''),
+                        storage_fee=data['storage_fee'],
+                        deduction=data['deduction'],
+                        acceptance=data['acceptance'],
+                        srid=data['srid'],
+                        report_type=data['report_type']
+                )
+            else:                
+                SalesReportOnSales(
+                    realizationreport_id=data['realizationreport_id'],
+                    date_from=data['date_from'],
+                    date_to=data['date_to'],
+                    create_dt=data['create_dt'],
+                    currency_name=data['currency_name'],
+                    suppliercontract_code=data['suppliercontract_code'],
+                    rrd_id=data['rrd_id'],
+                    gi_id=data['gi_id'],
+                    subject_name=data['subject_name'],
+                    nm_id=data['nm_id'],
+                    brand_name=data['brand_name'],
+                    sa_name=data['sa_name'],
+                    ts_name=data['ts_name'],
+                    barcode=data['barcode'],
+                    doc_type_name=data['doc_type_name'],
+                    quantity=data['quantity'],
+                    retail_price=data['retail_price'],
+                    retail_amount=data['retail_amount'],
+                    sale_percent=data['sale_percent'],
+                    commission_percent=data['commission_percent'],
+                    office_name=data['office_name'],
+                    supplier_oper_name=data['supplier_oper_name'],
+                    order_dt=data['order_dt'],
+                    sale_dt=data['sale_dt'],
+                    rr_dt=data['rr_dt'],
+                    shk_id=data['shk_id'],
+                    retail_price_withdisc_rub=data['retail_price_withdisc_rub'],
+                    delivery_amount=data['delivery_amount'],
+                    return_amount=data['return_amount'],
+                    delivery_rub=data['delivery_rub'],
+                    gi_box_type_name=data['gi_box_type_name'],
+                    product_discount_for_report=data['product_discount_for_report'],
+                    supplier_promo=data['supplier_promo'],
+                    rid=data['rid'],
+                    ppvz_spp_prc=data['ppvz_spp_prc'],
+                    ppvz_kvw_prc_base=data['ppvz_kvw_prc_base'],
+                    ppvz_kvw_prc=data['ppvz_kvw_prc'],
+                    sup_rating_prc_up=data['sup_rating_prc_up'],
+                    is_kgvp_v2=data['is_kgvp_v2'],
+                    ppvz_sales_commission=data['ppvz_sales_commission'],
+                    ppvz_for_pay=data['ppvz_for_pay'],
+                    ppvz_reward=data['ppvz_reward'],
+                    acquiring_fee=data['acquiring_fee'],
+                    acquiring_bank=data['acquiring_bank'],
+                    ppvz_vw=data['ppvz_vw'],
+                    ppvz_vw_nds=data['ppvz_vw_nds'],
+                    ppvz_office_id=data['ppvz_office_id'],
+                    ppvz_office_name=data['ppvz_office_name'],
+                    ppvz_supplier_id=data['ppvz_supplier_id'],
+                    ppvz_supplier_name=data['ppvz_supplier_name'],
+                    ppvz_inn=data['ppvz_inn'],
+                    declaration_number=data['declaration_number'],
+                    bonus_type_name=data.get('bonus_type_name', ''),
+                    sticker_id=data['sticker_id'],
+                    site_country=data['site_country'],
+                    penalty=data['penalty'],
+                    additional_payment=data['additional_payment'],
+                    rebill_logistic_cost=data.get('rebill_logistic_cost', 0),
+                    rebill_logistic_org=data.get('rebill_logistic_org', ''),
+                    kiz=data.get('kiz', ''),
+                    storage_fee=data['storage_fee'],
+                    deduction=data['deduction'],
+                    acceptance=data['acceptance'],
+                    srid=data['srid'],
+                    report_type=data['report_type']
+                ).save()
+                
 
-        connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
-                                      dbname=os.getenv('DB_NAME'),
-                                      password=os.getenv('POSTGRES_PASSWORD'),
-                                      host=os.getenv('DB_HOST'),
-                                      port=os.getenv('DB_PORT'))
-        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # Курсор для выполнения операций с базой данных
-        cursor = connection.cursor()        
-        data_key_dict = {
-                'realizationreport_id': 'integer',
-                'date_from': 'text',
-                'date_to': 'text',
-                'create_dt': 'text',
-                'currency_name': 'text',
-                'suppliercontract_code': 'text',
-                'rrd_id': 'integer',
-                'gi_id': 'integer',
-                'subject_name': 'text',
-                'nm_id': 'integer',
-                'brand_name': 'text',
-                'sa_name': 'text',
-                'ts_name': 'text',
-                'barcode': 'text',
-                'doc_type_name': 'text',
-                'quantity': 'integer',
-                'retail_price': 'float',
-                'retail_amount': 'float',
-                'sale_percent': 'integer',
-                'commission_percent': 'float',
-                'office_name': 'text',
-                'supplier_oper_name': 'text',
-                'order_dt': 'text',
-                'sale_dt': 'text',
-                'rr_dt': 'text',
-                'shk_id': 'integer',
-                'retail_price_withdisc_rub': 'float',
-                'delivery_amount': 'integer',
-                'return_amount': 'integer',
-                'delivery_rub': 'float',
-                'gi_box_type_name': 'text',
-                'product_discount_for_report': 'float',
-                'supplier_promo': 'float',
-                'rid': 'integer',
-                'ppvz_spp_prc': 'float',
-                'ppvz_kvw_prc_base': 'float',
-                'ppvz_kvw_prc': 'float',
-                'sup_rating_prc_up': 'float',
-                'is_kgvp_v2': 'float',
-                'ppvz_sales_commission': 'float',
-                'ppvz_for_pay': 'float',
-                'ppvz_reward': 'float',
-                'acquiring_fee': 'float',
-                'acquiring_bank': 'text',
-                'ppvz_vw': 'float',
-                'ppvz_vw_nds': 'float',
-                'ppvz_office_id': 'integer',
-                'ppvz_office_name': 'text',
-                'ppvz_supplier_id': 'integer',
-                'ppvz_supplier_name': 'text',
-                'ppvz_inn': 'text',
-                'declaration_number': 'text',
-                'bonus_type_name': 'text',
-                'sticker_id': 'text',
-                'site_country': 'text',
-                'penalty': 'float',
-                'additional_payment': 'float',
-                'rebill_logistic_cost': 'float',
-                'rebill_logistic_org': 'text',
-                'kiz': 'text',
-                'srid': 'text'
-        }
-        common_data_reports = []
-        for i in data_report:
-            check_data_reports = []
-            for key, value in data_key_dict.items():
-                if key in i.keys():
-                    check_data_reports.append(i[key])
-                else:
-                    if value == 'text':
-                        check_data_reports.append('')
-                    else:
-                        check_data_reports.append(0)
-            common_data_reports.append(check_data_reports)
-            # Подключение к существующей базе данных
-            cursor.execute(
-                '''
-                INSERT INTO database_salesreportonSales (
-                    realizationreport_id,
-                    date_from,
-                    date_to,
-                    create_dt,
-                    currency_name,
-                    suppliercontract_code,
-                    rrd_id,
-                    gi_id,
-                    subject_name,
-                    nm_id,
-                    brand_name,
-                    sa_name,
-                    ts_name,
-                    barcode,
-                    doc_type_name,
-                    quantity,
-                    retail_price,
-                    retail_amount,
-                    sale_percent,
-                    commission_percent,
-                    office_name,
-                    supplier_oper_name,
-                    order_dt,
-                    sale_dt,
-                    rr_dt,
-                    shk_id,
-                    retail_price_withdisc_rub,
-                    delivery_amount,
-                    return_amount,
-                    delivery_rub,
-                    gi_box_type_name,
-                    product_discount_for_report,
-                    supplier_promo,
-                    rid,
-                    ppvz_spp_prc,
-                    ppvz_kvw_prc_base,
-                    ppvz_kvw_prc,
-                    sup_rating_prc_up,
-                    is_kgvp_v2,
-                    ppvz_sales_commission,
-                    ppvz_for_pay,
-                    ppvz_reward,
-                    acquiring_fee,
-                    acquiring_bank,
-                    ppvz_vw,
-                    ppvz_vw_nds,
-                    ppvz_office_id,
-                    ppvz_office_name,
-                    ppvz_supplier_id,
-                    ppvz_supplier_name,
-                    ppvz_inn,
-                    declaration_number,
-                    bonus_type_name,
-                    sticker_id,
-                    site_country,
-                    penalty,
-                    additional_payment,
-                    rebill_logistic_cost,
-                    rebill_logistic_org,
-                    kiz,
-                    srid
-                    ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (rrd_id) DO NOTHING;''',
-                check_data_reports)
-            connection.commit()
-        if connection:
-            cursor.close()
-            connection.close()
-            print("Соединение с PostgreSQL закрыто")
-
-    except Exception as e:
-        #обработка ошибки и отправка сообщения через бота
-        message_text = error_message('sales_report_statistic', sales_report_statistic, e)
-        bot.send_message(chat_id=CHAT_ID, text=message_text, parse_mode='HTML')
 
 # add_data_stock_api()
 #add_data_sales()

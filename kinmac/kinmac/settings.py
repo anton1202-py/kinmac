@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'django.contrib.staticfiles',
     'django_celery_beat',
+    'api_requests',
     'main',
     'database',
     'payment',

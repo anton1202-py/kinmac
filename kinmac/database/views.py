@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 import pandas as pd
+from celery_tasks.tasks import sales_report_statistic
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -25,6 +26,7 @@ def database_home(request):
     context = {
         'data': data,
     }
+    sales_report_statistic()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
         empexceldata = pd.read_excel(myfile)
