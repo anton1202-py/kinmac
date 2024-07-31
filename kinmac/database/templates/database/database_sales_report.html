@@ -26,19 +26,19 @@
             <h1>Отчет о продажах по реализации</h1>
         </div>
         <div class='filter-data'>
-            <form action="" class="filter-form" method="POST" id="ytr">
+            <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
                 <div class="inner-form-data">
                     <p>От</p>
-                    <input type="date"  name="datestart" class="choose-date" required="" id="datestart">
+                    <input type="date"  name="datestart" class="big-filter-form" required="" id="datestart">
                 </div><br>
                 <div class="inner-form-data">
                     <p>До</p>
-                    <input type="date"  name="datefinish" class="choose-date" required="" id="datefinish">
+                    <input type="date"  name="datefinish" class="big-filter-form" required="" id="datefinish">
                 </div><br>
                 <div class="inner-form-data">
                     <p>Артикул для фильтра</p>
-                    <input type="text"  name="article_filter" class="choose-date" id="article_filter">
+                    <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
                 </div><br>
                 <div class="inner-form-data">
                     <br>
