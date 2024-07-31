@@ -12,26 +12,26 @@
             <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
 
-                <label for="datestart">
+                <div>
                     <span>Дата</span><br>
                     <input type="date" name="date_filter" id="datestart">
-                </label>
-                <label for="id_payment_type">
+                </div>
+                <div>
                     <span>Тип оплаты</span><br>
                     {{ form.payment_type }}
-                </label>
-                <label for="id_category">
+                </div>
+                <div>
                     <span>Категория</span><br>
                     {{ form.category }}
-                </label>
-                <label for="contractor_name">
+                </div>
+                <div>
                     <span>Контрагент</span><br>
                     {{ form.contractor_name }}
-                </label>
-                <label for="status_of_payment">
+                </div>
+                <div>
                     <span>Статус</span><br>
                     {{ form.status_of_payment }}
-                </label>
+                </div>
 
                 <div class="inner-form-data">
                     <br>

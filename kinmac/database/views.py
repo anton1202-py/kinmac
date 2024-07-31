@@ -5,6 +5,7 @@ from celery_tasks.tasks import sales_report_statistic
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from django.db.models.functions import (ExtractMonth, ExtractWeek, ExtractYear,
                                         TruncWeek)
@@ -276,14 +277,23 @@ def sales_report(request):
             data = SalesReportOnSales.objects.filter(
                 Q(date_from__gt=datestart)).order_by('rrd_id')
         if datefinish:
-            data = SalesReportOnSales.objects.filter(
+            data = data.filter(
                 Q(date_from__lt=datefinish)).order_by('rrd_id')
         if article_filter:
-            data = SalesReportOnSales.objects.filter(
-                Q(sa_name=article_filter))
+            data = data.filter(
+                Q(sa_name=article_filter)).order_by('rrd_id')
+    paginator = Paginator(data, 100)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)  # Если номер страницы не целый, возвращаем первую страницу
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)  # Если страница выходит за пределы, возвращаем последнюю страницу
     context = {
         'form': form,
         'data': data,
+        'page_obj': page_obj,
     }
     return render(request, 'database/database_sales_report.html', context)
 
@@ -323,7 +333,6 @@ def weekly_sales_data(request):
     unique_week = list(set(week_data))
     #sorted_list = sorted(unique_week, key=lambda x: (x['name'], x['age']))
     unique_week.sort()
-    print(week_data)
     for sale in sales:
         supplier_article = sale['supplier_article']
         barcode = sale['barcode']
@@ -475,15 +484,11 @@ class DatabaseWeeklySalesDetailView(ListView):
             for week in unique_week:
                 inner_dict = {}
                 if week not in amount.keys():
-                    print('week', week)
                     amount[week] = ''
         for article_data in data.values():
             for week in unique_week:
                 if week not in article_data:
                     article_data[week] = 0
-        print('warehouses_data', warehouses_data)
-        print('data', data)
-        print('warehouses', warehouses)
         context.update({
             'data': data,
             'unique_week': unique_week,

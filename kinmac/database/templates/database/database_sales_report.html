@@ -120,7 +120,7 @@
                     <th>Код маркировки</th>
                     <th>Уникальный идентификатор заказа</th>
                 </tr>
-                {% for el in data %}   
+                {% for el in page_obj %}   
                 <tr>
                     <td>{{ el.realizationreport_id }}</td>
                     <td>{{ el.date_from }}</td>
@@ -186,6 +186,23 @@
                 </tr>
                 {% endfor %}
             </table>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; первая</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+                    {% endif %}
+         
+                    <span class="current">
+                        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+                    </span>
+         
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
         </div>
     </div>    
 {% endblock %}

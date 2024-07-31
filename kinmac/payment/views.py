@@ -226,7 +226,6 @@ def get_button_value(request):
     Отдает данные JQUERY когда вызывается форма написания комментария
     при согласовании заявки.
     """
-    print(request.user.id)
     approve_user = ApprovedFunction.objects.get(
         username = request.user.id
     )
@@ -234,7 +233,6 @@ def get_button_value(request):
         approve=approve_user.pk
     )
     button_value = buttons.button_name
-    print(button_value)
     return JsonResponse({'button': button_value})
 
 
@@ -590,14 +588,13 @@ def payment_working_statistic(request):
             ).order_by('id')
         amount_sum = payments.aggregate(total_amount=Sum('payment_sum'))[
             'total_amount']
-    if request.method == 'POST' and request.POST.get('export')=='create_file' and form.is_valid():
+    if request.method == 'POST' and 'export' in request.POST and form.is_valid():
        
         date_filter = form.cleaned_data.get("date_filter")
         payment_type = form.cleaned_data.get("payment_type")
         category = form.cleaned_data.get("category")
         contractor_name = form.cleaned_data.get("contractor_name")
         status_of_payment = form.cleaned_data.get("status_of_payment")
-        print(request.POST)
 
         if date_filter:
             payments = payments.filter(
@@ -710,9 +707,6 @@ class PaymentUpdateView(UpdateView):
         context['approval_model'] = self.approval_model.objects.filter(
             payment=self.object.pk)
 
-        for i in self.approval_model.objects.filter(
-                payment=self.object.pk):
-            print(i.user.username, i.status)
         data_update_dict = {
             self.second_model.objects.filter(
                 payment_id=self.object.pk): [self.form_class2, 'second_form'],
