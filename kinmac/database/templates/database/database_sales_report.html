@@ -29,15 +29,15 @@
             <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
                 <div class="inner-form-data">
-                    <p>От</p>
+                    <span>От</span>
                     <input type="date"  name="datestart" class="big-filter-form" required="" id="datestart">
                 </div>
                 <div class="inner-form-data">
-                    <p>До</p>
+                    <span>До</span>
                     <input type="date"  name="datefinish" class="big-filter-form" required="" id="datefinish">
                 </div>
                 <div class="inner-form-data">
-                    <p>Артикул для фильтра</p>
+                    <span>Артикул для фильтра</span>
                     <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
                 </div>
                 <div class="inner-form-data">
