@@ -10,12 +10,12 @@ import requests
 import telegram
 from api_requests.wb_requests import get_report_detail_by_period
 from celery_tasks.celery import app
+from database.models import SalesReportOnSales
 from dotenv import load_dotenv
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 from kinmac.constants_file import TELEGRAM_ADMIN_CHAT_ID, bot, wb_headers
-from kinmac.database.models import SalesReportOnSales
 
 load_dotenv()
 
