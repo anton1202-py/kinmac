@@ -268,20 +268,19 @@ def sales_report(request):
     datestart = control_date_orders
     datefinish = date.today()
 
-    if form.is_valid():
-        datestart = form.cleaned_data.get("datestart")
-        datefinish = form.cleaned_data.get("datefinish")
-        article_filter = form.cleaned_data.get("article_filter")
+    if request.POST:
+        datestart = request.POST.get("datestart")
+        datefinish = request.POST.get("datefinish")
+        article_filter = request.POST.get("article_filter")
         if datestart:
-            data = Orders.objects.filter(
-                Q(date_from__gte=datestart)).order_by('order_date')
+            data = SalesReportOnSales.objects.filter(
+                Q(date_from__gt=datestart)).order_by('rrd_id')
         if datefinish:
-            data = Orders.objects.filter(
-                Q(date_from__lte=datefinish)).order_by('order_date')
+            data = SalesReportOnSales.objects.filter(
+                Q(date_from__lt=datefinish)).order_by('rrd_id')
         if article_filter:
-            data = Orders.objects.filter(
+            data = SalesReportOnSales.objects.filter(
                 Q(sa_name=article_filter))
-        return redirect('deliveries')
     context = {
         'form': form,
         'data': data,
