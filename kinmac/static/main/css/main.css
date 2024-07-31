@@ -4,7 +4,7 @@
 :root{
     --color-primary: #7380ec;
     --color-danger: #ff7782;
-    --color-success: #41f1b6;
+    --color-success: #0ca572;
     --color-warning: #ffbb55;
     --color-white: #fff;
     --color-info-dark: #7d8da1;
@@ -14,6 +14,8 @@
     --color-primary-variant: #111e88;
     --color-dark-variant: #677483;
     --color-background: #f6f6f9;
+    --color-table-separator: #dedede;
+    --color-table-highliter: #f3f3f3;
 
     --card-border-radius: 8  --card-padding: 1.8rem;
     --border-radius-1: 0.4rem;
@@ -24,6 +26,10 @@
     --padding-1: 1.2rem;
     
     --box-shadow: 0 2rem 3rem var(--color-light);
+
+    --small-table-gap: 0.2rem;
+    --normal-table-gap: 1rem;
+    --big-table-gap: 2rem;
 }
 
 * {
@@ -44,11 +50,15 @@ body {
     width: 100vw;
     height: 100vh;
     font-family: poppins, sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     user-select: none;
     overflow-x: hidden;
     background: var(--color-background);
     color: var(--color-dark);
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
 }
 
 .container {
@@ -126,7 +136,7 @@ b {
 aside {
     height: 100vh;
     float: left;
-    width: 18%;
+    width: 15%;
     padding-top: 2%;
     padding-left: 1.5%;
 }
@@ -217,7 +227,7 @@ aside .sidebar .message-count {
 .features {
     float: left;
     text-align: left;
-    width: 80%;
+    width: 84%;
 }
 
 main .features h1{
@@ -306,6 +316,25 @@ ul.mainmenu li a:hover {
     transition: all 500ms ease;
 }
 
+.custom-button-success {
+    padding: 15px;
+    margin: 0;
+    border-radius: 8px;
+    border: none;
+    color: var(--color-white);
+    background: var(--color-success);
+    font-weight: 600;
+}
+
+.custom-button-success:hover {
+    padding: 15px;
+    border: none;
+    color: var(--color-white);
+    background: var(--color-dark);
+    font-weight: 600;
+    transition: all 500ms ease;
+}
+
 .custom-button-small {
     padding: 5px;
     margin: 0;
@@ -358,6 +387,9 @@ ul.mainmenu li a:hover {
     border-radius: 8px;
     border: 1px solid var(--color-primary);
     color: var(--color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     white-space: nowrap;
     font-weight: 600;
 }
@@ -399,7 +431,7 @@ ul.mainmenu li a:hover {
 .top-befor-header {
     display: flex;
     align-items: center;
-    margin-top: 35px;
+    margin-top: 25px;
     justify-content: space-between;
 }
 
@@ -450,12 +482,21 @@ form {
 /* ========= ФИЛЬТР =========*/
 
 .filter-data {
-    margin: 0;
-    padding: 0;
     display: flex;
-    float: left;
-
 }
+
+.filter-data .big-filter-form input,
+.filter-data .big-filter-form select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+}
+
 
 .filter-form {
     margin: 0 0 20px 0;
@@ -464,6 +505,32 @@ form {
     display: flex;
     gap: 1rem;
 }
+
+.big-filter-form {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    gap: 0.2rem;
+}
+
+.filter-data form .inner-form-data-button button {
+    padding: 5px 8px 5px 8px;
+    border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+}
+
+.inner-form-data-button {
+    margin: 0;
+    text-align: right;
+    margin-left: auto
+}
+
+
+
+
+
+
 
 .choose-date {
     padding: 15px;
@@ -484,47 +551,95 @@ form {
     font-size: 14px;
     border: 1px solid var(--color-primary);
     outline: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius-1);
 }
 
-.inner-form-data p {
+.form-filter-data {
+    padding: 3px;
+    font-family: poppins, sans-serif;
     margin: 0;
-    padding: 0;
+    color: var(--color-dark);
+    font-size: 1rem;
+    border: 1px solid var(--color-primary);
+    outline: none;
+    border-radius: var(--border-radius-1);
 }
+
 /* ========= КОНЕЦ ФИЛЬТРА =========*/
 
 /* ==========ЗАГРУЗКА ИЗ EXCEL ========= */
 
 .input-file {
+    display: none;
     visibility: hidden;
 }
 /* ==========ИМПОРТ В EXCEL ==========*/
 .import-excel {
     float: right;
+    text-align: right;
     margin: 0;
     padding: 0px;
+    background: #111e88;
+
 }
 .import-excel form {
     margin: 0;
+    padding: 0;
 }
 
 .import-excel form button{
     float: right;
     margin: 0;
+    padding: 5px 8px 5px 8px;
 }
+
+.import-excel form button:hover{
+    float: right;
+    margin: 0;
+    padding: 5px 8px 5px 8px;
+}
+
+#export {
+    background: #11884a;
+    width: 150px;
+
+    display: flex;
+    justify-content: right;
+}
+
+#export button {
+    margin: 0;
+    padding: 5px 8px 5px 8px;
+}
+/* ==========КОНЕЦ ИМПОРТА В EXCEL ==========*/
 
 /* ========== ГРАФИКИ =========*/
 
 .charts {
+    
     display: flex;
     gap: 0.5rem;
     align-items: center;
     margin-top: 35px;
+}
 
+
+
+.chart_sales_by_week {
+    max-height: 20rem;
+    background: var(--color-white);
+    padding: var(--card-padding);
+    box-shadow: var(--box-shadow);
+    transition: all 300ms ease;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#acquisitions {
+    width: 100%; /* график растягивается на всю ширину контейнера */
 }
 
 .chart {
-
     background: var(--color-white);
     border-radius: var(--card-border-radius);
     padding: var(--card-padding);
@@ -548,8 +663,7 @@ form {
 main .recent-orders table {
     background: var(--color-white);
     width: 100%;
-    border-radius: var(--card-border-radius);
-    padding: var(--card-padding);
+    /* padding: var(--card-padding); */
     text-align: center;
     box-shadow: var(--box-shadow);
     transition: all 300ms ease;
@@ -560,8 +674,10 @@ main .recent-orders table:hover {
 }
 
 table {
+    padding: 0;
+    margin: 0;
     text-align: center;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0px;
     width: 100%;
     margin-bottom: 20px;
@@ -570,43 +686,716 @@ table {
 table th {
     text-align: center;
     font-weight: bold;
-	padding: 10px 15px;
-	background: #ededed;
+    padding: 0;
+    margin: 0;
+	/* padding: 10px 15px; */
+    background: #ededed;
+    border: 1px solid var(--color-table-separator);
  }
 
-table tr th:first-child {
-	border-radius: 8px 0 0 8px;
-}
-
-table tr th:last-child {
-	border-radius: 0 8px 8px 0;
-}
  /* границы ячеек тела таблицы */
+
 table td {
-	padding: 10px 15px;
+	/* padding: 0.5rem 0.5rem; */
+    padding: 0;
+    margin: 0;
     text-align: center;
     vertical-align: center;
-    border: none;
+    border: 1px solid var(--color-table-separator);    
 }
+
+table tr {
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--color-table-separator);
+}
+
 table tr a {
+    padding: 0;
+    margin: 0;
     text-decoration: none;
     font-weight: 600;
     color: var(--color-primary);
 }
 table tr:hover {
-	transform: scale(1.02);
+    background: #eeeeee;
     transition: transform .6s;	
 }
 
-table tr:nth-child(odd){
-	background: #ededed;
+
+/* =========== СОЗДАНИЕ ЗАЯВКИ НА ОПЛАТУ ==========*/
+
+.main-form-create-payment {
+    width: 100%;
+    text-align: center;
 }
 
-table tr td:first-child {
-	border-radius: 8px 0 0 8px;
+.main-form-create-payment form {
+    margin: 0;
+    width: 450px;
+    display: inline-block;
 }
 
-table tr td:last-child {
-	border-radius: 0 8px 8px 0;
+/* Кнопка для выбора файла */
+.main-form-create-payment label .choose-file-button{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    color: var(--color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    margin: 0;
 }
 
+.main-form-create-payment label .choose-file-button:hover{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    font-weight: 600;
+    margin: 0;
+}
+/* Конец кнопки для выбора файла */
+
+.main-form-create-payment label{
+    display: block;
+	margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.input-file-list-create {
+    font-size: 0.8rem;
+    color: #bcbcbc;
+    margin: 0;
+    padding: 0;
+}
+
+.main-form-create-payment label > span{
+    text-align: left;
+    float: left;
+	width: 45%;
+	color: var(--color-dark);
+	font-weight: bold;
+	font-size: 13px;
+	text-shadow: 1px 1px 1px #fff;
+}
+
+
+.main-form-create-payment fieldset{
+    border-radius: var(--border-radius-2);
+	-webkit-border-radius: var(--border-radius-2);
+	-moz-border-radius: var(--border-radius-2);
+	margin: 0px 0px 10px 0px;
+	border: 1px solid var(--color-primary);
+	padding: 20px;
+	background: var(--color-background);
+}
+
+
+.main-form-create-payment textarea{
+	width:250px;
+	height:50px;
+}
+
+.main-form-create-payment input[type=text],
+.main-form-create-payment input[type=date],
+.main-form-create-payment input[type=datetime],
+.main-form-create-payment input[type=number],
+.main-form-create-payment input[type=search],
+.main-form-create-payment input[type=time],
+.main-form-create-payment input[type=url],
+.main-form-create-payment input[type=email],
+.main-form-create-payment input[type=file],
+.main-form-create-payment select, 
+.main-form-create-payment textarea{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+	width:50%;
+}
+.main-form-create-payment  input[type=submit],
+.main-form-create-payment  input[type=button]{
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: #FFCBE2;
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+}
+.form-create-payment {
+    display: flex;
+    vertical-align: middle;
+    gap: 1rem;
+}
+
+.form-create-payment p {
+    white-space: nowrap;
+    padding: 0;
+
+}
+.form-control-div {
+    padding: 0;
+    margin: 0;
+}
+
+
+/* =========== КОНЕЦ СОЗДАНИЯ ЗАЯВКИ НА ОПЛАТУ ==========*/
+
+/* ========= PAYMENT DETAIL =========*/
+
+.creator-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.reduct-buttons form .custom-button {
+    margin-left: 2rem;
+}
+
+.form-buttons {
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+
+.reduct-buttons {
+    float: left;
+}
+
+/* ========== ВСПЛЫВАЮЩИЕ ФОРМЫ =========== */
+
+#popup-container {
+    z-index: 1;
+    position: absolute;
+}
+
+#popup-approve-container {
+    z-index: 1;
+    position: absolute;
+}
+
+#popup-pay-container {
+    z-index: 1;
+    position: absolute;
+}
+
+#popup-container .reject_payment_class {
+    background-color: #f2f2f2;
+    z-index: 1;
+    padding: 20px;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+#popup-pay-container .pay_payment_class {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+#popup-approve-container .approve_payment_class {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+.popup-pay-container-class {
+    max-width: 450px;
+}
+
+.popup-approve-container-class {
+    max-width: 450px;
+}
+
+/* Кнопка для выбора файла */
+.popup-pay-container-class label .choose-file-button{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    color: var(--color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    margin: 0;
+}
+
+.popup-pay-container-class label .choose-file-button:hover{
+    padding: 7px;
+    border-radius: 8px;
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    font-weight: 600;
+    margin: 0;
+}
+/* Конец кнопки для выбора файла */
+
+.popup-pay-container-class label{
+    display: block;
+	margin-bottom: 2rem;
+    gap: 2rem;
+}
+
+.popup-pay-container-class label > span{
+    float: left;
+	width: 45%;
+	color: var(--color-dark);
+	font-weight: bold;
+	font-size: 13px;
+	text-shadow: 1px 1px 1px #fff;
+}
+
+.pay_payment_class fieldset{
+    border-radius: var(--border-radius-2);
+	-webkit-border-radius: var(--border-radius-2);
+	-moz-border-radius: var(--border-radius-2);
+	margin: 0px 0px 10px 0px;
+	border: 1px solid var(--color-primary);
+	padding: 20px;
+	background: var(--color-background);
+}
+
+
+.pay_payment_class input[type=text],
+.pay_payment_class input[type=date],
+.pay_payment_class input[type=datetime],
+.pay_payment_class input[type=number],
+.pay_payment_class input[type=search],
+.pay_payment_class input[type=time],
+.pay_payment_class input[type=url],
+.pay_payment_class input[type=email],
+.pay_payment_class input[type=file],
+.pay_payment_class select, 
+.pay_payment_class textarea{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+	width:50%;
+}
+.pay_payment_class input[type=submit],
+.pay_payment_class input[type=button]{
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: #FFCBE2;
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+}
+
+#reject_payment_id {
+    margin-top: 20px;
+}
+
+#approve_payment_id {
+    margin-top: 20px;
+}
+
+#approve_payment_button_id {
+    display: inline-block;
+}
+
+#pay_payment_button_id {
+    display: inline-block;
+}
+
+#popup-icon_close {
+    float: right;
+    margin-bottom: 30px;
+}
+
+#id-form-pay_payment-add-file {
+    display: none;
+}
+
+/* ========== КОНЕЦ ВСПЛЫВАЮЩИХ ФОРМ =========== */
+
+/* ========== ОБЩАЯ СТАТИСТИКА. ТАБЛИЦА ==========*/
+
+.common-statistic-table-urgent-and-date {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    /* gap: var(--small-table-gap); */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+}
+
+.common-statistic-table-approve {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    /* gap: var(--small-table-gap); */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+
+}
+
+.action_icons {
+    display: flex;
+    gap: 1rem;
+}
+
+.action_icons form button b{
+    color: var(--color-info-dark);
+}
+
+#urgent-icon {
+    color: var(--color-danger);
+    margin: 0;
+    padding-bottom: 3px;
+}
+
+#pay-icon-button {
+    color: var(--color-success);
+}
+
+#reject-icon-button {
+    color: var(--color-danger);
+}
+
+#delete-icon-button {
+    color: var(--color-info-dark);
+}
+
+#edit-icon-button {
+    color: var(--color-info-dark);
+}
+
+.table_wrapper{
+    overflow-x: scroll;
+    position: fixed;
+
+    top: 200px;
+    left: 15%;
+    right: 0;
+    bottom: 0;
+}
+
+.table_wrapper_sales_by_week {
+    overflow-x: scroll;
+    position: fixed;
+    width: 82%;
+    top: 30rem;
+    left: 18%;
+    right: 0;
+    bottom: 0;
+}
+
+.table_wrapper table td {
+	/* padding: 0.5rem 0.5rem; */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+    border: 1px solid var(--color-table-separator);  
+}
+
+.table_wrapper table td form{
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 1rem;
+    width: auto;
+}
+
+.table_wrapper table td p{
+    padding: 0;
+    margin: 0;
+}
+
+.table_wrapper table td button{
+    background: transparent;
+}
+
+/* ========== РАБОЧАЯ СТАТИСТИКА ==========*/
+.working_table {
+    font-size: 0.8rem;
+}
+
+/* ========== КОНЕЧ РАБОЧАЯ СТАТИСТИКА ==========*/
+/* ========== ПОДСКАЗКИ ========== */
+
+
+/* ========== КОНЕЦ ПОДСКАЗКИ ========== */
+
+
+.form-paymentfile {
+    width: 100px;
+}
+
+.form-paymentfile {
+    margin: 0;
+    padding: 0;
+}
+
+/*========== ЗАГРУЗКА ФАЙЛА ОБ ОПЛАТЕ В ТАБЛИЦУ ========= */
+   
+.input_file {
+    opacity: 0;
+    display: none;
+}
+   
+#material-symbols-outlined {
+    height: 30px;
+    width: 30px;
+    display: flex;
+    border-right: 1px solid #fff;
+}
+
+.input-file-list {
+    font-size: 0.8rem;
+    color: #bcbcbc;
+    margin-bottom: 1rem;
+}
+
+/* кнопка */
+.table-button {
+    padding: 8px;
+    margin: 0;
+    border-radius: 8px;
+    border: var(--color-dark-variant) 1px solid;
+    color: var(--color-dark-variant);
+    font-weight: 600;
+}
+
+.table-button:hover {
+    border: none;
+    color: var(--color-white);
+    background: var(--color-info-dark);
+    transition: all 500ms ease;
+} 
+
+/* ========== POP UP окно о забытом файле платежки ========== */
+
+.error-popup-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 1.1rem;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    z-index: 9999;
+    width: 30%;
+    height: 30%;
+    background-color: #fff;
+    border-radius: var(--border-radius-1);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(200px);
+  }
+
+/* ========== ФОРМА РЕДАКТИРОВАНИЯ ЗАЯВКИ ========= */
+
+.main-form-create-payment form .update-form-table {
+    background: var(--color-background);
+    box-shadow: none;  
+}
+
+.features .main-form-create-payment form table th:first-child, 
+.features .main-form-create-payment form table td:first-child {
+    text-align: left;
+}
+
+.features .main-form-create-payment form table input,
+.features .main-form-create-payment form table textarea,
+.features .main-form-create-payment form table select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+    border: none;
+    width: 100%;
+}
+
+.features .main-form-create-payment form table label {
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: var(--color-dark);
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+    margin: 0;
+}
+
+/* ========== КОНЕЦ ФОРМЫ РЕДАКТИРОВАНИЯ ЗАЯВКИ ========= */
+
+/* ========== ФОРМА ПРОСМОТРА ЗАЯВКИ ========= */
+
+.main-form-create-payment .update-form-table {
+    background: var(--color-background);
+    box-shadow: none;  
+}
+
+.features .main-form-create-payment table th:first-child, 
+.features .main-form-create-payment table td:first-child {
+    text-align: left;
+}
+
+.features .main-form-create-payment table input,
+.features .main-form-create-payment table textarea,
+.features .main-form-create-payment table select{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+    border: none;
+    width: 100%;
+}
+
+.features .main-form-create-payment table label {
+	background: var(--color-background);
+	border: 1px solid var(--color-table-separator);
+	padding: 5px 15px 5px 15px;
+	color: var(--color-dark);
+	border-radius: var(--border-radius-1);
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	font-weight: bold;
+    margin: 0;
+}
+
+/* ========== КОНЕЦ ФОРМЫ ПРОСМОТРА ЗАЯВКИ ========= */
+
+/* ========== АДАПТИВ ПОД ТЕЛЕФОНЫ ========= */
+@media (max-width: 768px) {
+    aside {
+        display: none;
+        width: 0%;
+    }
+    aside .sidebar {
+        display: none;
+        
+    }
+    .features {
+        float: left;
+        text-align: left;
+        width: 100%;
+    }
+    .main-form-create-payment {
+        width: 100%;
+        text-align: center;
+    }
+
+    .main-form-create-payment label > span{
+        text-align: left;
+        float: left;
+        width: 45%;
+        color: var(--color-dark);
+        font-weight: bold;
+        font-size: 13px;
+        text-shadow: 1px 1px 1px #fff;
+    }
+    
+}
+
+@media (max-width: 480px) {
+    .main-form-create-payment form {
+        margin: 0;
+        width: 90%;
+    }
+    .main-form-create-payment fieldset{
+        width: 100%;
+        border-radius: var(--border-radius-2);
+        -webkit-border-radius: var(--border-radius-2);
+        -moz-border-radius: var(--border-radius-2);
+        margin: 0px 0px 10px 0px;
+        border: 1px solid var(--color-primary);
+        padding: 20px;
+        background: var(--color-background);
+    }
+
+    .main-form-create-payment fieldset{
+        width: 100%;
+        border-radius: var(--border-radius-2);
+        -webkit-border-radius: var(--border-radius-2);
+        -moz-border-radius: var(--border-radius-2);
+        margin: 0px 0px 10px 0px;
+        border: 1px solid var(--color-primary);
+        padding: 20px;
+        background: var(--color-background);
+    }
+
+    .main-form-create-payment label{
+        width: 100%;
+        display: block;
+        margin-bottom: 1rem;
+        gap: 2rem;
+    }
+
+    .main-form-create-payment label > span{
+        text-align: left;
+        float: left;
+        width: 87%;
+        color: var(--color-dark);
+        font-weight: bold;
+        font-size: 13px;
+        text-shadow: 1px 1px 1px #fff;
+    }
+    .main-form-create-payment input[type=text],
+    .main-form-create-payment input[type=date],
+    .main-form-create-payment input[type=datetime],
+    .main-form-create-payment input[type=number],
+    .main-form-create-payment input[type=search],
+    .main-form-create-payment input[type=time],
+    .main-form-create-payment input[type=url],
+    .main-form-create-payment input[type=email],
+    .main-form-create-payment input[type=file],
+    .main-form-create-payment select, 
+    .main-form-create-payment textarea{
+	border-radius: var(--border-radius-1);
+	-webkit-border-radius: var(--border-radius-1);
+	-moz-border-radius: var(--border-radius-1);
+	border: 1px solid var(--color-table-separator);
+	outline: none;
+	color: var(--color-dark);
+	padding: 5px 8px 5px 8px;
+	background: var(--color-background);
+	width:100%;
+}
+}
+
+
+/* ========== КОНЕЦ АДАПТИВА ПОД ТЕЛЕФОНЫ ========= */
