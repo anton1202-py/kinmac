@@ -634,7 +634,6 @@ def sales_report_statistic():
                         date_from=data['date_from'],
                         date_to=data['date_to'],
                         rrd_id=data['rrd_id']).exists():
-                print(f"обновил {data['realizationreport_id']}")
                 SalesReportOnSales.objects.filter(
                     realizationreport_id=data['realizationreport_id'],
                     date_from=data['date_from'],
@@ -703,7 +702,6 @@ def sales_report_statistic():
                         report_type=data['report_type']
                 )
             else:
-                print(f"ДОБАВИЛ НОВЫЙ {data['realizationreport_id']}")
                 SalesReportOnSales(
                     realizationreport_id=data['realizationreport_id'],
                     date_from=data['date_from'],
