@@ -1,6 +1,9 @@
+import os
+
 from celery import Celery
 from celery.schedules import crontab
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kinmac.settings')
 app = Celery('celery_tasks',
              include=['celery_tasks.tasks'])
 app.config_from_object('celery_tasks.celeryconfig')
