@@ -26,6 +26,7 @@ def database_home(request):
     context = {
         'data': data,
     }
+    
     # sales_report_statistic()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
