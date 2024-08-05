@@ -261,6 +261,7 @@ def sales_report(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=10)
+    
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
         date.today()])).order_by('realizationreport_id')
@@ -273,6 +274,7 @@ def sales_report(request):
         datestart = request.POST.get("datestart")
         datefinish = request.POST.get("datefinish")
         article_filter = request.POST.get("article_filter")
+        report_number_filter=request.POST.get("report_number_filter")
         if datestart:
             data = SalesReportOnSales.objects.filter(
                 Q(date_from__gt=datestart)).order_by('rrd_id')
@@ -282,6 +284,9 @@ def sales_report(request):
         if article_filter:
             data = data.filter(
                 Q(sa_name=article_filter)).order_by('rrd_id')
+        if report_number_filter:
+            data = data.filter(
+                Q(realizationreport_id=report_number_filter)).order_by('rrd_id')
     paginator = Paginator(data, 100)
     page_number = request.GET.get('page')
     try:

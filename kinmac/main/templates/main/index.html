@@ -92,6 +92,12 @@
             <h3>Отчет о продажах</h3>
         </a>
 
+        {% url 'check_report' as url_check_report %}
+        <a href="{{ url_check_report }}" {% if request.path == url_check_report %}class="active"{% endif %}>
+            <span class="material-symbols-outlined">lab_profile</span>
+            <h3>Сверка отчетов</h3>
+        </a>
+
         {% url 'weekly_sales' as url_weekly_sales %}
         <a href="{{ url_weekly_sales }}" {% if request.path == url_weekly_sales %}class="active"{% endif %}>
             <span class="material-symbols-sharp">pan_tool_alt</span>

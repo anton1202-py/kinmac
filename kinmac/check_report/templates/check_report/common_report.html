@@ -1,0 +1,154 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block content %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
+
+        // выбираем на странице все элементы типа textarea и input
+        document.querySelectorAll('textarea, input').forEach(function(e) {
+            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
+            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
+            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
+            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
+            e.addEventListener('input', function() {
+                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
+                window.sessionStorage.setItem(e.name, e.value);
+            })
+        })
+    
+    }); 
+</script>
+    <div class="features">
+         <div class="top-befor-header">
+            <h1>{{ page_name }}</h1>
+        </div>
+        <div class='filter-data' style="display: flex;">
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <span>От</span>
+                    <input type="date"  name="datestart" class="big-filter-form" id="datestart">
+                </div>
+                <div class="inner-form-data">
+                    <span>До</span>
+                    <input type="date"  name="datefinish" class="big-filter-form" id="datefinish">
+                </div>
+                <div class="inner-form-data">
+                    <span>Артикул для фильтра</span>
+                    <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
+                </div>
+                <div class="inner-form-data">
+                    <span>Номер отчета</span>
+                    <input type="text"  name="report_number_filter" class="big-filter-form" id="report_number_filter">
+                </div>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+            <div class="inner-form-data">
+                <form method="POST" id="uploadForm" enctype="multipart/form-data" class="big-filter-form">
+                    {% csrf_token %}
+                    <div class="inner-form-data">
+                        <label for="import_data" title="Загрузить группы из Excel">
+                            <span class="material-symbols-outlined">
+                                download
+                            </span>
+                        </label>
+                        <input type="file" id="import_data" name="import_file" class="input-file" style="margin-top: 0px;">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table_wrapper">
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                <tr>
+                    <th>Номер отчета</th>
+                    <th>Начала периода</th>
+                    <th>Конца периода</th>
+                    <th>Дата формирования отчёта</th>
+
+                    <th>Продажи минус возвраты</th>
+                    <th>Сумма продаж</th>
+                    <th>Сумма возвратов</th>
+
+                    <th>Стоимость логистики</th>
+
+                    <th>К перечислению</th>
+                    <th>К перечислению (проверка)</th>
+                    <th>К перечислению продажи</th>
+                    <th>К перечислению возврат</th>
+
+                    <th>Другие виды штрафов</th>
+                    <th>Общая сумма штрафов</th>
+                    <th>Стоимость хранения</th>
+                    <th>Стоимость платной приемки</th>
+                    <th>Прочие удержания/выплаты</th>
+                    <th>Итого к оплате</th>
+
+                    <th>Сумма комиссий (проверка)</th>
+                    <th>Отчет сопоставлен</th>
+                    
+                </tr>
+                {% for el in page_obj %}   
+                <tr style="{% if el.check_fact %}background-color: #e3fcd9;{% endif %}">
+                    <td>{{ el.realizationreport_id }}</td>
+                    <td>{{ el.date_from }}</td>
+                    <td>{{ el.date_to }}</td>
+                    <td>{{ el.create_dt }}</td>
+
+                    <td><b>{{ el.retail_without_return }}</b></td>
+                    <td>{{ el.retail_amount }}</td>
+                    <td>{{ el.return_amount }}</td>
+    
+                    <td><b>{{ el.delivery_rub }}</b></td>
+
+                    <td><b>{{ el.ppvz_for_pay }}</b></td>
+                    <td><b>{{ el.check_ppvz_for_pay }}</b></td>
+                    <td>{{ el.ppvz_retail }}</td>
+                    <td>{{ el.ppvz_return }}</td>
+
+                    <td>{{ el.penalty }}</td>
+                    <td>{{ el.common_penalty }}</td>
+                    <td>{{ el.storage_fee }}</td>
+                    <td>{{ el.acceptance_goods }}</td>
+                    <td>{{ el.penalty }}</td>
+
+                    <td>{{ el.total_paid }}</td>
+
+                    <td>{{ el.check_comission_summ }}</td>
+                    <td>{{ el.check_fact }}</td>                    
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; первая</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+                    {% endif %}
+         
+                    <span class="current">
+                        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+                    </span>
+         
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div> 
+    <script>
+        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ФАЙЛА ========= //
+        document.getElementById('import_data').addEventListener('change', function() {
+            document.getElementById('uploadForm').submit();
+        });
+
+    </script>  
+{% endblock %}

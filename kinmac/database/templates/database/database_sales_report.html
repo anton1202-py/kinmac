@@ -30,15 +30,19 @@
                 {% csrf_token %}
                 <div class="inner-form-data">
                     <span>От</span>
-                    <input type="date"  name="datestart" class="big-filter-form" required="" id="datestart">
+                    <input type="date"  name="datestart" class="big-filter-form" id="datestart">
                 </div>
                 <div class="inner-form-data">
                     <span>До</span>
-                    <input type="date"  name="datefinish" class="big-filter-form" required="" id="datefinish">
+                    <input type="date"  name="datefinish" class="big-filter-form" id="datefinish">
                 </div>
                 <div class="inner-form-data">
                     <span>Артикул для фильтра</span>
                     <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
+                </div>
+                <div class="inner-form-data">
+                    <span>Номер отчета</span>
+                    <input type="text"  name="report_number_filter" class="big-filter-form" id="report_number_filter">
                 </div>
                 <div class="inner-form-data">
                     <br>
