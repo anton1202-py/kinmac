@@ -6,8 +6,6 @@ from .models import BagImage
 
 def bag_photo_view(request):
     """Отображает страницу с фотографиями рюкзаков"""
-    if str(request.user) == 'AnonymousUser':
-        return redirect('login')
     page_name = 'Фото рюкзаков'
     if request.method == 'POST':
         files = request.FILES.getlist('files')  # Получаем список загруженных файлов
