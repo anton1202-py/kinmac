@@ -1,3 +1,11 @@
-from django.test import TestCase
+from zipfile import ZipFile
 
-# Create your tests here.
+import pandas as pd
+
+with ZipFile("kinmac\check_report\Детализация_еженедельного_отчета_№269464144.zip", "r") as myzip:
+    for item in myzip.namelist():
+        content = myzip.read(item)
+
+        excel_data_common = pd.read_excel(content)
+        column_list = excel_data_common.columns.tolist()
+        print(column_list)

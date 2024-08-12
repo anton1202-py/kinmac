@@ -1,0 +1,62 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block content %}
+
+    <div class="features">
+         <div class="top-befor-header">
+            <h1>{{ page_name }}</h1>
+        </div>
+        <h3>Загрузите изображения</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="files" multiple>
+            <button type="submit">Загрузить</button>
+        </form>
+
+        <h2>Загруженные изображения</h2>
+        <div class="image-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            {% for image in images %}
+                <img src="{{ image.image.url }}" class="thumbnail" alt="Image {{ image.id }}" style="max-width: 200px; max-height: 200px;">
+            {% empty %}
+                <p>Нет загруженных изображений.</p>
+            {% endfor %}
+        </div>
+
+        <div id="modal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modal-img">
+        </div>
+    </div> 
+    <script>
+        // Получаем элементы модального окна и изображения
+        var modal = document.getElementById("modal");
+        var modalImg = document.getElementById("modal-img");
+        var closeBtn = document.getElementsByClassName("close")[0];
+    
+        // Получаем все миниатюры изображений
+        var thumbnails = document.querySelectorAll(".thumbnail");
+    
+        thumbnails.forEach(thumbnail => {
+            thumbnail.onclick = function() {
+                modal.style.display = "block"; // Показываем модальное окно
+                modalImg.src = this.src; // Устанавливаем источник изображения в модальном окне
+            }
+        });
+    
+        // Закрытие модального окна при клике на кнопку закрытия
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+    
+        // Закрытие модального окна при клике вне изображения
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+    
+{% endblock %}

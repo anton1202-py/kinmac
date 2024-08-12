@@ -1,0 +1,264 @@
+{% extends 'main/index.html' %}
+
+{% load dict_filter %}
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block content %}
+
+    <div class="features">
+         <div class="top-befor-header">
+            <h1>{{ page_name }}</h1>
+            <style>
+                .green {
+                    background-color: #ddfff4;
+                }
+                .yellow {
+                    background-color: rgb(255, 255, 212);
+                }
+                .red {
+                    background-color: rgb(255, 193, 193);
+                }
+            </style>
+        </div>
+        <div class='filter-data' style="display: flex;">
+            <form action="" class="big-filter-form" method="POST" id="ytr">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <span>От</span>
+                    <input type="date"  name="datestart" class="big-filter-form" id="datestart">
+                </div>
+                <div class="inner-form-data">
+                    <span>До</span>
+                    <input type="date"  name="datefinish" class="big-filter-form" id="datefinish">
+                </div>
+                <div class="inner-form-data">
+                    <span>Артикул для фильтра</span>
+                    <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
+                </div>
+                <div class="inner-form-data">
+                    <span>Номер отчета</span>
+                    <input type="text"  name="report_number_filter" class="big-filter-form" id="report_number_filter">
+                </div>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
+                </div>
+            </form>
+            <div class="inner-form-data">
+                <form method="POST" id="uploadForm" enctype="multipart/form-data" class="big-filter-form">
+                    {% csrf_token %}
+                    <div class="inner-form-data">
+                        <label for="import_data" title="Загрузить группы из Excel">
+                            <span class="material-symbols-outlined">
+                                download
+                            </span>
+                        </label>
+                        <input type="file" id="import_data" name="import_file" class="input-file" style="margin-top: 0px;">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table_wrapper">
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                
+                <tr>
+                    <th rowspan="2">Номер отчета</th>
+                    <th rowspan="2">Начало</th>
+                    <th rowspan="2">Конец</th>
+                    <th rowspan="2">Формирование</th>
+                    <th colspan="6" class="excel-data">Данные из Excel</th>
+                    <th rowspan="2"></th>
+                    <th colspan="14" class="api-data">Данные из API</th>
+                    <th rowspan="2">Перезагрузить отчет API</th>
+                    <th rowspan="2">Загрузить из ZIP</th>
+                </tr>
+                </tr>
+                    <th class="excel-data">Продажи</th>
+                    <th class="excel-data">К перечислению</th>
+                    <th class="excel-data">Логистика</th>
+                    
+                    <th class="excel-data">Хранение</th>
+                    <th class="excel-data">Прочие удержания</th>
+                    <th class="excel-data">Итого к оплате</th>
+                    
+                    <th class="api-data">Продажи</th>
+                    <th class="api-data">%</th>
+                    <th class="api-data">К перечислению</th>
+                    <th class="api-data">%</th>
+                    <th class="api-data">К перечислению (контроль)</th>
+                    <th class="api-data">%</th>
+                    <th class="api-data">Логистика</th>
+                    <th class="api-data">%</th>
+                    <th class="api-data">Хранение</th>
+                    <th class="api-data">%</th>
+                    <th class="api-data">Прочие удержания</th>
+                    <th class="api-data">%</th>
+                    <th class="api-data">Итого к оплате</th>
+                    <th class="api-data">%</th>
+                </tr>
+                {% for el in excel_data %}   
+                <tr>
+                    <td>{{ el.realizationreport_id }}</td>
+                    <td>{{ el.date_from|date:'Y-m-d' }}</td>
+                    <td>{{ el.date_to|date:'Y-m-d' }}</td>
+                    <td>{{ el.create_dt }}</td>
+
+                    <td class="excel-data">{{ el.retail_amount }}</td>
+                    <td class="excel-data">{{ el.ppvz_for_pay }}</td>  
+                    <td class="excel-data">{{ el.delivery_rub }}</td>
+                   
+                    <td class="excel-data">{{ el.storage_fee }}</td>
+                    <td class="excel-data">{{ el.deduction }}</td>
+                    <td class="excel-data">{{ el.total_paid }}</td>
+
+                    <td></td>
+                    {% if db_data_dict|get_item:el.realizationreport_id %}
+                        {% with data_db=db_data_dict|get_item:el.realizationreport_id %}
+                        <td class="api-data">{{ data_db.0 }}</td>
+                        {% with retail_sale=data_db.0 %}
+                        <td>{{ el.retail_amount|divide:retail_sale|multiplicity:100|round_number_two }}</td>
+                        {% endwith %}
+                        <td class="api-data">{{ data_db.1 }}</td>
+                        {% with for_pay=data_db.1 %}
+                        <td>{{ el.ppvz_for_pay|divide:for_pay|multiplicity:100|round_number_two }}</td>
+                        {% endwith %}
+                        <td class="api-data">{{ data_db.2 }}</td>
+                        {% with for_pay=data_db.2 %}
+                        <td>{{ el.ppvz_for_pay|divide:for_pay|multiplicity:100|round_number_two }}</td>
+                        {% endwith %}
+                        <td class="api-data">{{ data_db.3 }}</td>
+                        {% with logistic_pay=data_db.3 %}
+                        <td>{{ el.delivery_rub|divide:logistic_pay|multiplicity:100|round_number_two }}</td>
+                        {% endwith %}
+                        <td class="api-data">{{ data_db.4 }}</td>
+                        {% with for_pay=data_db.1 %}
+                        <td>{{ el.ppvz_for_pay|divide:for_pay|multiplicity:100|round_number_two }}</td>
+                        {% endwith %}
+                        <td class="api-data">{{ data_db.5 }}</td>
+                        {% with deduction=data_db.5 %}
+                            {% if deduction == 0 %}
+                                {% if deduction == el.deduction %}
+                                    <td>100</td>
+                                {% else %}
+                                    <td>0</td>
+                                {% endif %}
+                            {% else %}
+                                <td>{{ el.deduction|divide:deduction|multiplicity:100|round_number_two }}</td>
+                            {% endif %}
+                        {% endwith %}
+                        <td class="api-data">{{ data_db.6 }}</td>
+                        {% with total_paid=data_db.6 %}
+                            <td>{{ el.total_paid|divide:total_paid|multiplicity:100|round_number_two }}</td>
+                        {% endwith %}
+                        {% endwith %}
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                    <td>
+                        <form action="" class="big-filter-form" method="POST" id="ytr">
+                            {% csrf_token %}
+                            <input type="hidden" name="report_number" value="{{ el.realizationreport_id }}">
+                            <input type="hidden" name="report_date_from" value="{{ el.date_from|date:'Y-m-d' }}">
+                            <input type="hidden" name="report_date_to" value="{{ el.date_to|date:'Y-m-d' }}">
+                            <input type="Submit" id="filter" name="reload_report" value="Перезагрузить"/>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST" id="uploadZip" enctype="multipart/form-data" class="big-filter-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="report_number" value="{{ el.realizationreport_id }}">
+                            <input type="hidden" name="report_date_from" value="{{ el.date_from|date:'Y-m-d' }}">
+                            <input type="hidden" name="report_date_to" value="{{ el.date_to|date:'Y-m-d' }}">
+                            
+                            
+                            <label for="reload_zip" title="Загрузить из ZIP">
+                                Загрузить из ZIP
+                            </label>
+                            <input type="file" id="reload_zip" name="reload_zip" class="input-file" style="margin-top: 0px;">
+
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; первая</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+                    {% endif %}
+         
+                    <span class="current">
+                        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+                    </span>
+         
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div> 
+    <script>
+        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ФАЙЛА ========= //
+        document.getElementById('import_data').addEventListener('change', function() {
+            document.getElementById('uploadForm').submit();
+        });
+
+        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ZIP ========= //
+        document.getElementById('reload_zip').addEventListener('change', function() {
+            document.getElementById('uploadZip').submit();
+        });
+
+        // ========== ЗАЛИВАЕТ ЯЧЕЙКИ В НУЖНЫЙ ЦВЕТ В ЗАВИСИМОСТИ ОТ ЗНАЧЕНИЯ ========= //
+        const rows = document.querySelectorAll('table[name="mytable"] tr');
+
+        // Получаем индексы столбцов с заголовками %
+        const percentColumns = [];
+        const headerCells = rows[1].cells;
+
+        for (let j = 0; j < headerCells.length; j++) {
+
+            if (headerCells[j].textContent.trim() === '%') {
+                console.log(headerCells[j].textContent.trim(), j+5)
+                percentColumns.push(j+5);
+            }
+        }
+
+        // Проходим по каждой строке, начиная со второй (пропуская заголовок)
+        for (let i = 2; i < rows.length; i++) {
+            const cells = rows[i].cells;
+        
+            // Проверяем только ячейки в столбцах с процентами
+            for (const colIndex of percentColumns) {
+                const percentValue = parseFloat(cells[colIndex].textContent.replace(',', '.'));
+            
+                if (!isNaN(percentValue)) {
+                    // Условие для изменения цвета ячейки
+                    if (percentValue === 100) {
+                        cells[colIndex].classList.add('green'); // Заливаем в зеленый
+                    } else if (Math.abs(percentValue - 100) < 1) {
+                        cells[colIndex].classList.add('yellow'); // Заливаем в желтый
+                    } else {
+                        cells[colIndex].classList.add('red'); // Заливаем в красный
+                    }
+                }
+            }
+        }
+    </script>  
+{% endblock %}

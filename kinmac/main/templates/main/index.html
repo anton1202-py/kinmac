@@ -98,6 +98,12 @@
             <h3>Сверка отчетов</h3>
         </a>
 
+        {% url 'compair_report' as url_compair_report %}
+        <a href="{{ url_compair_report }}" {% if request.path == url_compair_report %}class="active"{% endif %}>
+            <span class="material-symbols-outlined">lab_profile</span>
+            <h3>Сведение отчетов</h3>
+        </a>
+
         {% url 'weekly_sales' as url_weekly_sales %}
         <a href="{{ url_weekly_sales }}" {% if request.path == url_weekly_sales %}class="active"{% endif %}>
             <span class="material-symbols-sharp">pan_tool_alt</span>
@@ -119,6 +125,14 @@
         <a href="{{ url_working_statistic }}" {% if request.path == url_working_statistic %}class="active"{% endif %}>
             <span class="material-symbols-sharp">leaderboard</span>
             <h3>Рабочая талица</h3>
+        </a>
+
+        {% url 'upload_image' as url_upload_image %}
+        <a href="{{ url_upload_image }}" {% if request.path == url_upload_image %}class="active"{% endif %}>
+            <span class="material-symbols-outlined">
+                local_mall
+                </span>
+            <h3>Фото сумок</h3>
         </a>
         {% endif %}
         </div>

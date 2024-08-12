@@ -1,31 +1,15 @@
 {% extends 'main/index.html' %}
 
 
-{% block title %}Отчет о продажах по реализации{% endblock %}
+{% block title %}{{ page_name }}{% endblock %}
 
 {% block content %}
-<script>
-    document.addEventListener("DOMContentLoaded", function() { // событие загрузки страницы
 
-        // выбираем на странице все элементы типа textarea и input
-        document.querySelectorAll('textarea, input').forEach(function(e) {
-            // если данные значения уже записаны в sessionStorage, то вставляем их в поля формы
-            // путём этого мы как раз берём данные из памяти браузера, если страница была случайно перезагружена
-            if(e.value === '') e.value = window.sessionStorage.getItem(e.name, e.value);
-            // на событие ввода данных (включая вставку с помощью мыши) вешаем обработчик
-            e.addEventListener('input', function() {
-                // и записываем в sessionStorage данные, в качестве имени используя атрибут name поля элемента ввода
-                window.sessionStorage.setItem(e.name, e.value);
-            })
-        })
-    
-    }); 
-</script>
     <div class="features">
          <div class="top-befor-header">
-            <h1>Отчет о продажах по реализации</h1>
+            <h1>{{ page_name }}</h1>
         </div>
-        <div class='filter-data'>
+        <!-- <div class='filter-data'>
             <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
                 <div class="inner-form-data">
@@ -49,7 +33,7 @@
                     <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
                 </div>
             </form>
-        </div>
+        </div> -->
         <div class='import-excel'>
             <br>
             {#<form action="" id="export" name="export_xls" method="GET">#}
@@ -63,9 +47,9 @@
             <table name="mytable" class="sortable" style="white-space: nowrap">
                 <tr>
                     <th>Номер отчета</th>
-                    <th>Дата начала отчётного периода</th>
-                    <th>Дата конца отчётного периода</th>
-                    <th>Дата формирования отчёта</th>
+                    <th>Начала периода</th>
+                    <th>Конец периода</th>
+                    <th>Сформирован</th>
                     <th>Валюта отчёта</th>
                     <th>Договор</th>
                     <th>Номер строки</th>
@@ -124,7 +108,7 @@
                     <th>Код маркировки</th>
                     <th>Уникальный идентификатор заказа</th>
                 </tr>
-                {% for el in page_obj %}   
+                {% for el in sales_report %}   
                 <tr>
                     <td>{{ el.realizationreport_id }}</td>
                     <td>{{ el.date_from|date:'Y-m-d' }}</td>
@@ -190,23 +174,6 @@
                 </tr>
                 {% endfor %}
             </table>
-            <div class="pagination">
-                <span class="step-links">
-                    {% if page_obj.has_previous %}
-                        <a href="?page=1">&laquo; первая</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
-                    {% endif %}
-         
-                    <span class="current">
-                        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
-                    </span>
-         
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">следующая</a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
-                    {% endif %}
-                </span>
-            </div>
         </div>
     </div>    
 {% endblock %}

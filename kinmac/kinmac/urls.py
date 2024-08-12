@@ -9,5 +9,9 @@ urlpatterns = [
     path('database/', include('database.urls')),
     path('payment/', include('payment.urls')),
     path('check_report/', include('check_report.urls')),
+    path('bag_photo/', include('bag_photo.urls')),
 
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] 
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

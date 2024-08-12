@@ -18,7 +18,7 @@ def get_report_detail_by_period(header, date_from, date_to):
     Если нет данных за указанный период, метод вернет null.
     Технический перерыв в работе метода: каждый понедельник с 3:00 до 16:00.
     """
-    time.sleep(61)
+    # time.sleep(61)
     url = f'https://statistics-api.wildberries.ru/api/v5/supplier/reportDetailByPeriod?dateFrom={date_from}&dateTo={date_to}'
     response = requests.request("GET", url, headers=header)
     return response

@@ -107,3 +107,67 @@ class CommonSalesReportData(models.Model):
     class Meta:
         verbose_name = 'Сверка еженедельных отчетов'
         verbose_name_plural = 'Сверка еженедельных отчетов'
+
+
+class ExcelReportData(models.Model):
+    """Данных отчета их Excel файла"""
+    realizationreport_id = models.BigIntegerField(
+        verbose_name='Номер отчета',
+        null=True,
+        blank=True,
+    )
+    ur_lico = models.CharField(
+        verbose_name='Юридическое лицо',
+        max_length=300,
+        blank=True,
+        null=True,
+    )
+    date_from = models.DateTimeField(
+        verbose_name='Дата начала отчётного периода',
+        null=True,
+        blank=True,
+    )
+    date_to	= models.DateTimeField(
+        verbose_name='Дата конца отчётного периода',
+        null=True,
+        blank=True,
+    )
+    create_dt = models.DateTimeField(
+        verbose_name='Дата формирования отчёта',
+        null=True,
+        blank=True,
+    )
+    retail_amount = models.FloatField(
+        verbose_name='Сумма продаж',
+        null=True,
+        blank=True,
+    )
+    ppvz_for_pay = models.FloatField(
+        verbose_name='К перечислению',
+        null=True,
+        blank=True,
+    )
+    delivery_rub = models.FloatField(
+        verbose_name='Стоимость логистики',
+        null=True,
+        blank=True,
+    )
+    storage_fee = models.FloatField(
+        verbose_name='Стоимость хранения',
+        null=True,
+        blank=True,
+    )
+    deduction = models.FloatField(
+        verbose_name='Прочие удержания/выплаты',
+        null=True,
+        blank=True,
+    )
+    total_paid = models.FloatField(
+        verbose_name='Итого к оплате',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Данных отчета их Excel файла'
+        verbose_name_plural = 'Данных отчета их Excel файла'

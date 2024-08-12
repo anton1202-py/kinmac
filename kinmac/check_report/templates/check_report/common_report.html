@@ -48,6 +48,10 @@
                     <br>
                     <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
                 </div>
+                <div class="inner-form-data">
+                    <br>
+                    <input type="Submit" id="filter" name="reconciliation" value="Свести отчеты" class="custom-button-change"/>
+                </div>
             </form>
             <div class="inner-form-data">
                 <form method="POST" id="uploadForm" enctype="multipart/form-data" class="big-filter-form">
@@ -112,7 +116,7 @@
                     <td>{{ el.ppvz_retail }}</td>
                     <td>{{ el.ppvz_return }}</td>
 
-                    <td>{{ el.penalty }}</td>
+                    <td>{{ el.deduction }}</td>
                     <td>{{ el.common_penalty }}</td>
                     <td>{{ el.storage_fee }}</td>
                     <td>{{ el.acceptance_goods }}</td>

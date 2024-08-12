@@ -10,6 +10,7 @@ import requests
 import telegram
 from api_requests.wb_requests import get_report_detail_by_period
 from celery_tasks.celery import app
+from check_report.supplyment import write_sales_report_data_to_database
 from database.models import SalesReportOnSales
 from dotenv import load_dotenv
 from psycopg2 import Error
@@ -32,10 +33,10 @@ def error_message(function_name: str, function, error_text: str) -> str:
     error_text - текст ошибки.
     """
     tb_str = traceback.format_exc()
-    message_error = (f'Ошибка в функции: <b>{function_name}</b>\n'
-                     f'<b>Функция выполняет</b>: {function.__doc__}\n'
-                     f'<b>Ошибка</b>\n: {error_text}\n\n'
-                     f'<b>Техническая информация</b>:\n {tb_str}')
+    message_error = (f'Ошибка в функции: {function_name}\n'
+                     f'Функция выполняет: {function.__doc__}\n'
+                     f'Ошибка\n: {error_text}\n\n'
+                     f'Техническая информация:\n {tb_str}')
     return message_error
 
 @app.task
@@ -481,51 +482,52 @@ def delivery_statistic():
         response_delivery = requests.get(url_delivery, headers=APIKEY)
         data_deliveries = json.loads(response_delivery.text)
         common_data_deliveries = []
-        for i in data_deliveries:
-            check_data_deliveries = []
-            check_data_deliveries.append(i['incomeId'])
-            check_data_deliveries.append(i['number'])
-            check_data_deliveries.append(i['date'])
-            check_data_deliveries.append(i['lastChangeDate'])
-            check_data_deliveries.append(i['supplierArticle'])
-            check_data_deliveries.append(i['techSize'])
-            check_data_deliveries.append(i['barcode'])
-            check_data_deliveries.append(i['quantity'])
-            check_data_deliveries.append(i['totalPrice'])
-            check_data_deliveries.append(i['dateClose'])
-            check_data_deliveries.append(i['warehouseName'])
-            check_data_deliveries.append(i['nmId'])
-            check_data_deliveries.append(i['status'])
-            common_data_deliveries.append(check_data_deliveries)
-
-        # Подключение к существующей базе данных
-        connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
-                                      dbname=os.getenv('DB_NAME'),
-                                      password=os.getenv('POSTGRES_PASSWORD'),
-                                      host=os.getenv('DB_HOST'),
-                                      port=os.getenv('DB_PORT'))
-        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # Курсор для выполнения операций с базой данных
-        cursor = connection.cursor()
-        cursor.executemany(
-            '''INSERT INTO database_deliveries (income_id,
-                number,
-                delivery_date,
-                last_change_date,
-                supplier_article,
-                tech_size,
-                barcode,
-                quantity,
-                total_price,
-                date_close,
-                warehouse_name,
-                nmid,
-                status) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
-            common_data_deliveries)
-        if connection:
-            cursor.close()
-            connection.close()
-            print("Соединение с PostgreSQL закрыто")
+        if data_deliveries:
+            for i in data_deliveries:
+                check_data_deliveries = []
+                check_data_deliveries.append(i['incomeId'])
+                check_data_deliveries.append(i['number'])
+                check_data_deliveries.append(i['date'])
+                check_data_deliveries.append(i['lastChangeDate'])
+                check_data_deliveries.append(i['supplierArticle'])
+                check_data_deliveries.append(i['techSize'])
+                check_data_deliveries.append(i['barcode'])
+                check_data_deliveries.append(i['quantity'])
+                check_data_deliveries.append(i['totalPrice'])
+                check_data_deliveries.append(i['dateClose'])
+                check_data_deliveries.append(i['warehouseName'])
+                check_data_deliveries.append(i['nmId'])
+                check_data_deliveries.append(i['status'])
+                common_data_deliveries.append(check_data_deliveries)
+    
+            # Подключение к существующей базе данных
+            connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
+                                          dbname=os.getenv('DB_NAME'),
+                                          password=os.getenv('POSTGRES_PASSWORD'),
+                                          host=os.getenv('DB_HOST'),
+                                          port=os.getenv('DB_PORT'))
+            connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            # Курсор для выполнения операций с базой данных
+            cursor = connection.cursor()
+            cursor.executemany(
+                '''INSERT INTO database_deliveries (income_id,
+                    number,
+                    delivery_date,
+                    last_change_date,
+                    supplier_article,
+                    tech_size,
+                    barcode,
+                    quantity,
+                    total_price,
+                    date_close,
+                    warehouse_name,
+                    nmid,
+                    status) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''',
+                common_data_deliveries)
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
         message_text = error_message('delivery_statistic', delivery_statistic, e)
@@ -629,146 +631,7 @@ def sales_report_statistic():
     common_data = get_report_detail_by_period(wb_headers, start_date, finish_date)
     if common_data:
         for data in common_data:
-            if SalesReportOnSales.objects.filter(
-                        realizationreport_id=data['realizationreport_id'],
-                        date_from=data['date_from'],
-                        date_to=data['date_to'],
-                        rrd_id=data['rrd_id']).exists():
-                SalesReportOnSales.objects.filter(
-                    realizationreport_id=data['realizationreport_id'],
-                    date_from=data['date_from'],
-                    date_to=data['date_to'],
-                    rrd_id=data['rrd_id']).update(
-                        create_dt=data['create_dt'],
-                        currency_name=data['currency_name'],
-                        suppliercontract_code=data['suppliercontract_code'],
-                        gi_id=data['gi_id'],
-                        subject_name=data['subject_name'],
-                        nm_id=data['nm_id'],
-                        brand_name=data['brand_name'],
-                        sa_name=data['sa_name'],
-                        ts_name=data['ts_name'],
-                        barcode=data['barcode'],
-                        doc_type_name=data['doc_type_name'],
-                        quantity=data['quantity'],
-                        retail_price=data['retail_price'],
-                        retail_amount=data['retail_amount'],
-                        sale_percent=data['sale_percent'],
-                        commission_percent=data['commission_percent'],
-                        office_name=data['office_name'],
-                        supplier_oper_name=data['supplier_oper_name'],
-                        order_dt=data['order_dt'],
-                        sale_dt=data['sale_dt'],
-                        rr_dt=data['rr_dt'],
-                        shk_id=data['shk_id'],
-                        retail_price_withdisc_rub=data['retail_price_withdisc_rub'],
-                        delivery_amount=data['delivery_amount'],
-                        return_amount=data['return_amount'],
-                        delivery_rub=data['delivery_rub'],
-                        gi_box_type_name=data['gi_box_type_name'],
-                        product_discount_for_report=data['product_discount_for_report'],
-                        supplier_promo=data['supplier_promo'],
-                        rid=data['rid'],
-                        ppvz_spp_prc=data['ppvz_spp_prc'],
-                        ppvz_kvw_prc_base=data['ppvz_kvw_prc_base'],
-                        ppvz_kvw_prc=data['ppvz_kvw_prc'],
-                        sup_rating_prc_up=data['sup_rating_prc_up'],
-                        is_kgvp_v2=data['is_kgvp_v2'],
-                        ppvz_sales_commission=data['ppvz_sales_commission'],
-                        ppvz_for_pay=data['ppvz_for_pay'],
-                        ppvz_reward=data['ppvz_reward'],
-                        acquiring_fee=data['acquiring_fee'],
-                        acquiring_bank=data['acquiring_bank'],
-                        ppvz_vw=data['ppvz_vw'],
-                        ppvz_vw_nds=data['ppvz_vw_nds'],
-                        ppvz_office_id=data['ppvz_office_id'],
-                        ppvz_office_name=data['ppvz_office_name'],
-                        ppvz_supplier_id=data['ppvz_supplier_id'],
-                        ppvz_supplier_name=data['ppvz_supplier_name'],
-                        ppvz_inn=data['ppvz_inn'],
-                        declaration_number=data['declaration_number'],
-                        bonus_type_name=data.get('bonus_type_name', ''),
-                        sticker_id=data['sticker_id'],
-                        site_country=data['site_country'],
-                        penalty=data['penalty'],
-                        additional_payment=data['additional_payment'],
-                        rebill_logistic_cost=data.get('rebill_logistic_cost', 0),
-                        rebill_logistic_org=data.get('rebill_logistic_org', ''),
-                        kiz=data.get('kiz', ''),
-                        storage_fee=data['storage_fee'],
-                        deduction=data['deduction'],
-                        acceptance=data['acceptance'],
-                        srid=data['srid'],
-                        report_type=data['report_type']
-                )
-            else:
-                SalesReportOnSales(
-                    realizationreport_id=data['realizationreport_id'],
-                    date_from=data['date_from'],
-                    date_to=data['date_to'],
-                    create_dt=data['create_dt'],
-                    currency_name=data['currency_name'],
-                    suppliercontract_code=data['suppliercontract_code'],
-                    rrd_id=data['rrd_id'],
-                    gi_id=data['gi_id'],
-                    subject_name=data['subject_name'],
-                    nm_id=data['nm_id'],
-                    brand_name=data['brand_name'],
-                    sa_name=data['sa_name'],
-                    ts_name=data['ts_name'],
-                    barcode=data['barcode'],
-                    doc_type_name=data['doc_type_name'],
-                    quantity=data['quantity'],
-                    retail_price=data['retail_price'],
-                    retail_amount=data['retail_amount'],
-                    sale_percent=data['sale_percent'],
-                    commission_percent=data['commission_percent'],
-                    office_name=data['office_name'],
-                    supplier_oper_name=data['supplier_oper_name'],
-                    order_dt=data['order_dt'],
-                    sale_dt=data['sale_dt'],
-                    rr_dt=data['rr_dt'],
-                    shk_id=data['shk_id'],
-                    retail_price_withdisc_rub=data['retail_price_withdisc_rub'],
-                    delivery_amount=data['delivery_amount'],
-                    return_amount=data['return_amount'],
-                    delivery_rub=data['delivery_rub'],
-                    gi_box_type_name=data['gi_box_type_name'],
-                    product_discount_for_report=data['product_discount_for_report'],
-                    supplier_promo=data['supplier_promo'],
-                    rid=data['rid'],
-                    ppvz_spp_prc=data['ppvz_spp_prc'],
-                    ppvz_kvw_prc_base=data['ppvz_kvw_prc_base'],
-                    ppvz_kvw_prc=data['ppvz_kvw_prc'],
-                    sup_rating_prc_up=data['sup_rating_prc_up'],
-                    is_kgvp_v2=data['is_kgvp_v2'],
-                    ppvz_sales_commission=data['ppvz_sales_commission'],
-                    ppvz_for_pay=data['ppvz_for_pay'],
-                    ppvz_reward=data['ppvz_reward'],
-                    acquiring_fee=data['acquiring_fee'],
-                    acquiring_bank=data['acquiring_bank'],
-                    ppvz_vw=data['ppvz_vw'],
-                    ppvz_vw_nds=data['ppvz_vw_nds'],
-                    ppvz_office_id=data['ppvz_office_id'],
-                    ppvz_office_name=data['ppvz_office_name'],
-                    ppvz_supplier_id=data['ppvz_supplier_id'],
-                    ppvz_supplier_name=data['ppvz_supplier_name'],
-                    ppvz_inn=data['ppvz_inn'],
-                    declaration_number=data['declaration_number'],
-                    bonus_type_name=data.get('bonus_type_name', ''),
-                    sticker_id=data['sticker_id'],
-                    site_country=data['site_country'],
-                    penalty=data['penalty'],
-                    additional_payment=data['additional_payment'],
-                    rebill_logistic_cost=data.get('rebill_logistic_cost', 0),
-                    rebill_logistic_org=data.get('rebill_logistic_org', ''),
-                    kiz=data.get('kiz', ''),
-                    storage_fee=data['storage_fee'],
-                    deduction=data['deduction'],
-                    acceptance=data['acceptance'],
-                    srid=data['srid'],
-                    report_type=data['report_type']
-                ).save()
+            write_sales_report_data_to_database(data)
                 
 
 

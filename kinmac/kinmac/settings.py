@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'telegram_working',
     'planning',
     'check_report',
+    'bag_photo',
 ]
 
 MIDDLEWARE = [
