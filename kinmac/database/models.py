@@ -334,6 +334,12 @@ class Sales(models.Model):
         max_length=50,
         null=True
     )
+    order_type = models.CharField(
+        verbose_name='oblastOkrugName',
+        max_length=100,
+        null=True,
+        blank=True
+    )
     region_name = models.CharField(
         verbose_name='regionName',
         max_length=50,
@@ -352,7 +358,8 @@ class Sales(models.Model):
     odid = models.CharField(
         verbose_name='odid',
         max_length=50,
-        null=True
+        null=True,
+        blank=True
     )
     spp = models.CharField(
         verbose_name='spp',
@@ -394,10 +401,16 @@ class Sales(models.Model):
         max_length=50,
         null=True
     )
+    paymen_sale_amount = models.IntegerField(
+        verbose_name='Оплачено с WB Кошелька',
+        blank=True,
+        null=True,
+    )
     is_storno = models.CharField(
         verbose_name='IsStorno',
         max_length=50,
-        null=True
+        null=True,
+        blank=True
     )
     g_number = models.CharField(
         verbose_name='gNumber',

@@ -421,27 +421,25 @@ def rewrite_sales_order(date_from, date_to, realizationreport_id):
 
 def rewrite_sales_order_from_zip(date_from, date_to, realizationreport_id, zip_address):
     """Перезаписывает необходимый отчет в базу данных"""
-    # SalesReportOnSales.objects.filter(
-    #     realizationreport_id=realizationreport_id,
-    #                     date_from=date_from,
-    #                     date_to=date_to
-    #                     ).delete()
-    # CommonSalesReportData.objects.filter(
-    #     realizationreport_id=realizationreport_id,
-    #                     date_from=date_from,
-    #                     date_to=date_to
-    #                     ).delete()
+    SalesReportOnSales.objects.filter(
+        realizationreport_id=realizationreport_id,
+                        date_from=date_from,
+                        date_to=date_to
+                        ).delete()
+    CommonSalesReportData.objects.filter(
+        realizationreport_id=realizationreport_id,
+                        date_from=date_from,
+                        date_to=date_to
+                        ).delete()
     with ZipFile(zip_address, "r") as myzip:
         for item in myzip.namelist():
             content = myzip.read(item)
             excel_data_common = pd.read_excel(content)
+            add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationreport_id, content)
             column_list = excel_data_common.columns.tolist()
-            print(column_list)
-    # for data in main_data:
-    #     write_sales_report_data_to_database(data)
-    # report_reconciliation()
+    report_reconciliation()
 
-def add_data_to_db_from_analytic_report_zip(xlsx_file):
+def add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationreport_id, xlsx_file):
     """Записывает данные в базу данных из файла ZIP"""
     excel_data_common = pd.read_excel(xlsx_file)    
     excel_data = pd.DataFrame(excel_data_common, columns=[
@@ -567,3 +565,72 @@ def add_data_to_db_from_analytic_report_zip(xlsx_file):
     # = excel_data['Фиксированный коэффициент склада по поставке'].to_list()
     # = excel_data['Дата начала действия фиксации'].to_list()
     # = excel_data['Дата конца действия фиксации'].to_list()
+    for i in range(len(sa_name)):
+        
+        SalesReportOnSales(
+            realizationreport_id=realizationreport_id,
+            date_from=date_from,
+            date_to=date_to,
+            # create_dt=create_dt[i],
+            # currency_name=currency_name[i],
+            # suppliercontract_code=suppliercontract_code[i],
+            # rrd_id=rrd_id[i],
+            gi_id=gi_id[i],
+            subject_name=subject_name[i],
+            nm_id=nm_id[i],
+            brand_name=brand_name[i],
+            sa_name=sa_name[i],
+            ts_name=ts_name[i],
+            barcode=barcode[i],
+            doc_type_name=doc_type_name[i],
+            quantity=quantity[i],
+            retail_price=retail_price[i],
+            retail_amount=retail_amount[i],
+            sale_percent=sale_percent[i],
+            commission_percent=commission_percent[i],
+            office_name=office_name[i],
+            supplier_oper_name=supplier_oper_name[i],
+            order_dt=order_dt[i],
+            sale_dt=sale_dt[i],
+            # rr_dt=rr_dt[i],
+            shk_id=shk_id[i],
+            retail_price_withdisc_rub=retail_price_withdisc_rub[i],
+            delivery_amount=delivery_amount[i],
+            return_amount=return_amount[i],
+            delivery_rub=delivery_rub[i],
+            gi_box_type_name=gi_box_type_name[i],
+            product_discount_for_report=product_discount_for_report[i],
+            supplier_promo=supplier_promo[i],
+            rid=rid[i] if str(rid[i]) != 'nan' else 0,
+            ppvz_spp_prc=ppvz_spp_prc[i],
+            ppvz_kvw_prc_base=ppvz_kvw_prc_base[i],
+            ppvz_kvw_prc=ppvz_kvw_prc[i],
+            sup_rating_prc_up=sup_rating_prc_up[i],
+            is_kgvp_v2=is_kgvp_v2[i],
+            ppvz_sales_commission=ppvz_sales_commission[i],
+            ppvz_for_pay=ppvz_for_pay[i],
+            ppvz_reward=ppvz_reward[i],
+            acquiring_fee=acquiring_fee[i],
+            acquiring_bank=acquiring_bank[i],
+            ppvz_vw=ppvz_vw[i],
+            ppvz_vw_nds=ppvz_vw_nds[i],
+            ppvz_office_id=ppvz_office_id[i],
+            ppvz_office_name=ppvz_office_name[i],
+            # ppvz_supplier_id=ppvz_supplier_id[i],
+            ppvz_supplier_name=ppvz_supplier_name[i],
+            ppvz_inn=ppvz_inn[i],
+            declaration_number=declaration_number[i],
+            bonus_type_name=bonus_type_name[i],
+            sticker_id=sticker_id[i],
+            site_country=site_country[i],
+            penalty=penalty[i],
+            additional_payment=additional_payment[i],
+            rebill_logistic_cost=rebill_logistic_cost[i],
+            rebill_logistic_org=rebill_logistic_org[i],
+            kiz=kiz[i],
+            storage_fee=storage_fee[i],
+            deduction=deduction[i],
+            acceptance=acceptance[i],
+            srid=srid[i]
+            # report_type=report_type[i]
+        ).save()

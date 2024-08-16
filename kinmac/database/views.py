@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 
 import pandas as pd
-from celery_tasks.tasks import sales_report_statistic
+from celery_tasks.tasks import (add_data_sales, add_data_stock_api,
+                                sales_report_statistic)
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -27,6 +28,7 @@ def database_home(request):
     context = {
         'data': data,
     }
+    # add_data_sales()
     # sales_report_statistic()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
@@ -83,11 +85,11 @@ def database_home(request):
 def database_stock_api(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    control_date_stock = date.today() - timedelta(days=1)
+    control_date_stock = date.today() - timedelta(days=3)
     articles = Articles.objects.all()
-    data = StocksApi.objects.filter(Q(pub_date__range=[
-        control_date_stock,
-        control_date_stock]))
+    data = StocksApi.objects.filter(Q(pub_date__gte=
+        control_date_stock
+        ))
     form = SelectDateForm(request.POST or None)
     datestart = control_date_stock
     datefinish = control_date_stock
@@ -157,15 +159,15 @@ def database_sales(request):
     """Отображение страницы База данных продаж"""
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    control_date_stock = date.today() - timedelta(days=1)
+    control_date_sale = date.today() - timedelta(days=3)
     seller_articles = Articles.objects.all()
-    data = Sales.objects.filter(Q(pub_date__range=[
-        control_date_stock,
-        control_date_stock]))
+    data = Sales.objects.filter(Q(pub_date__gte=
+        control_date_sale
+       ))
 
     form = SelectDateForm(request.POST or None)
-    datestart = control_date_stock
-    datefinish = control_date_stock
+    datestart = control_date_sale
+    datefinish = control_date_sale
 
     if form.is_valid():
         datestart = form.cleaned_data.get("datestart")
@@ -181,7 +183,7 @@ def database_sales(request):
     context = {
         'form': form,
         'data': data,
-        'form_date': str(control_date_stock),
+        'form_date': str(control_date_sale),
         'lenght': len(seller_articles.all().values()),
         'seller_articles': seller_articles.all().values(),
     }

@@ -29,24 +29,27 @@ def check_report(request):
     data = CommonSalesReportData.objects.all().order_by('realizationreport_id')
     # for i in data:
     #     i.delete()
+    # sales_report_statistic()
     if request.POST:
         if 'reconciliation' in request.POST:
             report_reconciliation()
         elif 'import_file' in request.FILES:
             errors_list = download_report_data_for_check(request.FILES['import_file'])
-    paginator = Paginator(data, 100)
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.get_page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.get_page(1)  # Если номер страницы не целый, возвращаем первую страницу
-    except EmptyPage:
-        page_obj = paginator.get_page(paginator.num_pages)  # Если страница выходит за пределы, возвращаем последнюю страницу
-    # sales_report_statistic()
+        elif 'reload_zip' in request.FILES:
+            print(request.POST)
+            report_date_from = request.POST.get('report_date_from')
+            report_date_to = request.POST.get('report_date_to')
+            report_number = request.POST.get('report_number')
+            print(report_date_from, report_date_to, report_number)
+            rewrite_sales_order_from_zip(report_date_from, report_date_to, report_number, request.FILES['reload_zip'])
+            
+            
+            data = CommonSalesReportData.objects.all().order_by('realizationreport_id')
+    
+    
     context = {
         'page_name': page_name,
         'data': data,
-        'page_obj': page_obj,
     }
     
     return render(request, 'check_report/common_report.html', context)
@@ -61,17 +64,17 @@ def compair_report(request):
     db_report_data = CommonSalesReportData.objects.all()
     
     if request.POST:
-        print(request.POST)
-        print(request.FILES)
         if 'reconciliation' in request.POST:
             report_reconciliation()
         elif 'reload_report' in request.POST:
+            print(request.POST)
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
             rewrite_sales_order(report_date_from, report_date_to, report_number)
             db_report_data = CommonSalesReportData.objects.all()
         elif 'reload_zip' in request.FILES:
+            print(request.POST)
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
