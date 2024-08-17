@@ -12,7 +12,7 @@ app.config_from_object('celery_tasks.celeryconfig')
 app.conf.beat_schedule = {
     "add_data_stock_api": {
         "task": "celery_tasks.tasks.add_data_stock_api",
-        "schedule": crontab(hour=6, minute=1)
+        "schedule": crontab(hour=15, minute=17)
     },
     "add_data_sales": {
         "task": "celery_tasks.tasks.add_data_sales",

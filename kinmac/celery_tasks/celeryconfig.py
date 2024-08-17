@@ -1,4 +1,4 @@
-broker_url = 'redis://localhost:6379/0'
+broker_url = 'redis://localhost:6379/1'
 task_serializer = 'json'
 result_serializer = 'json'
 accept_content = ['json']
