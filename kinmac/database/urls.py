@@ -32,7 +32,7 @@ urlpatterns = [
           views.stock_site,
           name='stock_site'
           ),
-    path('stock_site/<str:seller_article>',
+    path('stock_site/<str:nomenclatura_wb>',
           views.DatabaseStockSiteDetailView.as_view(),
           name='stock_site_detail'
           ),

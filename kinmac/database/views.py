@@ -2,7 +2,8 @@ from datetime import date, timedelta
 
 import pandas as pd
 from celery_tasks.tasks import (add_data_sales, add_data_stock_api,
-                                sales_report_statistic)
+                                add_stock_data_site, delivery_statistic,
+                                orders_statistic, sales_report_statistic)
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -28,7 +29,7 @@ def database_home(request):
     context = {
         'data': data,
     }
-    # add_data_sales()
+    # add_stock_data_site()
     # sales_report_statistic()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
@@ -117,7 +118,7 @@ def database_stock_api(request):
 def stock_site(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    control_date_stock = date.today()  # - timedelta(days=1)
+    control_date_stock = date.today()
     control_date_stock_tomorrow = date.today() + timedelta(days=1)
     data = StocksSite.objects.filter(Q(pub_date__range=[
         control_date_stock,
@@ -195,9 +196,8 @@ def database_deliveries(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_delivery = date.today() - timedelta(days=30)
-    data = Deliveries.objects.filter(Q(delivery_date__range=[
-        control_date_delivery,
-        date.today()])).order_by('delivery_date')
+    data = Deliveries.objects.filter(Q(delivery_date__gte=
+        control_date_delivery)).order_by('delivery_date')
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_delivery
@@ -229,9 +229,9 @@ def database_orders(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
-    data = Orders.objects.filter(Q(order_date__range=[
-        control_date_orders,
-        date.today()])).order_by('order_date')
+    data = Orders.objects.filter(Q(order_date__gte=
+        control_date_orders
+        )).order_by('order_date')
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_orders
@@ -388,7 +388,7 @@ class DatabaseStockSiteDetailView(ListView):
 
     def get_queryset(self):
         return StocksSite.objects.filter(
-            seller_article=self.kwargs['seller_article'])
+            seller_article=self.kwargs['nomenclatura_wb'])
 
 
 class DatabaseSalesDetailView(ListView):
