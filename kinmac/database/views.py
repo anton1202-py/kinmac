@@ -259,14 +259,14 @@ def database_orders(request):
 
 
 def sales_report(request):
-    """Отображение страницы База данных заказов"""
+    """Отображение страницы Отчета о продажах"""
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
     
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
-        date.today()])).order_by('realizationreport_id')
+        date.today()])).order_by('-realizationreport_id')
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_orders

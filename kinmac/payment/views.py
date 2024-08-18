@@ -1,19 +1,15 @@
 import datetime
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
-import pandas as pd
 import telegram
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
-from django.http import FileResponse, HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
-from django.urls import reverse
 from django.views.generic import UpdateView
 from dotenv import load_dotenv
-from openpyxl import Workbook
 from telegram_working.assistance import (save_message_function,
                                          upgrade_message_function)
 from telegram_working.start_tg_approve import start_tg_working
@@ -26,7 +22,6 @@ from .models import (ApprovalStatus, ApprovedFunction, CashPayment,
                      PayWithCheckingAccount, TelegramApproveButtonMessage,
                      TelegramMessageActions, TransferToCard)
 from .supplement import excel_creating_mod
-from .validators import StripToNumbers
 
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -240,7 +235,8 @@ def payment_common_statistic(request):
     """Функция отвечает за отображение списка заявок на платёж"""
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    payments = Payments.objects.all().order_by('id')
+    time_filter = datetime.now() - timedelta(days=60)
+    payments = Payments.objects.filter(pub_date__gte=time_filter).order_by('id')
     approval_users = ApprovedFunction.objects.filter(
         rating_for_approval__range=(1, 10))
 
