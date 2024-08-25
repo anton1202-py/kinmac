@@ -43,7 +43,6 @@ def common_sales_analytic(request):
 def add_costprice_article(request):
     """Страница с добавлением себестоимости артикула"""
     page_name = 'Себестоимость товаров'
-    update_info_about_articles()
     costprice_data = CostPrice.objects.filter(article__brand='KINMAC')
 
     articles_data = Articles.objects.all()
