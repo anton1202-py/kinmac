@@ -8,6 +8,7 @@ from check_report.supplyment import (add_data_to_db_from_excel,
                                      rewrite_sales_order,
                                      rewrite_sales_order_from_zip)
 from database.models import Articles, CostPrice, SalesReportOnSales
+from database.periodic_tasks import update_info_about_articles
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -42,6 +43,7 @@ def common_sales_analytic(request):
 def add_costprice_article(request):
     """Страница с добавлением себестоимости артикула"""
     page_name = 'Себестоимость товаров'
+    update_info_about_articles()
     costprice_data = CostPrice.objects.filter(article__brand='KINMAC')
 
     articles_data = Articles.objects.all()
