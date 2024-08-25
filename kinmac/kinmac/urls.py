@@ -10,6 +10,8 @@ urlpatterns = [
     path('payment/', include('payment.urls')),
     path('check_report/', include('check_report.urls')),
     path('bag_photo/', include('bag_photo.urls')),
+    path('sales_analytics/', include('sales_analytics.urls')),
+
 
 ] 
 

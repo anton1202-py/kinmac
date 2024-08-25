@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'planning',
     'check_report',
     'bag_photo',
+    'sales_analytics',
 ]
 
 MIDDLEWARE = [

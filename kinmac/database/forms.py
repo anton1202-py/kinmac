@@ -8,7 +8,7 @@ from .models import Articles
 class ArticlesForm(ModelForm):
     class Meta:
         model = Articles
-        fields = ['common_article', 'brend', 'barcode', 'nomenclatura_wb',
+        fields = ['common_article', 'brand', 'barcode', 'nomenclatura_wb',
                   'nomenclatura_ozon', 'predmet', 'size', 'model',
                   'color', 'prime_cost', 'average_cost']
         widgets = {
@@ -16,7 +16,7 @@ class ArticlesForm(ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Артикул'
             }),
-            'brend': TextInput(attrs={
+            'brand': TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Бренд'
             }),

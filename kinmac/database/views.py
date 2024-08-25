@@ -4,6 +4,7 @@ import pandas as pd
 from celery_tasks.tasks import (add_data_sales, add_data_stock_api,
                                 add_stock_data_site, delivery_statistic,
                                 orders_statistic, sales_report_statistic)
+from database.periodic_tasks import update_info_about_articles
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -24,7 +25,7 @@ from .models import (Articles, Deliveries, Orders, Sales, SalesReportOnSales,
 def database_home(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-
+    # update_info_about_articles()
     data = Articles.objects.all()
     context = {
         'data': data,
@@ -43,7 +44,7 @@ def database_home(request):
         nomenclatura_ozon_list = load_excel_data_wb_stock['Номенк OZON'].to_list(
         )
         common_article_list = load_excel_data_wb_stock['Арт'].to_list()
-        brend_list = load_excel_data_wb_stock['Бренд'].to_list()
+        brand_list = load_excel_data_wb_stock['Бренд'].to_list()
         predmet_list = load_excel_data_wb_stock['Предмет'].to_list()
         size_list = load_excel_data_wb_stock['SIZE'].to_list()
         model_list = load_excel_data_wb_stock['MODEL'].to_list()
@@ -57,7 +58,7 @@ def database_home(request):
                     barcode=barcode_list[i],
                     nomenclatura_wb=nomenclatura_wb_list[i],
                     nomenclatura_ozon=nomenclatura_ozon_list[i],
-                    brend=brend_list[i],
+                    brand=brand_list[i],
                     predmet=predmet_list[i],
                     size=size_list[i],
                     model=model_list[i],
@@ -71,7 +72,7 @@ def database_home(request):
                     barcode=barcode_list[i],
                     nomenclatura_wb=nomenclatura_wb_list[i],
                     nomenclatura_ozon=nomenclatura_ozon_list[i],
-                    brend=brend_list[i],
+                    brand=brand_list[i],
                     predmet=predmet_list[i],
                     size=size_list[i],
                     model=model_list[i],

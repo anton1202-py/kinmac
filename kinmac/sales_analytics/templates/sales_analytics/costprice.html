@@ -1,0 +1,124 @@
+{% extends 'main/index.html' %}
+
+
+{% block title %}{{ page_name }}{% endblock %}
+
+{% block content %}
+
+    <div class="features">
+         <div class="top-befor-header">
+            <h1>{{ page_name }}</h1>
+        </div>
+
+        {% if error_text %}
+            <script>
+                alert("{{ error_text }}");
+            </script>
+        {% endif %}
+
+        <div class="inner-form-data">
+            <form method="POST" id="uploadForm" enctype="multipart/form-data" class="big-filter-form" >
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <button type="submit" name="export" value="create_file" title="Скачать шаблон">
+                        <span class="material-symbols-outlined">
+                            ios_share
+                        </span>
+                    </button>
+                </div>
+    
+                <div class="inner-form-data">
+                    <label for="import_data" title="Загрузить себестоимость из Excel">
+                        <span class="material-symbols-outlined">
+                            download
+                        </span>
+                    </label>
+                    <input type="file" id="import_data" name="import_file" class="input-file" onchange="submitForm()">
+                </div>
+            </form>
+        </div>
+        <div class="table_wrapper">
+            <table name="mytable" class="sortable" style="white-space: nowrap">
+                <tr>
+                    <th>Артикул</th>
+                    <th>Название</th>
+                    <th>Себестоимость</th>
+                    <th>Дата себестоимости</th>
+                </tr>
+                {% for el in costprice_data %}   
+                <tr>
+                    <td>{{ el.article.common_article }}</td>
+                    <td>{{ el.article.name }}</td>
+                    <td><input class="input_cost_price" placeholder="{{ el.costprice }}" type="number" name="cost_price" data-row="{{ el.article.nomenclatura_wb }}"/></td>
+                    <td>{{ el.costprice_date }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div> 
+    <script>
+        // =========== ОБНОВЛЯЕТ СЕБЕСТОИМОСТЬ ТОВАРА ========== //
+        document.querySelectorAll('.input_cost_price').forEach(select => {
+            select.addEventListener('input', function() {
+                var mainCostprice = this.value;
+                var rowNumber = this.dataset.row;
+                console.log(rowNumber)
+
+                var formData = new FormData();
+                formData.append('main_costprice', mainCostprice);
+                formData.append('article', rowNumber);
+                formData.append('csrfmiddlewaretoken', document.querySelector('input[name="csrfmiddlewaretoken"]').value);
+            
+                fetch('update_costprice/', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Обработка успешного ответа от сервера
+                        // Например, обновление отображаемого значения фамилии в таблице
+                    } else {
+                        // Обработка ошибки
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ФАЙЛА ========= //
+        document.getElementById('import_data').addEventListener('change', function() {
+            document.getElementById('uploadForm').submit();
+        });
+
+        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ZIP ========= //
+        document.querySelectorAll('input[type="file"]').forEach(function(input) {
+            input.addEventListener('change', function() {
+                // Получаем id формы, к которой принадлежит этот input
+                var reportId = this.id.split('-')[1]; // Получаем часть id после "-"
+                console.log(reportId)
+                var form = document.getElementById('uploadZip-' + reportId);
+                form.submit();
+            });
+        });
+
+        // ========== УПОРЯДОЧИВАЕТ ТАБЛИЦУ ПРИ НАЖАТИИ НА СТОЛБЕЦ ========= //
+        const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent; 
+            const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+                )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+            // do the work...
+            document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+                const table = th.closest('table');
+                Array.from(table.querySelectorAll('tr')).slice(1) // выбираем все строки, начиная со второй
+                    .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+                    .forEach(tr => table.appendChild(tr) );
+            })));
+        
+        // ========== Обрабатывает нажати кнопки загрузить из файла ========= //
+        function submitForm() {
+          document.getElementById('uploadForm').submit();
+        }
+    </script>  
+{% endblock %}

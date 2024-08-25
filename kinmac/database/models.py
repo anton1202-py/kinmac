@@ -7,13 +7,13 @@ from django.urls import reverse
 class Articles(models.Model):
     common_article = models.CharField(
         verbose_name='Артикул',
-        max_length=50,
+        max_length=300,
         unique=True,
         null=True
     )
-    brend = models.CharField(
+    brand = models.CharField(
         verbose_name='Бренд',
-        max_length=50,
+        max_length=300,
         null=True,
     )
     barcode = models.CharField(
@@ -38,7 +38,7 @@ class Articles(models.Model):
     )
     size = models.CharField(
         verbose_name='Размер',
-        max_length=50,
+        max_length=300,
         null=True,
     )
     model = models.CharField(
@@ -59,6 +59,11 @@ class Articles(models.Model):
     average_cost = models.CharField(
         verbose_name='Средняя себестоимость',
         max_length=100,
+        null=True,
+    )
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=300,
         null=True,
     )
 
@@ -85,6 +90,33 @@ class CodingMarketplaces(models.Model):
     class Meta:
         verbose_name = 'Код маркетплейса'
         verbose_name_plural = 'Коды маркетплейсов'
+
+
+
+class CostPrice(models.Model):
+    """Себестоимость товаров (вбивается вручную)"""
+    article = models.ForeignKey(
+        Articles,
+        verbose_name='Артикул',
+        on_delete=models.SET_NULL,
+        related_name='costprice_article',
+        blank=True,
+        null=True,
+    )
+    costprice_date = models.DateTimeField(
+        verbose_name='Дата себестоимости',
+        null=True,
+        blank=True,
+    )
+    costprice = models.FloatField(
+        verbose_name='Себестоимость артикула',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Себестоимость'
+        verbose_name_plural = 'Себестоимость'
 
 
 class CodingWbStock(models.Model):

@@ -299,7 +299,7 @@ def orders_statistic():
 @app.task
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
-    start_date = date.today() - timedelta(days=60)
+    start_date = date.today() - timedelta(days=90)
     finish_date = date.today() - timedelta(days=1)
     common_data = get_report_detail_by_period(wb_headers, start_date, finish_date)
     if common_data:

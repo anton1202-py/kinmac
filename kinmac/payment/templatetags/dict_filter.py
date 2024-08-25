@@ -23,4 +23,7 @@ def float_make(value):
 
 @register.filter
 def round_number_two(value):
-    return round(value, 2)
+    if value:
+        return round(value, 2)
+    else:
+        return value

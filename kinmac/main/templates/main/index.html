@@ -104,6 +104,18 @@
             <h3>Сведение отчетов</h3>
         </a>
 
+        {% url 'sales_analytic_costprice' as url_sales_analytic_costprice %}
+        <a href="{{ url_sales_analytic_costprice }}" {% if request.path == url_sales_analytic_costprice %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">price_check</span>
+            <h3>Себестоимость</h3>
+        </a>
+
+        {% url 'common_sales_analytic' as url_common_sales_analytic %}
+        <a href="{{ url_common_sales_analytic }}" {% if request.path == url_common_sales_analytic %}class="active"{% endif %}>
+            <span class="material-symbols-sharp">query_stats</span>
+            <h3>Аналитика продаж</h3>
+        </a>
+
         {% url 'weekly_sales' as url_weekly_sales %}
         <a href="{{ url_weekly_sales }}" {% if request.path == url_weekly_sales %}class="active"{% endif %}>
             <span class="material-symbols-sharp">pan_tool_alt</span>

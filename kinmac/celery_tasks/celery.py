@@ -5,7 +5,9 @@ from celery.schedules import crontab
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kinmac.settings')
 app = Celery('celery_tasks',
-             include=['celery_tasks.tasks'])
+             include=['celery_tasks.tasks',
+                      'database.periodic_tasks',
+                      'sales_analytics.periodic_tasks'])
 app.config_from_object('celery_tasks.celeryconfig')
 
 
@@ -45,5 +47,17 @@ app.conf.beat_schedule = {
     "add_stock_data_site4": {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=19, minute=1)
+    },
+    "database_update_articles": {
+        "task": "database.periodic_tasks.update_info_about_articles",
+        "schedule": crontab(hour=22, minute=1)
+    },
+    "sales_analytics_article_analytic_update": {
+        "task": "sales_analytics.periodic_tasks.articles_analytics_data",
+        "schedule": crontab(hour=16, minute=1)
+    },
+    "sales_analytics_common_update": {
+        "task": "sales_analytics.periodic_tasks.commom_analytics_data",
+        "schedule": crontab(hour=18, minute=1)
     },
 }
