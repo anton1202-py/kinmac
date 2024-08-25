@@ -54,10 +54,10 @@ app.conf.beat_schedule = {
     },
     "sales_analytics_article_analytic_update": {
         "task": "sales_analytics.periodic_tasks.articles_analytics_data",
-        "schedule": crontab(hour=16, minute=1)
+        "schedule": crontab(hour=22, minute=1)
     },
     "sales_analytics_common_update": {
         "task": "sales_analytics.periodic_tasks.commom_analytics_data",
-        "schedule": crontab(hour=18, minute=1)
+        "schedule": crontab(hour=23, minute=1)
     },
 }
