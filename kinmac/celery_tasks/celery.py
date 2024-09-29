@@ -31,7 +31,7 @@ app.conf.beat_schedule = {
     },
     "add_data_reports": {
         "task": "celery_tasks.tasks.sales_report_statistic",
-        "schedule": crontab(hour=22, minute=1)
+        "schedule": crontab(hour=23, minute=1)
     },
     "add_stock_data_site1": {
         "task": "celery_tasks.tasks.add_stock_data_site",
@@ -64,10 +64,10 @@ app.conf.beat_schedule = {
 
     "reklama_update_adv_list": {
         "task": "reklama.periodic_tasks.campaign_list_to_db",
-        "schedule": crontab(hour=18, minute=1)
+        "schedule": crontab(hour=23, minute=30)
     },
     "reklama_update_article_costs": {
         "task": "reklama.periodic_tasks.update_daily_article_adv_cost",
-        "schedule": crontab(hour=19, minute=58)
+        "schedule": crontab(hour=23, minute=40)
     },
 }
