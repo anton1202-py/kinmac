@@ -9,12 +9,14 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Case, Count, IntegerField, Q, Sum, When
-from django.db.models.functions import (ExtractMonth, ExtractWeek, ExtractYear,
+from django.db.models import Case, Count, IntegerField, Q, When
+from django.db.models.functions import (ExtractWeek, ExtractYear,
                                         TruncWeek)
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from kinmac.constants_file import BRAND_LIST
+from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
                     SelectDateStocksForm)
@@ -26,6 +28,16 @@ def database_home(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     # update_info_about_articles()
+    # articles_analytics_data()
+    update_daily_article_adv_cost()
+    # campaign_list_to_db()
+    # commom_analytics_data()
+    # sales_report_statistic()
+    # update_info_about_articles()
+    datas = SalesReportOnSales.objects.all()
+    for dat in datas:
+        if dat.brand_name not in BRAND_LIST:
+            dat.delete()
     data = Articles.objects.all()
     context = {
         'data': data,

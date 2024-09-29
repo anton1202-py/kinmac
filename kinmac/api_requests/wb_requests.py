@@ -141,4 +141,87 @@ def get_report_detail_by_period(header, date_from, date_to):
     response = requests.request("GET", url, headers=header)
     return response
 
+# ========== КОНЕЦ ЗАПРОСЫ СТАТИСТИКИ ========== #
 
+# ========= ЗАПРОСЫ АНАЛИТИКИ ========== #
+@api_retry_decorator
+def get_create_storage_cost_report(header, date_from, date_to):
+    """
+    Создаёт задание на генерацию отчёта. 
+    Можно получить отчёт максимум за 8 дней. 
+    Максимум 1 запрос в минуту
+    """
+    # time.sleep(61)
+    url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?dateFrom={date_from}&dateTo={date_to}"
+    response = requests.request("GET", url, headers=header)
+    return response
+
+
+@api_retry_decorator
+def get_check_storage_cost_report_status(header, report_id):
+    """
+    Возвращает статус задания на генерацию. 
+    Максимум 1 запрос в 5 секунд
+    """
+    # time.sleep(61)
+    url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/status"
+    response = requests.request("GET", url, headers=header)
+    return response
+
+
+@api_retry_decorator
+def get_storage_cost_report_data(header, report_id):
+    """
+    Возвращает отчёт по ID задания. 
+    Максимум 1 запрос в минуту
+    """
+    url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/download"
+    response = requests.request("GET", url, headers=header)
+    return response
+
+
+
+
+# ========= ЗАПРОСЫ РЕКЛАМЫ ========== #
+@api_retry_decorator
+def get_adv_campaign_lists_data(header):
+    """
+    Метод позволяет получать списки кампаний, 
+    сгруппированных по типу и статусу, с информацией о дате последнего изменения кампании.
+    
+    Допускается 5 запросов в секунду.
+    """
+    url = f"https://advert-api.wildberries.ru/adv/v1/promotion/count"
+    response = requests.request("GET", url, headers=header)
+    return response
+
+
+@api_retry_decorator
+def get_adv_info(header, campaign_list):
+    """
+    Метод позволяет получать информацию о кампаниях по query параметрам, 
+    либо по списку ID кампаний.
+    Допускается 5 запросов в секунду.
+    """
+    url = f"https://advert-api.wildberries.ru/adv/v1/promotion/adverts"
+    payload = json.dumps(campaign_list)
+    response = requests.request("POST", url, headers=header, data=payload)
+    return response
+
+
+@api_retry_decorator
+def get_campaign_statistic(header, campaign_list):
+    """
+    Возвращает статистику кампаний.
+    Максимум 1 запрос в минуту.
+    Данные вернутся для кампаний в статусе 7, 9 и 11.
+    Важно. В запросе можно передавать либо параметр dates либо параметр interval, но не оба.
+    Можно отправить запрос только с ID кампании. При этом вернутся данные за последние сутки,
+    но не за весь период существования кампании.
+    """
+    url = f"https://advert-api.wildberries.ru/adv/v2/fullstats"
+    payload = json.dumps(campaign_list)
+    response = requests.request("POST", url, headers=header, data=payload)
+    return response
+
+# ========= КОНЕЦ ЗАПРОСЫ РЕКЛАМЫ ========== #

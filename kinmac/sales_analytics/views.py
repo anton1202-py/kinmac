@@ -25,13 +25,14 @@ from sales_analytics.supplyment import (costprice_article_timport_from_excel,
                                         template_for_article_costprice)
 
 from .models import ArticleSaleAnalytic, CommonSaleAnalytic
+from kinmac.constants_file import BRAND_LIST
 
 
 def common_sales_analytic(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     page_name = 'Общий анализ продаж'
-    analytic_data = CommonSaleAnalytic.objects.filter(article__brand='KINMAC')
+    analytic_data = CommonSaleAnalytic.objects.filter(article__brand__in=BRAND_LIST)
    
     context = {
         'page_name': page_name,
@@ -73,20 +74,35 @@ def add_costprice_article(request):
 
 
 def update_costprice(request):
+    """Обновление себестоимости и затрат на ФФ через jQuery"""
     if request.POST:
-        print(request.POST)
-        article = request.POST.get('article')        
-        # Сохраняем себестоимоть
+        article = request.POST.get('article')   
+        costprice = request.POST.get('main_costprice', '')
+        ff_cost = request.POST.get('main_ff_cost', '')
+       
         if article:
-            costprice = int(request.POST.get('main_costprice'))
-            if CostPrice.objects.filter(article__nomenclatura_wb=article).exists():
-                CostPrice.objects.filter(article__nomenclatura_wb=article).update(
-                    costprice=costprice, costprice_date=datetime.now()
-                )
-            else:
-                CostPrice(article__nomenclatura_wb=article,
-                    costprice=costprice, costprice_date=datetime.now()
-                ).save()
+            # Сохраняем себестоимоть
+            if costprice:
+                costprice = int(costprice)
+                if CostPrice.objects.filter(article__nomenclatura_wb=article).exists():
+                    CostPrice.objects.filter(article__nomenclatura_wb=article).update(
+                        costprice=costprice, costprice_date=datetime.now()
+                    )
+                else:
+                    CostPrice(article__nomenclatura_wb=article,
+                        costprice=costprice, costprice_date=datetime.now()
+                    ).save()
+            # Сохраняем затраты на Фулфилмент
+            if ff_cost:
+                costprice = int(ff_cost)
+                if CostPrice.objects.filter(article__nomenclatura_wb=article).exists():
+                    CostPrice.objects.filter(article__nomenclatura_wb=article).update(
+                        ff_cost=ff_cost, ff_cost_date=datetime.now()
+                    )
+                else:
+                    CostPrice(article__nomenclatura_wb=article,
+                        ff_cost=ff_cost, ff_cost_date=datetime.now()
+                    ).save()
         return JsonResponse({'message': 'Value saved successfully.'})
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 

@@ -62,19 +62,16 @@ def compair_report(request):
     page_name = 'Сведение еженедельных отчетов'
     excel_data = ExcelReportData.objects.all().order_by('realizationreport_id')
     db_report_data = CommonSalesReportData.objects.all()
-    
     if request.POST:
         if 'reconciliation' in request.POST:
             report_reconciliation()
         elif 'reload_report' in request.POST:
-            print(request.POST)
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
             rewrite_sales_order(report_date_from, report_date_to, report_number)
             db_report_data = CommonSalesReportData.objects.all()
         elif 'reload_zip' in request.FILES:
-            print(request.POST)
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')

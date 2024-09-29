@@ -18,3 +18,6 @@ wb_headers = {
     'Content-Type': 'application/json',
     'Authorization': WB_COMMON_KEY
 }
+
+BRAND_LIST = ['KINMAC', 'Allonsy']
+bot = telegram.Bot(token=TELEGRAM_TOKEN)

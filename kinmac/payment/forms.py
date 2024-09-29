@@ -18,8 +18,8 @@ class PaymentsForm(ModelForm):
                   'urgent_payment', 'status_of_payment', 'date_of_payment', 'accountant', 'file_of_payment', 'payment_coefficient']
         project = forms.ChoiceField(choices=Projects.objects.all())
         category = forms.ChoiceField(choices=Categories.objects.all())
-        # contractor_name = forms.ChoiceField(
-        #    choices=Contractors.objects.all(), required=False)
+        contractor_name = forms.ChoiceField(
+           choices=Contractors.objects.all(), required=False)
         payer_organization = forms.ChoiceField(
             choices=PayerOrganization.objects.all())
 

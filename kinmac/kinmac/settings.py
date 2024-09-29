@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'check_report',
     'bag_photo',
     'sales_analytics',
+    'reklama',
 ]
 
 MIDDLEWARE = [

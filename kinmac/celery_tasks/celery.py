@@ -7,7 +7,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kinmac.settings')
 app = Celery('celery_tasks',
              include=['celery_tasks.tasks',
                       'database.periodic_tasks',
-                      'sales_analytics.periodic_tasks'])
+                      'sales_analytics.periodic_tasks',
+                      'reklama.periodic_tasks'])
 app.config_from_object('celery_tasks.celeryconfig')
 
 
@@ -52,12 +53,21 @@ app.conf.beat_schedule = {
         "task": "database.periodic_tasks.update_info_about_articles",
         "schedule": crontab(hour=22, minute=1)
     },
-    "sales_analytics_article_analytic_update": {
-        "task": "sales_analytics.periodic_tasks.articles_analytics_data",
-        "schedule": crontab(hour=22, minute=1)
-    },
+    # "sales_analytics_article_analytic_update": {
+    #     "task": "sales_analytics.periodic_tasks.articles_analytics_data",
+    #     "schedule": crontab(hour=22, minute=1)
+    # },
     "sales_analytics_common_update": {
         "task": "sales_analytics.periodic_tasks.commom_analytics_data",
-        "schedule": crontab(hour=23, minute=1)
+        "schedule": crontab(hour=23, minute=58)
+    },
+
+    "reklama_update_adv_list": {
+        "task": "reklama.periodic_tasks.campaign_list_to_db",
+        "schedule": crontab(hour=18, minute=1)
+    },
+    "reklama_update_article_costs": {
+        "task": "reklama.periodic_tasks.update_daily_article_adv_cost",
+        "schedule": crontab(hour=19, minute=58)
     },
 }

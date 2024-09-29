@@ -44,6 +44,8 @@
                     <th>Название</th>
                     <th>Себестоимость</th>
                     <th>Дата себестоимости</th>
+                    <th>Затраты на ФФ</th>
+                    <th>Обновление ФФ</th>
                 </tr>
                 {% for el in costprice_data %}   
                 <tr>
@@ -51,6 +53,8 @@
                     <td>{{ el.article.name }}</td>
                     <td><input class="input_cost_price" placeholder="{{ el.costprice }}" type="number" name="cost_price" data-row="{{ el.article.nomenclatura_wb }}"/></td>
                     <td>{{ el.costprice_date }}</td>
+                    <td><input class="input_ff_cost" placeholder="{{ el.ff_cost }}" type="number" name="ff_cost" data-row="{{ el.article.nomenclatura_wb }}"/></td>
+                    <td>{{ el.ff_cost_date }}</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -66,6 +70,36 @@
 
                 var formData = new FormData();
                 formData.append('main_costprice', mainCostprice);
+                formData.append('article', rowNumber);
+                formData.append('csrfmiddlewaretoken', document.querySelector('input[name="csrfmiddlewaretoken"]').value);
+            
+                fetch('update_costprice/', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Обработка успешного ответа от сервера
+                        // Например, обновление отображаемого значения фамилии в таблице
+                    } else {
+                        // Обработка ошибки
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+
+        // =========== ОБНОВЛЯЕТ ЗАТРАТЫ НА ФУЛФИЛМЕНТ ========== //
+        document.querySelectorAll('.input_ff_cost').forEach(select => {
+            select.addEventListener('input', function() {
+                var mainFfCost = this.value;
+                var rowNumber = this.dataset.row;
+                console.log(rowNumber)
+
+                var formData = new FormData();
+                formData.append('main_ff_cost', mainFfCost);
                 formData.append('article', rowNumber);
                 formData.append('csrfmiddlewaretoken', document.querySelector('input[name="csrfmiddlewaretoken"]').value);
             

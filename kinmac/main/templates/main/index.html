@@ -92,11 +92,11 @@
             <h3>Отчет о продажах</h3>
         </a>
 
-        {% url 'check_report' as url_check_report %}
+        <!-- {% url 'check_report' as url_check_report %}
         <a href="{{ url_check_report }}" {% if request.path == url_check_report %}class="active"{% endif %}>
             <span class="material-symbols-outlined">lab_profile</span>
             <h3>Сверка отчетов</h3>
-        </a>
+        </a> -->
 
         {% url 'compair_report' as url_compair_report %}
         <a href="{{ url_compair_report }}" {% if request.path == url_compair_report %}class="active"{% endif %}>

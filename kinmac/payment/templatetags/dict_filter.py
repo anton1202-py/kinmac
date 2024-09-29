@@ -15,6 +15,8 @@ def multiplicity(value, arg):
 
 @register.filter
 def divide(value, arg):
+    if arg == 0:
+        return 0
     return value / arg
 
 @register.filter

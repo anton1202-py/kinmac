@@ -17,7 +17,7 @@ from api_requests.wb_requests import (get_report_detail_by_period,
                                       wb_article_data_from_api)
 from celery_tasks.celery import app
 from check_report.supplyment import write_sales_report_data_to_database
-from database.models import SalesReportOnSales
+from database.models import SalesReportOnSales, WeeklyReportInDatabase
 from database.supplyment import (add_data_delivery_to_db,
                                  add_data_orders_from_site_to_db,
                                  add_data_sales_to_db, add_data_stock_from_api,
@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from kinmac.constants_file import (STATISTIC_WB_TOKEN, TELEGRAM_ADMIN_CHAT_ID,
+from kinmac.constants_file import (BRAND_LIST, TELEGRAM_ADMIN_CHAT_ID,
                                    bot, wb_headers)
 
 load_dotenv()
@@ -303,5 +303,21 @@ def sales_report_statistic():
     finish_date = date.today() - timedelta(days=1)
     common_data = get_report_detail_by_period(wb_headers, start_date, finish_date)
     if common_data:
+        reports_data = {}
         for data in common_data:
-            write_sales_report_data_to_database(data)
+            if not WeeklyReportInDatabase.objects.filter(realizationreport_id=data['realizationreport_id']).exists():
+                if data['realizationreport_id'] not in reports_data:
+                    reports_data[data['realizationreport_id']] = {
+                        'date_from': data['date_from'],
+                        'date_to': data['date_to'],
+                        'create_dt': data['create_dt']
+                    }
+                write_sales_report_data_to_database(data)
+        if reports_data:
+            for report_number, info in reports_data.items():
+                WeeklyReportInDatabase(
+                    realizationreport_id=report_number,
+                    date_from=info['date_from'],
+                    date_to=info['date_to'],
+                    create_dt=info['create_dt']
+                ).save()

@@ -113,6 +113,15 @@ class CostPrice(models.Model):
         null=True,
         blank=True,
     )
+    ff_cost = models.FloatField(
+        verbose_name='Затраты на Фулфилмент',
+        default=125
+    )
+    ff_cost_date = models.DateTimeField(
+        verbose_name='Дата обновления затрат на ФФ',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Себестоимость'
@@ -1013,3 +1022,30 @@ class SalesReportOnSales(models.Model):
     class Meta:
         verbose_name = 'Отчет о продажах по реализации'
         verbose_name_plural = 'Отчет о продажах по реализации'
+
+
+class WeeklyReportInDatabase(models.Model):
+    """
+    Указывает, что еженедельный отчет записался в базу данных.
+    К этой информации привязаны сигналы для обновления аналитики по отчетам.
+    """
+    realizationreport_id = models.BigIntegerField(
+        verbose_name='Номер отчета',
+        unique=True
+    )
+    date_from = models.DateTimeField(
+        verbose_name='Дата начала отчётного периода',
+        null=True,
+        blank=True,
+    )
+    date_to	= models.DateTimeField(
+        verbose_name='Дата конца отчётного периода',
+        null=True,
+        blank=True,
+    )
+    create_dt = models.DateTimeField(
+        verbose_name='Дата формирования отчёта',
+        null=True,
+        blank=True,
+    )
+    

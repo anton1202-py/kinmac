@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 
 import pandas as pd
 from celery_tasks.tasks import sales_report_statistic
@@ -9,6 +10,8 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Side
 
+from api_requests.wb_requests import get_check_storage_cost_report_status, get_create_storage_cost_report, get_storage_cost_report_data
+from kinmac.constants_file import wb_headers, BRAND_LIST
 from .models import (ArticleSaleAnalytic, CommonSaleAnalytic,
                      ReportForCommonSaleAnalytic)
 
@@ -94,3 +97,33 @@ def costprice_article_timport_from_excel(xlsx_file):
         
     else:
         return f'Вы пытались загрузить ошибочный файл {xlsx_file}.'
+    
+
+
+def calculate_storage_cost(date_start: str, date_finish: str) -> dict:
+    """
+    Рассчитывает стоимость хранения товара за входящие даны на ВБ
+    Входящие переменные
+    date_start - дата начала периода хранения
+    date_finish - дата завершения периода хранения
+
+    Возвращает словарь типа {nm_id: summ}
+    """
+    article_storagecost = {}
+    report_number = get_create_storage_cost_report(wb_headers, date_start, date_finish)['data']['taskId']
+    time.sleep(5)
+    status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
+    while status != 'done':
+        time.sleep(5)
+        status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
+    
+    costs_data = get_storage_cost_report_data(wb_headers, report_number)
+    for data in costs_data:
+        if data['brand'] in BRAND_LIST: 
+            if data['nmId'] in article_storagecost:
+                article_storagecost[data['nmId']] += data['warehousePrice']
+            else:
+                article_storagecost[data['nmId']] = data['warehousePrice']
+    return article_storagecost
+
+
