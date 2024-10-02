@@ -28,11 +28,11 @@ from .models import (Articles, Deliveries, Orders, Sales, SalesReportOnSales,
 def database_home(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    datas = SalesReportOnSales.objects.all()
-    for dat in datas:
-        if dat.brand_name not in BRAND_LIST:
-            dat.delete()
-    data = Articles.objects.all()
+    # datas = SalesReportOnSales.objects.all()
+    # for dat in datas:
+    #     if dat.brand_name not in BRAND_LIST:
+    #         dat.delete()
+    data = Articles.objects.all(brand__in=BRAND_LIST)
     context = {
         'data': data,
     }
