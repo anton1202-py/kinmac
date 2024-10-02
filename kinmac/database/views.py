@@ -32,7 +32,7 @@ def database_home(request):
     # for dat in datas:
     #     if dat.brand_name not in BRAND_LIST:
     #         dat.delete()
-    data = Articles.objects.all(brand__in=BRAND_LIST)
+    data = Articles.objects.filter(brand__in=BRAND_LIST)
     context = {
         'data': data,
     }
