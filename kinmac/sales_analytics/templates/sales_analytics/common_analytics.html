@@ -51,6 +51,14 @@
                 </form>
             </div>
         </div> -->
+        <div class="inner-form-data">
+            <form method="POST" enctype="multipart/form-data" class="big-filter-form">
+                {% csrf_token %}
+                <div class="inner-form-data">
+                    <input type="submit" name="update_data" class="custom-button-change" value="Обновить данные">
+                </div>
+            </form>
+        </div>
 
         <div class="table_wrapper">
             <table name="mytable" class="sortable" style="white-space: nowrap">

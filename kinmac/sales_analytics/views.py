@@ -21,6 +21,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from sales_analytics.periodic_tasks import commom_analytics_data
 from sales_analytics.supplyment import (costprice_article_timport_from_excel,
                                         template_for_article_costprice)
 
@@ -33,7 +34,10 @@ def common_sales_analytic(request):
         return redirect('login')
     page_name = 'Общий анализ продаж'
     analytic_data = CommonSaleAnalytic.objects.filter(article__brand__in=BRAND_LIST)
-   
+    if request.POST:
+        print(request.POST)
+        if 'update_data' in request.POST:
+            commom_analytics_data()
     context = {
         'page_name': page_name,
         'analytic_data': analytic_data,

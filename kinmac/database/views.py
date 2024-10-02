@@ -15,6 +15,7 @@ from django.db.models.functions import (ExtractWeek, ExtractYear,
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from check_report.signals import articles_analytics_data
 from kinmac.constants_file import BRAND_LIST
 from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost
 
@@ -27,13 +28,6 @@ from .models import (Articles, Deliveries, Orders, Sales, SalesReportOnSales,
 def database_home(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    # update_info_about_articles()
-    # articles_analytics_data()
-    update_daily_article_adv_cost()
-    # campaign_list_to_db()
-    # commom_analytics_data()
-    # sales_report_statistic()
-    # update_info_about_articles()
     datas = SalesReportOnSales.objects.all()
     for dat in datas:
         if dat.brand_name not in BRAND_LIST:
@@ -276,7 +270,10 @@ def sales_report(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
-    
+    all_data = SalesReportOnSales.objects.all().values('realizationreport_id').distinct()
+    # for data in all_data:
+    #     articles_analytics_data(data['realizationreport_id'])
+    # print(all_data)
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
         date.today()])).order_by('-realizationreport_id')
@@ -289,7 +286,10 @@ def sales_report(request):
         datestart = request.POST.get("datestart")
         datefinish = request.POST.get("datefinish")
         article_filter = request.POST.get("article_filter")
+        
         report_number_filter=request.POST.get("report_number_filter")
+        line_number_filter=request.POST.get("line_number_filter")
+        data = SalesReportOnSales.objects.filter().order_by('-realizationreport_id')
         if datestart:
             data = SalesReportOnSales.objects.filter(
                 Q(date_from__gt=datestart)).order_by('rrd_id')
@@ -298,11 +298,13 @@ def sales_report(request):
                 Q(date_from__lt=datefinish)).order_by('rrd_id')
         if article_filter:
             data = data.filter(
-                Q(sa_name=article_filter)).order_by('rrd_id')
+                Q(sa_name=article_filter.lower())).order_by('rrd_id')
         if report_number_filter:
-            print(data)
             data = data.filter(
                 Q(realizationreport_id=report_number_filter)).order_by('rrd_id')
+        if line_number_filter:
+            data = data.filter(
+                Q(rrd_id=line_number_filter)).order_by('rrd_id')
     paginator = Paginator(data, 100)
     page_number = request.GET.get('page')
     try:

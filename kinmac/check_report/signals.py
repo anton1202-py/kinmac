@@ -28,10 +28,8 @@ FILTER_MINUS_DATA_LIST = ['Сторно продаж', 'Возврат', 'Кор
 
 def articles_analytics_data(report_number):
     """Обновляет данные аналитики из еженедельных отчетов"""
-
     # Словарь вида: {номер_отчета: [{'nm_id': nom номер ВБ}}
     nm_ids_list = SalesReportOnSales.objects.filter(realizationreport_id=report_number, brand_name__in=BRAND_LIST).values('nm_id').distinct()
-
     analytic_date = SalesReportOnSales.objects.filter(realizationreport_id=report_number).first().date_from
     analytic_date_to = SalesReportOnSales.objects.filter(realizationreport_id=report_number).first().date_to
     date_start = analytic_date.strftime('%Y-%m-%d')
@@ -103,8 +101,7 @@ def articles_analytics_data(report_number):
 
             advertisment_cost_data = ArticleDailyCostToAdv.objects.filter(article=article, cost_date__range=(date_start, date_finish))
             advertisment = advertisment_cost_data.aggregate(cost_sum=Sum('cost'))['cost_sum'] if advertisment_cost_data else 0
-            
-            print(advertisment)
+
             refusals_and_returns_amount = return_amount
             average_percent_of_buyout = round((common_sales_with_returns / (common_sales_with_returns + refusals_and_returns_amount))*100, 2) if (common_sales_with_returns + refusals_and_returns_amount) != 0 else 0
             self_purchase = 0
