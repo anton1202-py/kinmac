@@ -271,9 +271,9 @@ def sales_report(request):
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
     all_data = SalesReportOnSales.objects.all().values('realizationreport_id').distinct()
-    for data in all_data:
-        articles_analytics_data(data['realizationreport_id'])
-    print(all_data)
+    # for data in all_data:
+    #     articles_analytics_data(data['realizationreport_id'])
+    # print(all_data)
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
         date.today()])).order_by('-realizationreport_id')
