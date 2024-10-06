@@ -91,20 +91,27 @@ def articles_analytics_data(report_number):
             penalty = sum_penalty
             logistic = sum_logistic
             average_logistic_cost = round((logistic / common_sales_with_returns), 2) if common_sales_with_returns != 0 else 0
+
+            # Расходы на хранение
             if nm_id_dict['nm_id'] in costs_data:
                 storage = costs_data[nm_id_dict['nm_id']]
             else:
                 storage = 0
-            ff_cost = CostPrice.objects.filter(article=article).last().ff_cost if CostPrice.objects.filter(article=article).last().ff_cost else 0
             
+            # Расходы на Фулфилмент
+            ff_cost = CostPrice.objects.filter(article=article).last().ff_cost if CostPrice.objects.filter(article=article).last().ff_cost else 0
             ff_service = ff_cost * common_sales_with_returns
 
+            # Рекламные расходы
             advertisment_cost_data = ArticleDailyCostToAdv.objects.filter(article=article, cost_date__range=(date_start, date_finish))
             advertisment = advertisment_cost_data.aggregate(cost_sum=Sum('cost'))['cost_sum'] if advertisment_cost_data else 0
+            print('advertisment', advertisment)
 
             refusals_and_returns_amount = return_amount
             average_percent_of_buyout = round((common_sales_with_returns / (common_sales_with_returns + refusals_and_returns_amount))*100, 2) if (common_sales_with_returns + refusals_and_returns_amount) != 0 else 0
             self_purchase = 0
+
+            # Налог
             tax = sale * 0.06
             profit = for_pay - returns - penalty + reimbursement_of_transportation_costs +  payment_defective_and_lost - costprice_of_sales - logistic - tax
             average_profit_for_one_piece = profit / common_sales_with_returns if common_sales_with_returns != 0 else 0

@@ -115,13 +115,11 @@ class CommonSaleAnalytic(models.Model):
     )
     advertisment = models.FloatField(
         verbose_name='Рекламная кампания',
-        null=True,
-        blank=True,
+        default=0,
     )
     self_purchase = models.FloatField(
         verbose_name='Самовыкуп',
-        null=True,
-        blank=True,
+        default=0,
     )
     refusals_and_returns_amount = models.FloatField(
         verbose_name='Количество отказов и возвратов',
@@ -285,18 +283,15 @@ class ArticleSaleAnalytic(models.Model):
     )
     advertisment = models.FloatField(
         verbose_name='Рекламная кампания',
-        null=True,
-        blank=True,
+        default=0,
     )
     self_purchase = models.FloatField(
         verbose_name='Самовыкуп',
-        null=True,
-        blank=True,
+        default=0,
     )
     refusals_and_returns_amount = models.FloatField(
         verbose_name='Количество отказов и возвратов',
-        null=True,
-        blank=True,
+        default=0,
     )
     sales_amount = models.FloatField(
         verbose_name='Продажи, шт',

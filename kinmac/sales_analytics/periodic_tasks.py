@@ -22,6 +22,7 @@ def commom_analytics_data():
                 common_report_obj.returns += data.returns
                 common_report_obj.costprice_of_sales += data.costprice_of_sales
                 common_report_obj.penalty += data.penalty
+                common_report_obj.advertisment += data.advertisment
                 common_report_obj.compensation_for_the_substituted += data.compensation_for_the_substituted
                 common_report_obj.reimbursement_of_transportation_costs += data.reimbursement_of_transportation_costs
                 common_report_obj.payment_defective_and_lost += data.payment_defective_and_lost
@@ -63,6 +64,7 @@ def commom_analytics_data():
                     logistic=data.logistic,
                     average_logistic_cost=data.average_logistic_cost,
                     storage=data.storage,
+                    advertisment=data.advertisment,
                     ff_service=data.ff_service,
                     self_purchase=data.self_purchase,
                     refusals_and_returns_amount=data.refusals_and_returns_amount,
