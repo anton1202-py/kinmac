@@ -73,10 +73,10 @@ def calculate_storage_cost() -> None:
         date = str(date)
         print(date)
         report_number = get_create_storage_cost_report(wb_headers, date, date)['data']['taskId']
-        time.sleep(5)
+        time.sleep(15)
         status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
         while status != 'done':
-            time.sleep(5)
+            time.sleep(10)
             status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
 
         costs_data = get_storage_cost_report_data(wb_headers, report_number)
