@@ -53,6 +53,10 @@ app.conf.beat_schedule = {
         "task": "database.periodic_tasks.update_info_about_articles",
         "schedule": crontab(hour=22, minute=1)
     },
+    "database_update_storagecost": {
+        "task": "database.periodic_tasks.calculate_storage_cost",
+        "schedule": crontab(hour=22, minute=12)
+    },
     # "sales_analytics_article_analytic_update": {
     #     "task": "sales_analytics.periodic_tasks.articles_analytics_data",
     #     "schedule": crontab(hour=22, minute=1)

@@ -67,63 +67,35 @@ def commom_analytics_data():
             profitability = (profit / realization_summ_sale) * 100 if realization_summ_sale != 0 else 0
 
 
+            search_params = {'article': article}
 
+            defaults = {
+                'realization_summ_sale': realization_summ_sale,
+                'for_pay': for_pay,
+                'sale': sale,
+                'returns': returns,
+                'costprice_of_sales': costprice_of_sales,
+                'penalty': penalty,
+                'advertisment': advertisment,
+                'compensation_for_the_substituted': compensation_for_the_substituted,
+                'reimbursement_of_transportation_costs': reimbursement_of_transportation_costs,
+                'payment_defective_and_lost': payment_defective_and_lost,
+                'logistic': logistic,
+                'average_logistic_cost': average_logistic_cost,
+                'storage': storage,
+                'ff_service': ff_service,
+                'self_purchase': self_purchase,
+                'refusals_and_returns_amount': refusals_and_returns_amount,
+                'sales_amount': sales_amount,
+                'common_sales_with_returns': common_sales_with_returns,
+                'average_percent_of_buyout': average_percent_of_buyout,
+                'profit': profit,
+                'average_profit_for_one_piece': average_profit_for_one_piece,
+                'tax': tax,
+                'average_price_before_spp': average_price_before_spp,
+                'profit_with_self_purchase': profit_with_self_purchase,
+                'roi': roi,
+                'profitability': profitability
+            }
 
-            if CommonSaleAnalytic.objects.filter(article=article).exists():
-                common_report_obj = CommonSaleAnalytic.objects.get(article=article)
-                common_report_obj.realization_summ_sale = realization_summ_sale
-                common_report_obj.for_pay = for_pay
-                common_report_obj.sale = sale
-                common_report_obj.returns = returns
-                common_report_obj.costprice_of_sales = costprice_of_sales
-                common_report_obj.penalty = penalty
-                common_report_obj.advertisment = advertisment
-                common_report_obj.compensation_for_the_substituted = compensation_for_the_substituted
-                common_report_obj.reimbursement_of_transportation_costs = reimbursement_of_transportation_costs
-                common_report_obj.payment_defective_and_lost = payment_defective_and_lost
-                common_report_obj.logistic = logistic
-                common_report_obj.average_logistic_cost = average_logistic_cost
-                common_report_obj.storage = storage
-                common_report_obj.ff_service = ff_service
-                common_report_obj.self_purchase = self_purchase
-                common_report_obj.refusals_and_returns_amount = refusals_and_returns_amount
-                common_report_obj.sales_amount = sales_amount
-                common_report_obj.common_sales_with_returns = common_sales_with_returns
-                common_report_obj.average_percent_of_buyout = average_percent_of_buyout
-                common_report_obj.profit = profit
-                common_report_obj.average_profit_for_one_piece = average_profit_for_one_piece
-                common_report_obj.tax = tax
-                common_report_obj.average_price_before_spp  = average_price_before_spp
-                common_report_obj.profit_with_self_purchase = profit_with_self_purchase
-                common_report_obj.roi = roi
-                common_report_obj.profitability = profitability
-                common_report_obj.save()
-            else:
-                CommonSaleAnalytic(article=article,
-                    realization_summ_sale = realization_summ_sale,
-                    for_pay = for_pay,
-                    sale = sale,
-                    returns = returns,
-                    costprice_of_sales = costprice_of_sales,
-                    penalty = penalty,
-                    advertisment = advertisment,
-                    compensation_for_the_substituted = compensation_for_the_substituted,
-                    reimbursement_of_transportation_costs = reimbursement_of_transportation_costs,
-                    payment_defective_and_lost = payment_defective_and_lost,
-                    logistic = logistic,
-                    average_logistic_cost = average_logistic_cost,
-                    storage = storage,
-                    ff_service = ff_service,
-                    self_purchase = self_purchase,
-                    refusals_and_returns_amount = refusals_and_returns_amount,
-                    sales_amount = sales_amount,
-                    common_sales_with_returns = common_sales_with_returns,
-                    average_percent_of_buyout = average_percent_of_buyout,
-                    profit = profit,
-                    average_profit_for_one_piece = average_profit_for_one_piece,
-                    tax = tax,
-                    average_price_before_spp  = average_price_before_spp,
-                    profit_with_self_purchase = profit_with_self_purchase,
-                    roi = roi,
-                    profitability = profitability).save()
-
+            CommonSaleAnalytic.objects.update_or_create(defaults=defaults, **search_params)

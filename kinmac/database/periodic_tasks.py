@@ -54,7 +54,7 @@ def calculate_storage_cost() -> None:
     year = 2024
 
     # Начало года
-    start_date = datetime(year, 1, 1)
+    start_date = datetime(year, 4, 22)
 
     # Конец года
     end_date = datetime(year, 10, 7)
@@ -88,12 +88,13 @@ def calculate_storage_cost() -> None:
                     article_storagecost[data['nmId']] = data['warehousePrice']
 
         for article, amount in article_storagecost.items():
-            article_obj = Articles.objects.get(nomenclatura_wb=article)
-            defaults={'storage_cost': amount}
-            search_params = {'article': article_obj, 'start_date': date}
-            
-            StorageCost.objects.update_or_create(
-                defaults=defaults, **search_params
-            )
+            if Articles.objects.filter(nomenclatura_wb=article).exists():
+                article_obj = Articles.objects.get(nomenclatura_wb=article)
+                defaults={'storage_cost': amount}
+                search_params = {'article': article_obj, 'start_date': date}
+
+                StorageCost.objects.update_or_create(
+                    defaults=defaults, **search_params
+                )
 
     
