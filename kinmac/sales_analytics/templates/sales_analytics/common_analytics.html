@@ -9,7 +9,7 @@
          <div class="top-befor-header">
             <h1>{{ page_name }}</h1>
         </div>
-        <!-- <div class='filter-data' style="display: flex;">
+        <div class='filter-data' style="display: flex;">
             <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
                 <div class="inner-form-data">
@@ -25,40 +25,21 @@
                     <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
                 </div>
                 <div class="inner-form-data">
-                    <span>Номер отчета</span>
-                    <input type="text"  name="report_number_filter" class="big-filter-form" id="report_number_filter">
-                </div>
-                <div class="inner-form-data">
                     <br>
                     <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
                 </div>
-                <div class="inner-form-data">
-                    <br>
-                    <input type="Submit" id="filter" name="reconciliation" value="Свести отчеты" class="custom-button-change"/>
-                </div>
             </form>
             <div class="inner-form-data">
-                <form method="POST" id="uploadForm" enctype="multipart/form-data" class="big-filter-form">
+                <form method="POST" enctype="multipart/form-data" class="big-filter-form">
                     {% csrf_token %}
                     <div class="inner-form-data">
-                        <label for="import_data" title="Загрузить группы из Excel">
-                            <span class="material-symbols-outlined">
-                                download
-                            </span>
-                        </label>
-                        <input type="file" id="import_data" name="import_file" class="input-file" style="margin-top: 0px;">
+                        <br>
+                        <input type="submit" name="update_data" class="custom-button-change" value="Обновить данные">
                     </div>
                 </form>
             </div>
-        </div> -->
-        <div class="inner-form-data">
-            <form method="POST" enctype="multipart/form-data" class="big-filter-form">
-                {% csrf_token %}
-                <div class="inner-form-data">
-                    <input type="submit" name="update_data" class="custom-button-change" value="Обновить данные">
-                </div>
-            </form>
         </div>
+
 
         <div class="table_wrapper">
             <table name="mytable" class="sortable" style="white-space: nowrap">

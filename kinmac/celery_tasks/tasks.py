@@ -16,7 +16,7 @@ from api_requests.wb_requests import (get_report_detail_by_period,
                                       get_stock_from_webpage_api,
                                       wb_article_data_from_api)
 from celery_tasks.celery import app
-from check_report.supplyment import write_sales_report_data_to_database
+from check_report.supplyment import report_reconciliation, write_sales_report_data_to_database
 from database.models import SalesReportOnSales, WeeklyReportInDatabase
 from database.supplyment import (add_data_delivery_to_db,
                                  add_data_orders_from_site_to_db,
@@ -321,3 +321,4 @@ def sales_report_statistic():
                     date_to=info['date_to'],
                     create_dt=info['create_dt']
                 ).save()
+        report_reconciliation()

@@ -49,52 +49,29 @@ def calculate_storage_cost() -> None:
     Возвращает словарь типа {nm_id: summ}
     """
     date = datetime.now().date()
-    print(date)
     article_storagecost = {}
-    year = 2024
-
-    # Начало года
-    start_date = datetime(year, 4, 22)
-
-    # Конец года
-    end_date = datetime(year, 10, 7)
-
-    # Список для хранения дат
-    dates = []
-
-    # Цикл для получения всех дат
-    current_date = start_date
-    while current_date <= end_date:
-        dates.append(current_date.date())  # Добавляем дату в список
-        current_date += timedelta(days=1)   # Переходим к следующему дню
-
-    # Выводим все даты
-    for date in dates:
-        date = str(date)
-        print(date)
-        report_number = get_create_storage_cost_report(wb_headers, date, date)['data']['taskId']
-        time.sleep(15)
+    
+    date = str(date)
+    report_number = get_create_storage_cost_report(wb_headers, date, date)['data']['taskId']
+    time.sleep(15)
+    status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
+    while status != 'done':
+        time.sleep(10)
         status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
-        while status != 'done':
-            time.sleep(10)
-            status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
-
-        costs_data = get_storage_cost_report_data(wb_headers, report_number)
-        for data in costs_data:
-            if data['brand'] in BRAND_LIST: 
-                if data['nmId'] in article_storagecost:
-                    article_storagecost[data['nmId']] += data['warehousePrice']
-                else:
-                    article_storagecost[data['nmId']] = data['warehousePrice']
-
-        for article, amount in article_storagecost.items():
-            if Articles.objects.filter(nomenclatura_wb=article).exists():
-                article_obj = Articles.objects.get(nomenclatura_wb=article)
-                defaults={'storage_cost': amount}
-                search_params = {'article': article_obj, 'start_date': date}
-
-                StorageCost.objects.update_or_create(
-                    defaults=defaults, **search_params
-                )
+    costs_data = get_storage_cost_report_data(wb_headers, report_number)
+    for data in costs_data:
+        if data['brand'] in BRAND_LIST: 
+            if data['nmId'] in article_storagecost:
+                article_storagecost[data['nmId']] += data['warehousePrice']
+            else:
+                article_storagecost[data['nmId']] = data['warehousePrice']
+    for article, amount in article_storagecost.items():
+        if Articles.objects.filter(nomenclatura_wb=article).exists():
+            article_obj = Articles.objects.get(nomenclatura_wb=article)
+            defaults={'storage_cost': amount}
+            search_params = {'article': article_obj, 'start_date': date}
+            StorageCost.objects.update_or_create(
+                defaults=defaults, **search_params
+            )
 
     

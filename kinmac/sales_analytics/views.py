@@ -33,11 +33,15 @@ def common_sales_analytic(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     page_name = 'Общий анализ продаж'
-    analytic_data = CommonSaleAnalytic.objects.filter(article__brand__in=BRAND_LIST)
+    analytic_data = CommonSaleAnalytic.objects.all()
     if request.POST:
-        print(request.POST)
+        datestart = request.POST.get('datestart', '')
+        datefinish = request.POST.get('datefinish', '')
+        article_filter = request.POST.get('article_filter', '')
+        commom_analytics_data(datestart=datestart, datefinish=datefinish, article_filter=article_filter)
         if 'update_data' in request.POST:
             commom_analytics_data()
+        analytic_data = CommonSaleAnalytic.objects.all()
     context = {
         'page_name': page_name,
         'analytic_data': analytic_data,
@@ -45,21 +49,6 @@ def common_sales_analytic(request):
     
     return render(request, 'sales_analytics/common_analytics.html', context)
 
-def common_sales_analytic(request):
-    if str(request.user) == 'AnonymousUser':
-        return redirect('login')
-    page_name = 'Общий анализ продаж'
-    analytic_data = CommonSaleAnalytic.objects.filter(article__brand__in=BRAND_LIST)
-    if request.POST:
-        print(request.POST)
-        if 'update_data' in request.POST:
-            commom_analytics_data()
-    context = {
-        'page_name': page_name,
-        'analytic_data': analytic_data,
-    }
-    
-    return render(request, 'sales_analytics/common_analytics.html', context)
 
 def add_costprice_article(request):
     """Страница с добавлением себестоимости артикула"""

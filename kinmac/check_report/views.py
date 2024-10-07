@@ -27,9 +27,6 @@ def check_report(request):
         return redirect('login')
     page_name = 'Сверка еженедельных отчетов'
     data = CommonSalesReportData.objects.all().order_by('realizationreport_id')
-    # for i in data:
-    #     i.delete()
-    # sales_report_statistic()
     if request.POST:
         if 'reconciliation' in request.POST:
             report_reconciliation()
