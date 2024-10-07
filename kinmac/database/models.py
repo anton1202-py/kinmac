@@ -1048,4 +1048,27 @@ class WeeklyReportInDatabase(models.Model):
         null=True,
         blank=True,
     )
+
+
+class StorageCost(models.Model):
+    """Стоимость хранения артикулов по датам"""
+    article = models.ForeignKey(
+        Articles,
+        verbose_name='Артикул',
+        on_delete=models.SET_NULL,
+        related_name='article_storage_cost',
+        blank=True,
+        null=True,
+    )
+    start_date = models.DateField(
+        verbose_name='Начало периода',
+        null=True,
+        blank=True,
+    )
+    storage_cost = models.FloatField(
+        verbose_name='Затраты на хранение',
+    )
     
+    class Meta:
+        verbose_name = 'Стоимость хранения артикулов по датам'
+        verbose_name_plural = 'Стоимость хранения артикулов по датам'

@@ -45,18 +45,35 @@ def common_sales_analytic(request):
     
     return render(request, 'sales_analytics/common_analytics.html', context)
 
+def common_sales_analytic(request):
+    if str(request.user) == 'AnonymousUser':
+        return redirect('login')
+    page_name = 'Общий анализ продаж'
+    analytic_data = CommonSaleAnalytic.objects.filter(article__brand__in=BRAND_LIST)
+    if request.POST:
+        print(request.POST)
+        if 'update_data' in request.POST:
+            commom_analytics_data()
+    context = {
+        'page_name': page_name,
+        'analytic_data': analytic_data,
+    }
+    
+    return render(request, 'sales_analytics/common_analytics.html', context)
+
 def add_costprice_article(request):
     """Страница с добавлением себестоимости артикула"""
     page_name = 'Себестоимость товаров'
-    costprice_data = CostPrice.objects.filter(article__brand='KINMAC')
+    
 
-    articles_data = Articles.objects.all()
+    articles_data = Articles.objects.filter(brand__in=BRAND_LIST)
 
     for article in articles_data:
         if not CostPrice.objects.filter(article=article).exists():
             CostPrice(
                 article=article
             ).save()
+    costprice_data = CostPrice.objects.filter(article__brand__in=BRAND_LIST)
     error_text= []
     if request.POST:
         if 'export' in request.POST or 'import_file' in request.FILES:

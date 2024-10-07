@@ -4,7 +4,7 @@ import pandas as pd
 from celery_tasks.tasks import (add_data_sales, add_data_stock_api,
                                 add_stock_data_site, delivery_statistic,
                                 orders_statistic, sales_report_statistic)
-from database.periodic_tasks import update_info_about_articles
+from database.periodic_tasks import calculate_storage_cost, update_info_about_articles
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -271,9 +271,10 @@ def sales_report(request):
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
     all_data = SalesReportOnSales.objects.all().values('realizationreport_id').distinct()
-    for data in all_data:
-        articles_analytics_data(data['realizationreport_id'])
-    print(all_data)
+    calculate_storage_cost()
+    # for data in all_data:
+    #     articles_analytics_data(data['realizationreport_id'])
+    # print(all_data)
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
         date.today()])).order_by('-realizationreport_id')

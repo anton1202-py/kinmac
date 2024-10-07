@@ -183,14 +183,10 @@
                             <input type="hidden" name="report_number" value="{{ el.realizationreport_id }}">
                             <input type="hidden" name="report_date_from" value="{{ el.date_from|date:'Y-m-d' }}">
                             <input type="hidden" name="report_date_to" value="{{ el.date_to|date:'Y-m-d' }}">
-                            
-                            
-                            <label for="uploadZip-{{ el.realizationreport_id }}" title="Загрузить из ZIP">
+                            <label for="{{ el.realizationreport_id }}" title="Загрузить из ZIP">
                                 Загрузить из ZIP
                             </label>
-                            <input type="file" id="uploadZip-{{ el.realizationreport_id }}" name="reload_zip" class="input-file" style="margin-top: 0px;">
-                            
-
+                            <input type="file" id="{{ el.realizationreport_id }}" name="reload_zip" class="input-file" style="margin-top: 0px;">
                         </form>
                     </td>
                 </tr>
@@ -225,7 +221,7 @@
         document.querySelectorAll('input[type="file"]').forEach(function(input) {
             input.addEventListener('change', function() {
                 // Получаем id формы, к которой принадлежит этот input
-                var reportId = this.id.split('-')[1]; // Получаем часть id после "-"
+                var reportId = this.id; // Получаем часть id после "-"
                 console.log(reportId)
                 var form = document.getElementById('uploadZip-' + reportId);
                 form.submit();

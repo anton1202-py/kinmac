@@ -1,5 +1,5 @@
 from celery_tasks.celery import app
-
+from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from database.models import Articles, CostPrice
                              
 
@@ -11,71 +11,119 @@ def commom_analytics_data():
     """Обновляет общие данные аналитики из аналитика каждого артикула"""
     articles_list = Articles.objects.filter(brand__in=BRAND_LIST)
     for article in articles_list:
-        analytic_queryset = ArticleSaleAnalytic.objects.filter(article=article)
-        article_costprice = CostPrice.objects.filter(article=article).last().costprice if CostPrice.objects.filter(article=article).last().costprice else 0
-        for data in analytic_queryset:
+        if ArticleSaleAnalytic.objects.filter(article=article).exists():
+            article_costprice = CostPrice.objects.filter(article=article).last().costprice if CostPrice.objects.filter(article=article).last().costprice else 0
+            analytic_queryset = ArticleSaleAnalytic.objects.filter(article=article).aggregate(
+                realization_summ_sale=Sum('realization_summ_sale'),
+                for_pay=Sum('for_pay'),
+                sale=Sum('sale'),
+                returns=Sum('returns'),
+                costprice_of_sales=Sum('costprice_of_sales'),
+                penalty=Sum('penalty'),
+                advertisment=Sum('advertisment'),
+                compensation_for_the_substituted=Sum('compensation_for_the_substituted'),
+                reimbursement_of_transportation_costs=Sum('reimbursement_of_transportation_costs'),
+                payment_defective_and_lost=Sum('payment_defective_and_lost'),
+                logistic=Sum('logistic'),
+                storage=Sum('storage'),
+                ff_service=Sum('ff_service'),
+                self_purchase=Sum('self_purchase'),
+                refusals_and_returns_amount=Sum('refusals_and_returns_amount'),
+                sales_amount=Sum('sales_amount'),
+                common_sales_with_returns=Sum('common_sales_with_returns'),
+                tax=Sum('tax'),
+                profit=Sum('profit'),
+                profit_with_self_purchase=Sum('profit_with_self_purchase'),
+            )
+
+            realization_summ_sale = analytic_queryset['realization_summ_sale']
+            for_pay = analytic_queryset['for_pay']
+            sale = analytic_queryset['sale']
+            returns = analytic_queryset['returns']
+            costprice_of_sales = analytic_queryset['costprice_of_sales']
+            penalty =  analytic_queryset['penalty']
+            advertisment =  analytic_queryset['advertisment']
+            compensation_for_the_substituted =  analytic_queryset['compensation_for_the_substituted']
+            reimbursement_of_transportation_costs =  analytic_queryset['reimbursement_of_transportation_costs']
+            payment_defective_and_lost =  analytic_queryset['payment_defective_and_lost']
+            logistic =  analytic_queryset['logistic']
+            storage =  analytic_queryset['storage']
+            ff_service =  analytic_queryset['ff_service']
+            self_purchase =  analytic_queryset['self_purchase']
+            refusals_and_returns_amount = analytic_queryset['refusals_and_returns_amount']
+            sales_amount =  analytic_queryset['sales_amount']
+            common_sales_with_returns =  analytic_queryset['common_sales_with_returns']
+            tax = analytic_queryset['tax']
+            profit = analytic_queryset['profit']
+            profit_with_self_purchase = analytic_queryset['profit_with_self_purchase']
+            average_logistic_cost = round((logistic / common_sales_with_returns), 2) if common_sales_with_returns != 0 else 0
+            # TODO Проверить это значение. Есть вероятность ошибки. Дублируется значение 'common_sales_with_returns'
+            sum_sales_with_returns = common_sales_with_returns
+            sum_common_sales_with_returns = common_sales_with_returns + refusals_and_returns_amount
+            average_percent_of_buyout = round((sum_sales_with_returns / sum_common_sales_with_returns)*100, 2) if sum_common_sales_with_returns != 0 else 0
+            average_profit_for_one_piece = profit / sum_common_sales_with_returns if sum_common_sales_with_returns != 0 else 0
+            average_price_before_spp = realization_summ_sale/common_sales_with_returns if common_sales_with_returns != 0 else 0
+            roi = (average_profit_for_one_piece / (article_costprice + ff_service))*100 if (article_costprice + ff_service) != 0  else 0
+            profitability = (profit / realization_summ_sale) * 100 if realization_summ_sale != 0 else 0
+
+
+
+
             if CommonSaleAnalytic.objects.filter(article=article).exists():
                 common_report_obj = CommonSaleAnalytic.objects.get(article=article)
-                common_report_obj.realization_summ_sale += data.realization_summ_sale
-                common_report_obj.for_pay += data.for_pay
-                common_report_obj.sale += data.sale
-                common_report_obj.returns += data.returns
-                common_report_obj.costprice_of_sales += data.costprice_of_sales
-                common_report_obj.penalty += data.penalty
-                common_report_obj.advertisment += data.advertisment
-                common_report_obj.compensation_for_the_substituted += data.compensation_for_the_substituted
-                common_report_obj.reimbursement_of_transportation_costs += data.reimbursement_of_transportation_costs
-                common_report_obj.payment_defective_and_lost += data.payment_defective_and_lost
-                common_report_obj.logistic += data.logistic
-                common_report_obj.average_logistic_cost = round(((common_report_obj.logistic + data.logistic) / (common_report_obj.common_sales_with_returns + data.common_sales_with_returns)), 2) if (common_report_obj.common_sales_with_returns + data.common_sales_with_returns) != 0 else 0
-                common_report_obj.storage += data.storage
-                common_report_obj.ff_service += data.ff_service
-                common_report_obj.self_purchase += data.self_purchase
-                common_report_obj.refusals_and_returns_amount += data.refusals_and_returns_amount
-                common_report_obj.sales_amount += data.sales_amount
-                common_report_obj.common_sales_with_returns += data.common_sales_with_returns
-                sum_sales_with_returns = common_report_obj.common_sales_with_returns + data.common_sales_with_returns
-                sum_common_sales_with_returns = (common_report_obj.common_sales_with_returns + 
-                                                 data.common_sales_with_returns + 
-                                                 common_report_obj.refusals_and_returns_amount + 
-                                                 data.refusals_and_returns_amount)
-                common_report_obj.average_percent_of_buyout = round((sum_sales_with_returns / sum_common_sales_with_returns)*100, 2) if sum_common_sales_with_returns != 0 else 0
-                sum_profit = common_report_obj.profit + data.profit
-                sum_common_sales_with_returns = common_report_obj.common_sales_with_returns + data.common_sales_with_returns
-                common_report_obj.average_profit_for_one_piece = sum_profit / sum_common_sales_with_returns if sum_common_sales_with_returns != 0 else 0
-                common_report_obj.tax += data.tax
-                common_report_obj.profit += data.profit
-                common_report_obj.profit_with_self_purchase += data.profit_with_self_purchase
-                common_report_obj.roi = common_report_obj.average_profit_for_one_piece / (article_costprice + data.ff_service) if (article_costprice + data.ff_service) != 0  else 0
-                common_report_obj.profitability = (common_report_obj.profit / common_report_obj.realization_summ_sale) * 100 if common_report_obj.realization_summ_sale != 0 else 0
+                common_report_obj.realization_summ_sale = realization_summ_sale
+                common_report_obj.for_pay = for_pay
+                common_report_obj.sale = sale
+                common_report_obj.returns = returns
+                common_report_obj.costprice_of_sales = costprice_of_sales
+                common_report_obj.penalty = penalty
+                common_report_obj.advertisment = advertisment
+                common_report_obj.compensation_for_the_substituted = compensation_for_the_substituted
+                common_report_obj.reimbursement_of_transportation_costs = reimbursement_of_transportation_costs
+                common_report_obj.payment_defective_and_lost = payment_defective_and_lost
+                common_report_obj.logistic = logistic
+                common_report_obj.average_logistic_cost = average_logistic_cost
+                common_report_obj.storage = storage
+                common_report_obj.ff_service = ff_service
+                common_report_obj.self_purchase = self_purchase
+                common_report_obj.refusals_and_returns_amount = refusals_and_returns_amount
+                common_report_obj.sales_amount = sales_amount
+                common_report_obj.common_sales_with_returns = common_sales_with_returns
+                common_report_obj.average_percent_of_buyout = average_percent_of_buyout
+                common_report_obj.profit = profit
+                common_report_obj.average_profit_for_one_piece = average_profit_for_one_piece
+                common_report_obj.tax = tax
+                common_report_obj.average_price_before_spp  = average_price_before_spp
+                common_report_obj.profit_with_self_purchase = profit_with_self_purchase
+                common_report_obj.roi = roi
+                common_report_obj.profitability = profitability
                 common_report_obj.save()
             else:
-                CommonSaleAnalytic(
-                    article=article,
-                    realization_summ_sale=data.realization_summ_sale,
-                    for_pay=data.for_pay,
-                    sale=data.sale,
-                    returns=data.returns,
-                    costprice_of_sales=data.costprice_of_sales,
-                    penalty=data.penalty,
-                    compensation_for_the_substituted=data.compensation_for_the_substituted,
-                    reimbursement_of_transportation_costs=data.reimbursement_of_transportation_costs,
-                    payment_defective_and_lost=data.payment_defective_and_lost,
-                    logistic=data.logistic,
-                    average_logistic_cost=data.average_logistic_cost,
-                    storage=data.storage,
-                    advertisment=data.advertisment,
-                    ff_service=data.ff_service,
-                    self_purchase=data.self_purchase,
-                    refusals_and_returns_amount=data.refusals_and_returns_amount,
-                    sales_amount=data.sales_amount,
-                    common_sales_with_returns=data.common_sales_with_returns,
-                    average_percent_of_buyout=data.average_percent_of_buyout,
-                    average_profit_for_one_piece=data.average_profit_for_one_piece,
-                    tax=data.tax,
-                    profit=data.profit,
-                    profit_with_self_purchase=data.profit_with_self_purchase,
-                    roi=data.roi,
-                    profitability=data.profitability
-                ).save()
+                CommonSaleAnalytic(article=article,
+                    realization_summ_sale = realization_summ_sale,
+                    for_pay = for_pay,
+                    sale = sale,
+                    returns = returns,
+                    costprice_of_sales = costprice_of_sales,
+                    penalty = penalty,
+                    advertisment = advertisment,
+                    compensation_for_the_substituted = compensation_for_the_substituted,
+                    reimbursement_of_transportation_costs = reimbursement_of_transportation_costs,
+                    payment_defective_and_lost = payment_defective_and_lost,
+                    logistic = logistic,
+                    average_logistic_cost = average_logistic_cost,
+                    storage = storage,
+                    ff_service = ff_service,
+                    self_purchase = self_purchase,
+                    refusals_and_returns_amount = refusals_and_returns_amount,
+                    sales_amount = sales_amount,
+                    common_sales_with_returns = common_sales_with_returns,
+                    average_percent_of_buyout = average_percent_of_buyout,
+                    profit = profit,
+                    average_profit_for_one_piece = average_profit_for_one_piece,
+                    tax = tax,
+                    average_price_before_spp  = average_price_before_spp,
+                    profit_with_self_purchase = profit_with_self_purchase,
+                    roi = roi,
+                    profitability = profitability).save()
 

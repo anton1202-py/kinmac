@@ -104,8 +104,6 @@ def report_reconciliation():
         total_paid = ppvz_for_pay - delivery_rub - storage_fee - acceptance_goods - deduction - common_penalty
         total_paid = round(total_paid, 2)
 
-        if report['realizationreport_id'] == 254378741:
-            print('deduction',deduction)
         if not CommonSalesReportData.objects.filter(
             realizationreport_id=report['realizationreport_id'],
             date_from=report['date_from'],
@@ -460,10 +458,22 @@ def rewrite_sales_order_from_zip(date_from, date_to, realizationreport_id, zip_a
     with ZipFile(zip_address, "r") as myzip:
         for item in myzip.namelist():
             content = myzip.read(item)
-            excel_data_common = pd.read_excel(content)
             add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationreport_id, content)
-            column_list = excel_data_common.columns.tolist()
     report_reconciliation()
+    update_weekly_data = WeeklyReportInDatabase.objects.filter(
+        realizationreport_id=realizationreport_id)
+    if update_weekly_data:
+        for data in update_weekly_data:
+            data.date_from=date_from
+            data.date_to=date_to
+            data.save()
+    else:
+        WeeklyReportInDatabase(
+            realizationreport_id=realizationreport_id,
+            date_from=date_from,
+            date_to=date_to
+        ).save()
+    
 
 def add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationreport_id, xlsx_file):
     """Записывает данные в базу данных из файла ZIP"""
