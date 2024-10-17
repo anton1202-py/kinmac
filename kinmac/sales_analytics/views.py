@@ -1,26 +1,10 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime
+from database.models import Articles, CostPrice
 
-import pandas as pd
-from celery_tasks.tasks import sales_report_statistic
-from check_report.supplyment import (add_data_to_db_from_excel,
-                                     download_report_data_for_check,
-                                     report_reconciliation,
-                                     rewrite_sales_order,
-                                     rewrite_sales_order_from_zip)
-from database.models import Articles, CostPrice, SalesReportOnSales
-from database.periodic_tasks import update_info_about_articles
-from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import (Case, Count, IntegerField, Max, OuterRef, Q,
-                              Subquery, Sum, When)
-from django.db.models.functions import (ExtractMonth, ExtractWeek, ExtractYear,
-                                        TruncWeek)
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
-from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+
+from django.views.generic import ListView
 from sales_analytics.periodic_tasks import commom_analytics_data
 from sales_analytics.supplyment import (costprice_article_timport_from_excel,
                                         template_for_article_costprice)
