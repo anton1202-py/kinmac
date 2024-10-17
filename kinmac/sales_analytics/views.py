@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 
 from django.views.generic import ListView
 from sales_analytics.periodic_tasks import commom_analytics_data
-from sales_analytics.supplyment import (costprice_article_timport_from_excel,
+from sales_analytics.supplyment import (common_analytic_excel_file_export, costprice_article_timport_from_excel,
                                         template_for_article_costprice)
 
 from .models import ArticleSaleAnalytic, CommonSaleAnalytic
@@ -25,6 +25,9 @@ def common_sales_analytic(request):
         commom_analytics_data(datestart=datestart, datefinish=datefinish, article_filter=article_filter)
         if 'update_data' in request.POST:
             commom_analytics_data()
+        if request.POST.get('export') == 'create_file':
+            return common_analytic_excel_file_export(
+                analytic_data)
         analytic_data = CommonSaleAnalytic.objects.all()
     context = {
         'page_name': page_name,
