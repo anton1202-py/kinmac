@@ -485,6 +485,14 @@ form {
     display: flex;
 }
 
+.big-filter-form {
+    padding: 0;
+    display: flex;
+    width: 100%;
+    margin: 0;
+    gap: 0.2rem;
+}
+
 .filter-data .big-filter-form input,
 .filter-data .big-filter-form select{
 	border-radius: var(--border-radius-1);
@@ -506,12 +514,6 @@ form {
     gap: 1rem;
 }
 
-.big-filter-form {
-    display: flex;
-    width: 100%;
-    margin: 0;
-    gap: 0.2rem;
-}
 
 .filter-data form .inner-form-data-button button {
     padding: 5px 8px 5px 8px;
