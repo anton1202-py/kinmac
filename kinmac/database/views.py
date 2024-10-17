@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from check_report.signals import articles_analytics_data
 from kinmac.constants_file import BRAND_LIST
-from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost
+from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost, write_daily_adv_statistic
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
                     SelectDateStocksForm)
@@ -28,10 +28,6 @@ from .models import (Articles, Deliveries, Orders, Sales, SalesReportOnSales,
 def database_home(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    # datas = SalesReportOnSales.objects.all()
-    # for dat in datas:
-    #     if dat.brand_name not in BRAND_LIST:
-    #         dat.delete()
     data = Articles.objects.filter(brand__in=BRAND_LIST)
     context = {
         'data': data,

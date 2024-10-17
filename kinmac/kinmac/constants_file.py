@@ -12,7 +12,6 @@ WB_COMMON_KEY = os.getenv('WB_COMMON_KEY')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 TELEGRAM_ADMIN_CHAT_ID = os.getenv('TELEGRAM_ADMIN_CHAT_ID')
-bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 wb_headers = {
     'Content-Type': 'application/json',

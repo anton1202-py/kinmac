@@ -3,7 +3,7 @@ import os
 import traceback
 from datetime import date, datetime, timedelta
 from time import sleep
-
+import jwt
 import pandas as pd
 import psycopg2
 import requests
@@ -50,6 +50,24 @@ def error_message(function_name: str, function, error_text: str) -> str:
                      f'Техническая информация:\n {tb_str}')
     return message_error
 
+@app.task
+def check_wb_toket_expire():
+    """
+    Проверяет срок годности токена.
+    Если срок годности меньше 5 дней - отправляет сообщение в ТГ
+    """
+    
+    api_key = wb_headers['Authorization']
+    decoded = jwt.decode(api_key, options={"verify_signature": False})
+    timestamp = decoded['exp']
+    dt_object = datetime.fromtimestamp(timestamp)
+    # Форматирование в строку
+    delta_time = dt_object - datetime.now()
+    delta_days = delta_time.days
+    if delta_days < 5:
+        message = f'Токен ВБ истекает через {delta_days} дней. Срочно обновите его'
+        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
+                         text=message)
 
 @app.task
 def add_data_stock_api():

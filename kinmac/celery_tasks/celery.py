@@ -13,6 +13,10 @@ app.config_from_object('celery_tasks.celeryconfig')
 
 
 app.conf.beat_schedule = {
+    "check_token_life": {
+        "task": "celery_tasks.tasks.check_wb_toket_expire",
+        "schedule": crontab(hour=10, minute=1)
+    },
     "add_data_stock_api": {
         "task": "celery_tasks.tasks.add_data_stock_api",
         "schedule": crontab(hour=15, minute=17)
@@ -74,4 +78,11 @@ app.conf.beat_schedule = {
         "task": "reklama.periodic_tasks.update_daily_article_adv_cost",
         "schedule": crontab(hour=23, minute=40)
     },
+
+    "reklama_daily_statistic": {
+        "task": "reklama.periodic_tasks.write_daily_adv_statistic",
+        "schedule": crontab(hour=23, minute=50)
+    },
+
+    
 }

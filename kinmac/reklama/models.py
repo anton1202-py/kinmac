@@ -60,3 +60,81 @@ class ArticleDailyCostToAdv(models.Model):
     class Meta:
         verbose_name = 'Затраты на рекламу артикула'
         verbose_name_plural = 'Затраты на рекламу артикула'
+
+
+class CampaignDailyAdvStatistic(models.Model):
+    """Ежедневная статистика рекламной кампании за день."""
+    campaign = models.ForeignKey(
+        ReklamaCampaign,
+        verbose_name='Реклмная кампания',
+        on_delete=models.SET_NULL,
+        related_name='adv_daily_statistic_campaign',
+        blank=True,
+        null=True,
+    )
+    # article = models.ForeignKey(
+    #     Articles,
+    #     verbose_name='Артикул',
+    #     on_delete=models.SET_NULL,
+    #     related_name='adv_daily_cost_article',
+    #     blank=True,
+    #     null=True,
+    # )
+    statistic_date = models.DateField(
+        verbose_name='Дата',
+        blank=True,
+        null=True
+    )
+    views = models.IntegerField(
+        verbose_name='Просмотры',
+        blank=True,
+        null=True
+    )
+    clicks = models.IntegerField(
+        verbose_name='Клики',
+        blank=True,
+        null=True
+    )
+    ctr = models.FloatField(
+        verbose_name='CTR. Показатель кликабельности, отношение числа кликов к количеству показов, %',
+        blank=True,
+        null=True
+    )
+    cpc = models.FloatField(
+        verbose_name='CPC. Средняя стоимость клика, ₽.',
+        blank=True,
+        null=True
+    )
+    summ = models.FloatField(
+        verbose_name='Затраты, ₽.',
+        blank=True,
+        null=True
+    )
+    atbs = models.IntegerField(
+        verbose_name='Добавления в корзину',
+        blank=True,
+        null=True
+    )
+    orders = models.IntegerField(
+        verbose_name='Количество заказов',
+        blank=True,
+        null=True
+    )
+    cr = models.IntegerField(
+        verbose_name='CR(conversion rate). Отношение количества заказов к общему количеству посещений кампании',
+        blank=True,
+        null=True
+    )
+    shks = models.IntegerField(
+        verbose_name='Количество заказанных товаров, шт.',
+        blank=True,
+        null=True
+    )
+    sum_price = models.FloatField(
+        verbose_name='Заказов на сумму, ₽',
+        blank=True,
+        null=True
+    )
+    class Meta:
+        verbose_name = 'Затраты на рекламу артикула'
+        verbose_name_plural = 'Затраты на рекламу артикула'

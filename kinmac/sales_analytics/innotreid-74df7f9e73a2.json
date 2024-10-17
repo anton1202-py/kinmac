@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "innotreid",
+  "private_key_id": "74df7f9e73a222c5061811022c1a091bb1b3f68f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCnMCbrWvI+vfdu\nAaCTQDh4yg5ticp1PaaZ20Qo+8n3LiiZgl6KTc2VwgEiOl4peOJtFPGGb7IvRZ/c\nX5LMAXGSxYdChmLh651ji+qCGAt8J4Sbu5O+82li6zzQm8qcyTPUYB4oL/zfJKzp\n1QKQJqgOHxUDO0HcV1K+h5cluADyOzlCwzdv7lihrgo1b3qYP3lF/cuZ2bxME0xs\ngf7uSJWLYq9JFGZ5rBB4Sdn4Je1/f3R0rBZcZrOjxf+q5LQYJPRB9jkdQOghy2Gg\nCZfbd1xYmBAFuXrSApvGjnk/ngBDH94kdhBwbSfBAAtRZ4/Bq6E2zcloqqkpodri\nKZmECAszAgMBAAECggEADhNqGMNFxUMzKL+EUxbDamVV76JROau2HMVZfhCCLDMR\nAf5NkrFYOgqPvopRe9u3RzMjM+Fa4XX9g+KcC7GiFpcA0KNbLJAsu8EqPke4onxP\n7YNOaMjk5N959Z+YNbkO3wuJ88eOhQROdpAThirAWBKv2d92/Q5xDforyeYtq4xu\ntfgnWqsb2oAqdVgOPdAZI0QzOjTa3kvKH0Tx8VU7qlDisqhxG9LgdU82JpD1HA2Q\nSkMua2qWX8BA14ZZHHVcKhi26sEKlzT6VvzWhLRlHqEkqmKZaB2uKBEzeaq04ht/\nc3PW8C2w5024+yZAcn3SpAAEexqBaKZvjPtAY5FOmQKBgQDZSp9S5JT4MhEoIuVj\nV5fOiV1V7dSXQQxReLqOe8jc3y0SVOI1ymaY9EQg0WxtJLrbkfUDaHLiPq+jozCj\nMa9Flo7gWiZ2Cg2mABt21lod0cwIOnPMVQLDQ5azwWfKMdAQtZxscS4RTeysnPeo\nLU8gxw+xAx9f9RE3uoOB3DyzDwKBgQDE+JxGxhiw+5r7lQ9EjpnECXGPlrRxP/tA\n5l4MM979INr8GmuT8fmAuXiMa4KRTeKJtOJwQmSaFxDbcelUnfd0g34wSF8I1rKq\nSh6W+xyyFVxq+wRtTI639+6fJQ9x1biWCbkw/rT2NEmn8JZHFzuths1OdVXAa+Rn\njAtbzgIVnQKBgQCkv/mRBhMVJBDyF5NJAS7uwCPudQbNL9rBIwJ/6cbgAK7RyV5C\nXpXvvrSxFVhaYJD0zfOxg84nUFQnhCHqek9kOcVWwcOLmA/FHyuzrM5i8aD7VCZc\ndNBFcMegvzGMkrwpDyns5tuA705ViiYUc1YdihCRq8ZsIQnO8TGokm3LbQKBgQDC\nOJpwNvk12oLRvANYCHyaju1JNsMqQHqRXhYyVht04abMm4ikUx9AzKGPZJtUh8Xv\nH0uAghcM0d2vZL080J6mZtpQ5au/3WRDAd7z5RxAhUuhuW5+D9VSlcjXaAW4q5Ld\nby0KoLzzYE+Yp2SnKMORsbBTwuMRX9HSQIcauSHZCQKBgQCLhmphEPqe4uoAlL/f\nirIQpFd6LGbL8C0z5Ti7es4yomUnW0qsj/gMGmfLuxoGlW/N+fysG8WpRsma3YO5\n0mYTPWcTDPOxs630/RY12KApMJdMpVcNBCQL56rrOIqgYdG6klnfZEAY+m/obSR+\n+1DLpg92f4UPzx7yT1N+98TGiQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "kinmac-test@innotreid.iam.gserviceaccount.com",
+  "client_id": "101305252212034908397",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/kinmac-test%40innotreid.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

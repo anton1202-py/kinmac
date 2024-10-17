@@ -1,11 +1,14 @@
 
 from datetime import datetime, timedelta
+import math
 from api_requests.wb_requests import get_adv_campaign_lists_data, get_adv_info, get_campaign_statistic, wb_article_data_from_api
 from celery_tasks.celery import app
 
-from kinmac.constants_file import wb_headers
 
-from .models import ArticleDailyCostToAdv, Articles, ReklamaCampaign
+from kinmac.constants_file import TELEGRAM_ADMIN_CHAT_ID, wb_headers, bot
+from reklama.supplyment import get_daily_adv_statistic
+
+from .models import ArticleDailyCostToAdv, Articles, CampaignDailyAdvStatistic, ReklamaCampaign
 
 WORKING_CAMPAIGN_STATUSES = [4, 9, 11]
 WORKING_CAMPAIGN_TYPES = [8, 9]
@@ -75,7 +78,6 @@ def update_daily_article_adv_cost():
                 }
             }
         )
-    print(request_campaign_list)
     statistic_data = get_campaign_statistic(wb_headers, request_campaign_list)
     if statistic_data:
         for data in statistic_data:
@@ -98,3 +100,69 @@ def update_daily_article_adv_cost():
                                 cost_obj = ArticleDailyCostToAdv.objects.get(article=article_obj, cost_date=date, campaign=campaign_obj)
                                 cost_obj.cost += cost
                                 cost_obj.save()
+
+
+@app.task
+def write_daily_adv_statistic():
+    """
+    Записывает в базу данных ежедневную статистику рекламных кампаний
+    """
+    # Достаю из БД активные РК.
+    statistic_data = get_daily_adv_statistic()
+
+    # try:
+    for data in statistic_data:
+        campaign_number = data['advertId']
+        campaign_obj = ReklamaCampaign.objects.get(campaign=campaign_number)
+        for stat in data['days']:
+            request_date = stat['date']
+            date_obj = datetime.fromisoformat(request_date)
+            # Форматируем дату в нужный формат
+            date = date_obj.strftime("%Y-%m-%d")
+            views = stat['views']
+            clicks = stat['clicks']
+            ctr = stat['ctr']
+            cpc = stat['cpc']
+            sum = stat['sum']
+            atbs = stat['atbs']
+            orders = stat['orders']
+            cr = stat['cr']
+            shks = stat['shks']
+            sum_price = stat['sum_price']
+            search_params = {
+                'campaign': campaign_obj,
+                'statistic_date': date,
+            }
+            defaults = {
+                'views': views,
+                'clicks': clicks,
+                'ctr': ctr,
+                'cpc': cpc,
+                'summ': sum,
+                'atbs': atbs,
+                'orders': orders,
+                'cr': cr,
+                'shks': shks,
+                'sum_price': sum_price
+            }
+            CampaignDailyAdvStatistic.objects.update_or_create(
+                defaults=defaults, **search_params
+            )
+    # except:
+    #     message = f'Не получил статистику для кампаний на сегодня'
+    #     bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
+    #                      text=message[:4000])
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
