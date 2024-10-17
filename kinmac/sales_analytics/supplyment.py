@@ -1,24 +1,13 @@
 from datetime import datetime
-import time
-import gspread
 import pandas as pd
 
-
-from gspread_formatting import *
-from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
-from celery_tasks.tasks import sales_report_statistic
 from database.models import (Articles, CodingMarketplaces, CostPrice,
                              SalesReportOnSales)
 from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Side
-
-from api_requests.wb_requests import get_check_storage_cost_report_status, get_create_storage_cost_report, get_storage_cost_report_data
-from kinmac.constants_file import wb_headers, BRAND_LIST
-from .models import (ArticleSaleAnalytic, CommonSaleAnalytic,
-                     ReportForCommonSaleAnalytic)
 
 
 def template_for_article_costprice(costprice_data):
