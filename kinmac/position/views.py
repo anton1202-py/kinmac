@@ -28,7 +28,6 @@ from .models import ArticlePosition
 def article_position(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    article_position_task()
     page_name = 'Позиция артикулов по запросам'
     data = ArticlePosition.objects.all()
     if request.POST:
