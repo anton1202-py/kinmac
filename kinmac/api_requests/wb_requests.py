@@ -225,3 +225,15 @@ def get_campaign_statistic(header, campaign_list):
     return response
 
 # ========= КОНЕЦ ЗАПРОСЫ РЕКЛАМЫ ========== #
+
+# =========ЗАПРОС ПОЗИЦИИ АРТИКУЛА В ПОИСКЕ ========== #
+@api_retry_decorator
+def get_article_position(query, page=1, pvz=123585487):
+    """
+    Возвращает артикулы в поисковой выдаче по слову
+    """
+    url = f"https://search.wb.ru/exactmatch/ru/common/v7/search?ab_testing=false&appType=1&curr=rub&dest={pvz}&page={page}&query={query}&resultset=catalog&sort=popular&spp=30&suppressSpellcheck=false"
+    response = requests.request("GET", url)
+    return response
+
+# =========КОНЕЦ ЗАПРОС ПОЗИЦИИ АРТИКУЛА В ПОИСКЕ ========== #

@@ -8,6 +8,7 @@ app = Celery('celery_tasks',
              include=['celery_tasks.tasks',
                       'database.periodic_tasks',
                       'sales_analytics.periodic_tasks',
+                      'position.periodic_tasks',
                       'reklama.periodic_tasks'])
 app.config_from_object('celery_tasks.celeryconfig')
 
@@ -83,6 +84,13 @@ app.conf.beat_schedule = {
         "task": "reklama.periodic_tasks.write_daily_adv_statistic",
         "schedule": crontab(hour=23, minute=50)
     },
+
+    # ========== ПОЗИЦИЯ ТОВАРА В ВЫДАЧЕ ========== #
+    "position_articles_in_search": {
+        "task": "position.periodic_tasks.article_position_task",
+        "schedule": crontab(hour='8,18,22', minute=0)
+    },
+    # ========== КОНЕЦ ПОЗИЦИЯ ТОВАРА В ВЫДАЧЕ ========== #
 
     
 }

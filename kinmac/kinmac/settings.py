@@ -32,7 +32,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.postgres',
     'django.contrib.staticfiles',
+
     'django_celery_beat',
+
     'api_requests',
     'main',
     'database',
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'bag_photo',
     'sales_analytics',
     'reklama',
+    'position',
 ]
 
 MIDDLEWARE = [

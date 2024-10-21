@@ -127,6 +127,14 @@
             <span class="material-symbols-sharp">add_circle</span>
             <h3>Добавить заявку</h3>
         </a>
+        {% url 'article_position' as url_n %}
+        <a href="{{ url_n }}" {% if request.path == url_n %}class="active"{% endif %}>
+            <span class="material-symbols-outlined">
+                local_mall
+                </span>
+            <h3>Позиции артикулов</h3>
+        </a>
+
         {% if request.user.is_staff or request.user.username == 'alexander.lisov'%}
         {% url 'payment_common_statistic' as url_payment_statistic %}
         <a href="{{ url_payment_statistic }}" {% if request.path == url_payment_statistic %}class="active"{% endif %}>
@@ -136,7 +144,7 @@
         {% url 'payment_working_statistic' as url_working_statistic %}
         <a href="{{ url_working_statistic }}" {% if request.path == url_working_statistic %}class="active"{% endif %}>
             <span class="material-symbols-sharp">leaderboard</span>
-            <h3>Рабочая талица</h3>
+            <h3>Рабочая таблица</h3>
         </a>
 
         {% url 'upload_image' as url_upload_image %}
@@ -147,6 +155,7 @@
             <h3>Фото сумок</h3>
         </a>
         {% endif %}
+
         </div>
     </aside>
     <main>
