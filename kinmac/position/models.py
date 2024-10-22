@@ -37,7 +37,22 @@ class ArticlePosition(models.Model):
         verbose_name='Дата создания кампании',
         auto_now=True
     )
-    
+    in_advert = models.BooleanField(
+        verbose_name='Участвует в рекламе',
+        null=True,
+        blank=True
+    )
+    cmp = models.IntegerField(
+        verbose_name='CPM в рекламе',
+        null=True,
+        blank=True
+    )
+    position_before_adv = models.IntegerField(
+        verbose_name='Позиция до рекламы',
+        null=True,
+        blank=True
+    )
+
     class Meta:
         verbose_name = 'Позиция артикула по запросу'
         verbose_name_plural = 'Позиция артикула по запросу'

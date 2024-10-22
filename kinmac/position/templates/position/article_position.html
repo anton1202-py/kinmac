@@ -9,7 +9,7 @@
          <div class="top-befor-header">
             <h1>{{ page_name }}</h1>
         </div>
-        <!-- <div class='filter-data' style="display: flex;">
+        <div class='filter-data' style="display: flex;">
             <form action="" class="big-filter-form" method="POST" id="ytr">
                 {% csrf_token %}
                 <div class="inner-form-data">
@@ -21,23 +21,16 @@
                     <input type="date"  name="datefinish" class="big-filter-form" id="datefinish">
                 </div>
                 <div class="inner-form-data">
-                    <span>Артикул для фильтра</span>
+                    <span>Артикул ВБ или продавца</span>
                     <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
-                </div>
-                <div class="inner-form-data">
-                    <span>Номер отчета</span>
-                    <input type="text"  name="report_number_filter" class="big-filter-form" id="report_number_filter">
                 </div>
                 <div class="inner-form-data">
                     <br>
                     <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
                 </div>
-                <div class="inner-form-data">
-                    <br>
-                    <input type="Submit" id="filter" name="reconciliation" value="Свести отчеты" class="custom-button-change"/>
-                </div>
+                
             </form>
-            <div class="inner-form-data">
+            <!-- <div class="inner-form-data">
                 <form method="POST" id="uploadForm" enctype="multipart/form-data" class="big-filter-form">
                     {% csrf_token %}
                     <div class="inner-form-data">
@@ -49,8 +42,8 @@
                         <input type="file" id="import_data" name="import_file" class="input-file" style="margin-top: 0px;">
                     </div>
                 </form>
-            </div>
-        </div> -->
+            </div> -->
+        </div>
 
         <div class="table_wrapper">
             <table name="mytable" class="sortable" style="white-space: nowrap">
@@ -62,6 +55,11 @@
                     <th>Запрос</th>
                     <th>Позиция</th>
                     <th>Дата</th>
+
+                    <th>Реклама</th>
+                    <th>CPM</th>
+                    <th>Позиция до рекламы</th>
+
                 </tr>
                 {% for el in data %}   
                 <tr>
@@ -72,6 +70,15 @@
                     <td>{{ el.key_word }}</td>
                     <td>{{ el.position }}</td>
                     <td>{{ el.create_time }}</td>
+                    {% if el.cmp %}
+                    <td>{{ el.in_advert }}</td>
+                    <td>{{ el.cmp }}</td>
+                    <td>{{ el.position_before_adv }}</td>
+                    {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {% endif%}
                 </tr>
                 {% endfor %}
                 <form action="" class="big-filter-form" method="POST" id="ytr">
@@ -94,22 +101,6 @@
         </div>
     </div> 
     <script>
-        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ФАЙЛА ========= //
-        document.getElementById('import_data').addEventListener('change', function() {
-            document.getElementById('uploadForm').submit();
-        });
-
-        // ========== ОБРБАТЫВАЕТ НАЖАТИЕ КНОПКИ ЗАГРУЗИТЬ ИЗ ZIP ========= //
-        document.querySelectorAll('input[type="file"]').forEach(function(input) {
-        input.addEventListener('change', function() {
-            // Получаем id формы, к которой принадлежит этот input
-            var reportId = this.id.split('-')[1]; // Получаем часть id после "-"
-            console.log(reportId)
-            var form = document.getElementById('uploadZip-' + reportId);
-            form.submit();
-        });
-    });
-
         // ========== УПОРЯДОЧИВАЕТ ТАБЛИЦУ ПРИ НАЖАТИИ НА СТОЛБЕЦ ========= //
         const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent; 
         function comparer(index, asc) {
