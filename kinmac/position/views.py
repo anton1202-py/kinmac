@@ -18,6 +18,7 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from check_report.signals import articles_analytics_data
 from api_requests.wb_requests import get_campaign_statistic, get_stock_from_webpage_api
 from kinmac.constants_file import BRAND_LIST
+from database.models import Articles
 from position.periodic_tasks import article_position_task
 from position.supplyment import article_position_in_search
 from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost, write_daily_adv_statistic
@@ -30,11 +31,19 @@ def article_position(request):
         return redirect('login')
     page_name = 'Позиция артикулов по запросам'
     data = ArticlePosition.objects.all()
+    for i in data:
+        if Articles.objects.filter(nomenclatura_wb=i.wb_article).exists():
+            seller_article = Articles.objects.filter(nomenclatura_wb=i.wb_article).first().common_article
+            i.seller_article = seller_article
+            i.save()
     if request.POST:
         wb_article = int(request.POST.get('wb_article', ''))
         key_word = request.POST.get('key_word', '')
         position = None
         if key_word and wb_article:
+            seller_article = ''
+            if Articles.objects.filter(nomenclatura_wb=wb_article).exists():
+                seller_article = Articles.objects.filter(nomenclatura_wb=wb_article).first().common_article
             about_article = get_stock_from_webpage_api(wb_article)
             if about_article:
                 article_data = about_article['data']['products'][0]
@@ -52,6 +61,7 @@ def article_position(request):
                     wb_article=wb_article,
                     key_word=key_word,
                     name=name,
+                    seller_article=seller_article,
                     brand=brand,
                     position=position
                 ).save()

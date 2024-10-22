@@ -88,7 +88,7 @@ app.conf.beat_schedule = {
     # ========== ПОЗИЦИЯ ТОВАРА В ВЫДАЧЕ ========== #
     "position_articles_in_search": {
         "task": "position.periodic_tasks.article_position_task",
-        "schedule": crontab(hour='8,18,22', minute=0)
+        "schedule": crontab(hour='9,15,21', minute=0)
     },
     # ========== КОНЕЦ ПОЗИЦИЯ ТОВАРА В ВЫДАЧЕ ========== #
 

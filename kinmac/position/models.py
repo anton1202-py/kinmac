@@ -7,11 +7,12 @@ class ArticlePosition(models.Model):
     wb_article = models.IntegerField(
         verbose_name='Номенклатура ВБ'
     )
-    # seller_article = models.IntegerField(
-    #     verbose_name='Артикул продавца',
-    #     null=True,
-    #     blank=True
-    # )
+    seller_article = models.CharField(
+        verbose_name='Артикул продавца',
+        max_length=255,
+        null=True,
+        blank=True
+    )
     name = key_word = models.CharField(
         verbose_name='Название',
         max_length=255,
