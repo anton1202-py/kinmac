@@ -21,10 +21,6 @@
                     <input type="date"  name="datefinish" class="big-filter-form" id="datefinish">
                 </div>
                 <div class="inner-form-data">
-                    <span>Артикул ВБ или продавца</span>
-                    <input type="text"  name="article_filter" class="big-filter-form" id="article_filter">
-                </div>
-                <div class="inner-form-data">
                     <br>
                     <input type="Submit" id="filter" name="submit" value="Фильтровать" class="custom-button-change"/>
                 </div>
@@ -48,10 +44,6 @@
         <div class="table_wrapper">
             <table name="mytable" class="sortable" style="white-space: nowrap">
                 <tr>
-                    <th>Артикул ВБ</th>
-                    <th>Артикул продавца</th>
-                    <th>Название</th>
-                    <th>Бренд</th>
                     <th>Запрос</th>
                     <th>Локация</th>
 
@@ -65,10 +57,6 @@
                 </tr>
                 {% for el in data %}   
                 <tr>
-                    <td><a href="{% url 'one_article_position' el.wb_article %}">{{ el.wb_article }}</a></td>
-                    <td>{{ el.seller_article }}</td>
-                    <td>{{ el.name }}</td>
-                    <td>{{ el.brand }}</td>
                     <td>{{ el.key_word }}</td>
                     <td>{{ el.district_position.city_name }}</td>
                     
