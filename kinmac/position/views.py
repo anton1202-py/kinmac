@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from django.shortcuts import redirect, render
+from position.periodic_tasks import article_position_task
 from position.supplyment import add_article_for_find_position
 
 from .models import ArticlePosition
@@ -7,6 +8,7 @@ from .models import ArticlePosition
 def article_position(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
+    article_position_task()
     page_name = 'Позиция артикулов по запросам'
     show_period = datetime.now() - timedelta(days=7)
     data = ArticlePosition.objects.filter(create_time__gte=show_period)

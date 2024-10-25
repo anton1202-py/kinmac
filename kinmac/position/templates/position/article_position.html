@@ -53,6 +53,8 @@
                     <th>Название</th>
                     <th>Бренд</th>
                     <th>Запрос</th>
+                    <th>Локация</th>
+
                     <th>Позиция</th>
                     <th>Дата</th>
 
@@ -68,6 +70,8 @@
                     <td>{{ el.name }}</td>
                     <td>{{ el.brand }}</td>
                     <td>{{ el.key_word }}</td>
+                    <td>{{ el.district_position.city_name }}</td>
+                    
                     <td>{{ el.position }}</td>
                     <td>{{ el.create_time }}</td>
                     {% if el.cmp %}

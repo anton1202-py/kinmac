@@ -232,7 +232,8 @@ def get_article_position(query, page=1, pvz=123585487):
     """
     Возвращает артикулы в поисковой выдаче по слову
     """
-    time.sleep(5)
+    time.sleep(3)
+    print('query', query)
     url = f"https://search.wb.ru/exactmatch/ru/common/v7/search?ab_testing=false&appType=1&curr=rub&dest={pvz}&page={page}&query={query}&resultset=catalog&sort=popular&spp=30&suppressSpellcheck=false"
     response = requests.request("GET", url)
     return response
