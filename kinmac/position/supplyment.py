@@ -8,12 +8,10 @@ from position.models import ArticlePosition, CityData
 def article_position_in_search(wb_article, keyword, dest, page=1):
     position = ''
     coder_keyword = urllib.parse.quote(keyword)
-    print('coder_keyword', coder_keyword)
     data = get_article_position(coder_keyword, page, dest)
     in_advert = False
     cmp = None
     position_before_adv = None
-    print('data', data)
     for position_numb, page_data in enumerate(data['data']['products']):
         if page_data['id'] == wb_article:
             position = position_numb + 1 + ((page-1) * 100)
