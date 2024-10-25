@@ -32,6 +32,7 @@ def article_position(request):
                 data = data.filter(seller_article=article_filter)
             else:
                 data = data.filter(wb_article=int(article_filter))
+    data = data.order_by('-create_time')
     context = {
         'page_name': page_name,
         'data': data,
