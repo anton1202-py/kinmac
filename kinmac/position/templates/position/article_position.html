@@ -118,7 +118,6 @@
                 }
             };
         }
-
         document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
             const table = th.closest('table');
             Array.from(table.querySelectorAll('tr')).slice(1) // выбираем все строки, начиная со второй
