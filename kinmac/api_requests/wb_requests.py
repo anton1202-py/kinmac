@@ -1,6 +1,6 @@
 import json
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import requests
 from api_requests.common_func import api_retry_decorator
@@ -226,7 +226,7 @@ def get_campaign_statistic(header, campaign_list):
 
 # ========= КОНЕЦ ЗАПРОСЫ РЕКЛАМЫ ========== #
 
-# =========ЗАПРОС ПОЗИЦИИ АРТИКУЛА В ПОИСКЕ ========== #
+# ========= ЗАПРОС ПОЗИЦИИ АРТИКУЛА В ПОИСКЕ ========== #
 @api_retry_decorator
 def get_article_position(query, page=1, pvz=123585487):
     """
@@ -237,4 +237,45 @@ def get_article_position(query, page=1, pvz=123585487):
     response = requests.request("GET", url)
     return response
 
-# =========КОНЕЦ ЗАПРОС ПОЗИЦИИ АРТИКУЛА В ПОИСКЕ ========== #
+# ========= КОНЕЦ ЗАПРОС ПОЗИЦИИ АРТИКУЛА В ПОИСКЕ ========== #
+
+
+# ========= КОМИССИИ ========== #
+def wb_comissions(header):
+    """
+    Достает комиссии всех присутствующих категорий
+
+    Входящие переменные:
+        TOKEN_WB - токен учетной записи ВБ
+    """
+    api_url = f"https://common-api.wildberries.ru/api/v1/tariffs/commission"
+    
+    response = requests.get(api_url, headers=header)
+    if response.status_code == 200:
+        data = response.json().get('report', [])
+        return data
+    else:
+        message = f'Ошибка при вызовае метода https://common-api.wildberries.ru/api/v1/tariffs/commission: {response.status_code}. {response.text}'
+        print(message)
+
+
+def wb_logistic(wb_headers):
+    """
+    Достает затраты на логистику в зависимости от габаритов
+
+    Входящие переменные:
+        TOKEN_WB - токен учетной записи ВБ
+    """
+    today_date = datetime.today().strftime('%Y-%m-%d')
+    api_url = f"https://common-api.wildberries.ru/api/v1/tariffs/box?date={today_date}"
+    
+    response = requests.get(api_url, headers=wb_headers)
+    if response.status_code == 200:
+
+        main_data = response.json().get('response', [])
+        if main_data:
+            data = main_data['data']
+            return data
+    else:
+        message = f'Ошибка при вызовае метода https://common-api.wildberries.ru/api/v1/tariffs/box?date: {response.status_code}. {response.text}'
+        print(message)

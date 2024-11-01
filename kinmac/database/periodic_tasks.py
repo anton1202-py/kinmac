@@ -5,7 +5,8 @@ from celery_tasks.celery import app
 
 from kinmac.constants_file import BRAND_LIST, wb_headers
 
-from .models import Articles, StorageCost
+
+from .models import Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
 
 
 @app.task
@@ -13,18 +14,33 @@ def update_info_about_articles():
     common_data = wb_article_data_from_api(wb_headers)
     if common_data:
         for data in common_data:
+            category_number = data['subjectID']
+            category_name = data['subjectName']
+            platform_obj, created = Platform.objects.get_or_create(
+            platform_type=MarketplaceChoices.WILDBERRIES)
+            category_obj, created = MarketplaceCategory.objects.get_or_create(
+                platform=platform_obj,
+                category_number=category_number,
+                category_name=category_name
+            )
             if Articles.objects.filter(
                 nomenclatura_wb=data['nmID']
             ).exists():
+
                 Articles.objects.filter(
                 nomenclatura_wb=data['nmID']
-            ).update(
+                    ).update(
                 common_article=data['vendorCode'],
                 brand=data['brand'],
                 barcode=data['sizes'][0]['skus'][0],
                 predmet=data['subjectName'],
                 size=data['sizes'][0]['techSize'],
-                name=data['title']
+                name=data['title'],
+                category=category_obj,
+                width = data['dimensions']['width'],
+                height = data['dimensions']['height'],
+                length = data['dimensions']['length'],
+                weight = 0
             )
             else:
                 Articles(
@@ -34,7 +50,12 @@ def update_info_about_articles():
                     barcode=data['sizes'][0]['skus'][0],
                     predmet=data['subjectName'],
                     size=data['sizes'][0]['techSize'],
-                    name=data['title']
+                    name=data['title'],
+                    category=category_obj,
+                    width = data['dimensions']['width'],
+                    height = data['dimensions']['height'],
+                    length = data['dimensions']['length'],
+                    weight = 0
                 ).save()
 
 

@@ -9,7 +9,8 @@ app = Celery('celery_tasks',
                       'database.periodic_tasks',
                       'sales_analytics.periodic_tasks',
                       'position.periodic_tasks',
-                      'reklama.periodic_tasks'])
+                      'reklama.periodic_tasks',
+                      'unit_economic.periodic_tasks',])
 app.config_from_object('celery_tasks.celeryconfig')
 
 
@@ -91,6 +92,13 @@ app.conf.beat_schedule = {
         "schedule": crontab(hour='9,15,21', minute=0)
     },
     # ========== КОНЕЦ ПОЗИЦИЯ ТОВАРА В ВЫДАЧЕ ========== #
+
+    # ========== UNIT_ECONOMICS ========== #
+    "tariffs_and_logistic": {
+        "task": "unit_economic.periodic_tasks.update_tariffs_and_logistic",
+        "schedule": crontab(hour='6', minute=2)
+    },
+    # ========== КОНЕЦ UNIT_ECONOMICS ========== #
 
     
 }

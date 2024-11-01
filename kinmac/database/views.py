@@ -31,7 +31,9 @@ def database_home(request):
     data = Articles.objects.filter(brand__in=BRAND_LIST)
     context = {
         'data': data,
-    }
+    }       
+    # update_info_about_articles()
+
     # add_stock_data_site()
     # sales_report_statistic()
     if request.method == 'POST' and request.FILES['myarticles']:

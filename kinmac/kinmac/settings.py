@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'sales_analytics',
     'reklama',
     'position',
+    'unit_economic',
 ]
 
 MIDDLEWARE = [

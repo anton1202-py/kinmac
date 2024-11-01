@@ -3,6 +3,40 @@ from datetime import datetime
 from django.db import models
 from django.urls import reverse
 
+class MarketplaceChoices(models.IntegerChoices):
+    WILDBERRIES = 1, 'Wildberries'
+    OZON = 2, 'OZON'
+    YANDEX_MARKET = 3, 'Яндекс Маркет'
+    MEGA_MARKET = 4, 'МегаМаркет'
+    MOY_SKLAD = 5, 'Мой склад'
+
+
+class Platform(models.Model):
+    """Платформа, на которой находятся товары"""
+
+    name = models.CharField(max_length=100, null=False, verbose_name="Название")
+
+    platform_type = models.IntegerField(
+        choices=MarketplaceChoices.choices,
+        default=MarketplaceChoices.WILDBERRIES,
+        null=False,
+        blank=False,
+        verbose_name="Платформа",
+    )
+
+
+class MarketplaceCategory(models.Model):
+    """Описывает категорию товара на Маркетплейсе."""
+    platform = models.ForeignKey(
+        Platform, related_name='mcategory_plaform', on_delete=models.CASCADE, verbose_name='Платформа')
+    category_number = models.IntegerField(
+        verbose_name="Номер категории", null=True, blank=True, )
+    category_name = models.CharField(
+        max_length=255, verbose_name="Название категории", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Категория на Маркетплейсе"
+        verbose_name_plural = "Категория на Маркетплейсе"
 
 class Articles(models.Model):
     common_article = models.CharField(
@@ -66,6 +100,12 @@ class Articles(models.Model):
         max_length=300,
         null=True,
     )
+    width = models.IntegerField(verbose_name='Ширина', null=True, blank=True)
+    height = models.IntegerField(verbose_name='Высота', null=True, blank=True)
+    length = models.IntegerField(verbose_name='Длина', null=True, blank=True)
+    weight = models.FloatField(verbose_name='Вес', null=True, blank=True)
+    category = models.ForeignKey(MarketplaceCategory, related_name='mp_category',
+                                 on_delete=models.CASCADE, verbose_name='Категория товара', null=True, blank=True)
 
     def __str__(self):
         return self.common_article
