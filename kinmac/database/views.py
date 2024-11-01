@@ -17,6 +17,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from check_report.signals import articles_analytics_data
 from kinmac.constants_file import BRAND_LIST
+from unit_economic.periodic_tasks import update_tariffs_and_logistic
 from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost, write_daily_adv_statistic
 
 from .forms import (ArticlesForm, LoginUserForm, SelectDateForm,
@@ -32,7 +33,8 @@ def database_home(request):
     context = {
         'data': data,
     }       
-    # update_info_about_articles()
+    update_info_about_articles()
+    update_tariffs_and_logistic()
 
     # add_stock_data_site()
     # sales_report_statistic()
