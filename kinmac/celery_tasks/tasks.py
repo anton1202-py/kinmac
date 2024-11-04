@@ -250,7 +250,6 @@ def add_stock_data_site():
         main_data = data['data']['products']
         for j in main_data:
             if 'priceU' in j:
-                print(j)
                 data_for_db = {}
                 amount = 0
                 data_for_db['pub_date'] = control_date

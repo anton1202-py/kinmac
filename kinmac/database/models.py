@@ -714,6 +714,10 @@ class Orders(models.Model):
 
 class SalesReportOnSales(models.Model):
     """Отчет о продажах по реализации"""
+    date_writing = models.DateTimeField(
+        verbose_name='Дата записи в базу',
+        auto_now=True,
+    )
     realizationreport_id = models.BigIntegerField(
         verbose_name='Номер отчета',
         null=True,

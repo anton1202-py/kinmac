@@ -8,4 +8,3 @@ with ZipFile("kinmac\check_report\Детализация_еженедельно�
 
         excel_data_common = pd.read_excel(content)
         column_list = excel_data_common.columns.tolist()
-        print(column_list)

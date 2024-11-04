@@ -33,11 +33,7 @@ def database_home(request):
     context = {
         'data': data,
     }       
-    update_info_about_articles()
-    update_tariffs_and_logistic()
 
-    # add_stock_data_site()
-    # sales_report_statistic()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
         empexceldata = pd.read_excel(myfile)

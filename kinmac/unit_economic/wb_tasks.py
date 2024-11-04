@@ -22,7 +22,6 @@ def wb_comission_add_to_db():
     Входящие переменные:
         TOKEN_WB - токен учетной записи
     """
-    
     data_list = wb_comissions(wb_headers)
     wb_comission_dict = {}
     if data_list:
@@ -35,11 +34,9 @@ def wb_comission_add_to_db():
             }
         goods_list = Articles.objects.filter(brand__in=BRAND_LIST)
         for good_data in goods_list:
-            print(good_data.category, good_data.name)
             fbs_commission = wb_comission_dict[good_data.category.category_number]['fbs_commission']
             fbo_commission = wb_comission_dict[good_data.category.category_number]['fbo_commission']
             dbs_commission = wb_comission_dict[good_data.category.category_number]['dbs_commission']
-            
             fbs_express_commission = wb_comission_dict[
                 good_data.category.category_number]['fbs_express_commission']
             add_marketplace_comission_to_db(
@@ -49,6 +46,7 @@ def wb_comission_add_to_db():
                 dbs_commission,
                 fbs_express_commission
             )
+
 
 def wb_logistic_add_to_db():
     """

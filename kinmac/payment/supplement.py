@@ -38,7 +38,6 @@ def excel_creating_mod(data):
 
     # Заполняем лист данными
     for row, item in enumerate(data, start=2):
-        print(item.pub_date)
         try:
             date_create = datetime.datetime.strptime(f'{item.pub_date}', '%Y-%m-%d %H:%M:%S.%f')
         except:

@@ -99,7 +99,6 @@ def common_analytic_excel_file_export(data):
     wb = Workbook()
     # Получаем активный лист
     ws = wb.active
-    print(data)
     table_headers = (
             "Артикул",
             "Средняя цена до СПП",

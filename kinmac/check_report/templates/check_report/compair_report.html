@@ -60,7 +60,7 @@
         </div>
 
         <div class="table_wrapper">
-            <table name="mytable" class="sortable" style="white-space: nowrap">
+            <table name="mytable" class="sortable" style="white-space: nowrap" id="compair-reports-table">
                 
                 <tr>
                     <th rowspan="2">Номер отчета</th>
@@ -102,7 +102,7 @@
                     <td>{{ el.realizationreport_id }}</td>
                     <td>{{ el.date_from|date:'Y-m-d' }}</td>
                     <td>{{ el.date_to|date:'Y-m-d' }}</td>
-                    <td>{{ el.create_dt }}</td>
+                    <td>{{ el.create_dt|date:'Y-m-d' }}</td>
 
                     <td class="excel-data">{{ el.retail_amount }}</td>
                     <td class="excel-data">{{ el.ppvz_for_pay }}</td>  
@@ -116,13 +116,16 @@
                     {% if db_data_dict|get_item:el.realizationreport_id %}
                         {% with data_db=db_data_dict|get_item:el.realizationreport_id %}
                         <td class="api-data">{{ data_db.0 }}</td>
+
                         {% with retail_sale=data_db.0 %}
                         <td>{{ el.retail_amount|divide:retail_sale|multiplicity:100|round_number_two }}</td>
                         {% endwith %}
+
                         <td class="api-data">{{ data_db.1 }}</td>
                         {% with for_pay=data_db.1 %}
                         <td>{{ el.ppvz_for_pay|divide:for_pay|multiplicity:100|round_number_two }}</td>
                         {% endwith %}
+                        
                         <td class="api-data">{{ data_db.2 }}</td>
                         {% with for_pay=data_db.2 %}
                         <td>{{ el.ppvz_for_pay|divide:for_pay|multiplicity:100|round_number_two }}</td>
@@ -222,7 +225,6 @@
             input.addEventListener('change', function() {
                 // Получаем id формы, к которой принадлежит этот input
                 var reportId = this.id; // Получаем часть id после "-"
-                console.log(reportId)
                 var form = document.getElementById('uploadZip-' + reportId);
                 form.submit();
             });
@@ -236,9 +238,7 @@
         const headerCells = rows[1].cells;
 
         for (let j = 0; j < headerCells.length; j++) {
-
             if (headerCells[j].textContent.trim() === '%') {
-                console.log(headerCells[j].textContent.trim(), j+5)
                 percentColumns.push(j+5);
             }
         }
@@ -263,5 +263,16 @@
                 }
             }
         }
+
+        // ========== РАЗБИВАЕТ ЧИСЛО НА РАЗРЯДЫ ========== //
+        document.querySelectorAll('td.api-data, td.excel-data').forEach(td => {
+            const value = td.textContent.trim();
+            const value_dig = parseFloat(value.replace(',', '.'));
+            if (!isNaN(value_dig)) {
+                td.textContent = value_dig.toLocaleString();
+            } 
+        });
+
+        
     </script>  
 {% endblock %}

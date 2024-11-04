@@ -29,6 +29,7 @@ def report_reconciliation():
                     delivery_rub=Sum('delivery_rub'),
                     storage_fee=Sum('storage_fee'),
                     deduction=Sum('penalty'),
+                    for_pay=Sum('ppvz_for_pay'),
                     ppvz_reward=Sum('ppvz_reward'),
                     acquiring_fee=Sum('acquiring_fee'),
                     ppvz_vw=Sum('ppvz_vw'),
@@ -103,7 +104,9 @@ def report_reconciliation():
         storage_fee = round((easy_data['storage_fee'] if easy_data['storage_fee'] else 0), 2)
         total_paid = ppvz_for_pay - delivery_rub - storage_fee - acceptance_goods - deduction - common_penalty
         total_paid = round(total_paid, 2)
-
+        print(report['realizationreport_id'], 'ppvz_for_pay', ppvz_for_pay)
+        print(report['realizationreport_id'], 'ppvz_retail', ppvz_retail, easy_data['for_pay'])
+        print(report['realizationreport_id'], 'ppvz_return', ppvz_return)
         if not CommonSalesReportData.objects.filter(
             realizationreport_id=report['realizationreport_id'],
             date_from=report['date_from'],
