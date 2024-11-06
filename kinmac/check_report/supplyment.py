@@ -3,7 +3,7 @@ from zipfile import ZipFile
 
 import pandas as pd
 from api_requests.wb_requests import get_report_detail_by_period
-from database.models import SalesReportOnSales, WeeklyReportInDatabase
+from database.models import SalesReportOnSales, StorageCost, WeeklyReportInDatabase
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -24,6 +24,12 @@ def report_reconciliation():
     """Сверка отчетов"""
     report_numbers = SalesReportOnSales.objects.all().values('realizationreport_id', 'date_from', 'date_to', 'create_dt').distinct()
     for report in report_numbers:
+        print(report['date_from'], report['date_to'])
+
+        storage_sum = StorageCost.objects.filter(start_date__gte=report['date_from'], start_date__lte=report['date_to']).aggregate(
+            result_data=Sum('storage_cost')
+        )
+        print(storage_sum)
         easy_data = SalesReportOnSales.objects.filter(
                 realizationreport_id=report['realizationreport_id']).aggregate(
                     delivery_rub=Sum('delivery_rub'),
