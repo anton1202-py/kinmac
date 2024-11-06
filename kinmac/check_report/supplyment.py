@@ -24,12 +24,9 @@ def report_reconciliation():
     """Сверка отчетов"""
     report_numbers = SalesReportOnSales.objects.all().values('realizationreport_id', 'date_from', 'date_to', 'create_dt').distinct()
     for report in report_numbers:
-        print(report['date_from'], report['date_to'])
-
         storage_sum = StorageCost.objects.filter(start_date__gte=report['date_from'], start_date__lte=report['date_to']).aggregate(
             result_data=Sum('storage_cost')
         )
-        print(storage_sum)
         easy_data = SalesReportOnSales.objects.filter(
                 realizationreport_id=report['realizationreport_id']).aggregate(
                     delivery_rub=Sum('delivery_rub'),
@@ -123,7 +120,7 @@ def report_reconciliation():
                 penalty=penalty,
                 delivery_rub=delivery_rub,
                 deduction=deduction,
-                storage_fee=storage_fee,
+                storage_fee=round(storage_sum['result_data']) if storage_sum['result_data'] else 0,
                 acceptance_goods=acceptance_goods,
                 common_penalty=common_penalty,
                 check_ppvz_for_pay=for_pay_sale,
@@ -145,7 +142,7 @@ def report_reconciliation():
                     delivery_rub=delivery_rub,
                     deduction=deduction,
                     acceptance_goods=acceptance_goods,
-                    storage_fee=storage_fee,
+                    storage_fee=round(storage_sum['result_data']) if storage_sum['result_data'] else 0,
                     common_penalty=common_penalty,
                     check_ppvz_for_pay=for_pay_sale,
                     total_paid=total_paid
