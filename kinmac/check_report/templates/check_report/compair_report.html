@@ -135,8 +135,8 @@
                         <td>{{ el.delivery_rub|divide:logistic_pay|multiplicity:100|round_number_two }}</td>
                         {% endwith %}
                         <td class="api-data">{{ data_db.4 }}</td>
-                        {% with for_pay=data_db.4 %}
-                        <td>{{ el.storage_fee|divide:for_pay|multiplicity:100|round_number_two }}</td>
+                        {% with storage_fee=data_db.4 %}
+                        <td>{{ storage_fee }} {{ el.storage_fee }} {{ el.storage_fee|divide:storage_fee|multiplicity:100|round_number_two }}</td>
                         {% endwith %}
                         <td class="api-data">{{ data_db.5 }}</td>
                         {% with deduction=data_db.5 %}
