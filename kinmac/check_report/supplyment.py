@@ -86,6 +86,7 @@ def report_reconciliation():
         
         acceptance_goods = round((easy_data['acceptance'] if easy_data['acceptance'] else 0), 2)
         for_pay_sale = round((retail_amount - return_amount - (sale_ppvz_sum - return_ppvz_sum)), 2)
+
         delivery_rub = round(easy_data['delivery_rub'], 2)
         common_penalty = round((easy_data['penalty'] if easy_data['penalty'] else 0), 2)
         
@@ -636,11 +637,11 @@ def add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationrepor
             ppvz_sales_commission=ppvz_sales_commission[i],
             ppvz_for_pay=ppvz_for_pay[i],
             ppvz_reward=ppvz_reward[i],
-            acquiring_fee=acquiring_fee[i],
+            acquiring_fee=acquiring_fee[i] if str(acquiring_fee[i]) != 'nan' else 0,
             acquiring_bank=acquiring_bank[i],
             ppvz_vw=ppvz_vw[i],
             ppvz_vw_nds=ppvz_vw_nds[i],
-            ppvz_office_id=ppvz_office_id[i],
+            ppvz_office_id=ppvz_office_id[i] if str(ppvz_office_id[i]) != 'nan' else None,
             ppvz_office_name=ppvz_office_name[i],
             # ppvz_supplier_id=ppvz_supplier_id[i],
             ppvz_supplier_name=ppvz_supplier_name[i],

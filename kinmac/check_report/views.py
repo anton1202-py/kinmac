@@ -77,9 +77,6 @@ def compair_report(request):
     db_data_dict = {}
     for db_data in db_report_data:
         db_data_dict[db_data.realizationreport_id] = [float(db_data.retail_without_return), float(db_data.ppvz_for_pay), db_data.check_ppvz_for_pay, db_data.delivery_rub, db_data.storage_fee, db_data.penalty, db_data.total_paid]
-    
-    for i, j in db_data_dict.items():
-        print(i, j)
     context = {
         'page_name': page_name,
         'excel_data': excel_data,
