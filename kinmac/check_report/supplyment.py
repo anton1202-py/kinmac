@@ -15,7 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
-from kinmac.constants_file import BRAND_LIST, TELEGRAM_ADMIN_CHAT_ID, bot, wb_headers
+from kinmac.constants_file import wb_headers
 
 from .models import CommonSalesReportData, ExcelReportData
 
@@ -38,9 +38,8 @@ def report_reconciliation():
                     penalty=Sum('deduction'),
                     ppvz_vw_nds=Sum('ppvz_vw_nds'))
         
-        sale_data = SalesReportOnSales.objects.filter(supplier_oper_name='Продажа',
+        sale_data = SalesReportOnSales.objects.filter(doc_type_name='Продажа',
                 realizationreport_id=report['realizationreport_id']).aggregate(
-                    sale_sum=Sum('retail_amount'), 
                     for_pay=Sum('ppvz_for_pay'),
                     ppvz_reward=Sum('ppvz_reward'),
                     acquiring_fee=Sum('acquiring_fee'),
@@ -48,18 +47,9 @@ def report_reconciliation():
                     ppvz_vw=Sum('ppvz_vw'),
                     retail_amount=Sum('retail_amount'),
                     ppvz_vw_nds=Sum('ppvz_vw_nds'))
-        sale_data_minus = SalesReportOnSales.objects.filter(
-                realizationreport_id=report['realizationreport_id']).exclude(supplier_oper_name='Возврат').aggregate(
-                    sale_sum=Sum('retail_amount'), 
-                    for_pay=Sum('ppvz_for_pay'),
-                    ppvz_reward=Sum('ppvz_reward'),
-                    acquiring_fee=Sum('acquiring_fee'),
-                    ppvz_vw=Sum('ppvz_vw'),
-                    retail_amount=Sum('retail_amount'),
-                    ppvz_vw_nds=Sum('ppvz_vw_nds'))
-        return_data = SalesReportOnSales.objects.filter(supplier_oper_name='Возврат',
-                realizationreport_id=report['realizationreport_id']).aggregate(
-                    sale_sum=Sum('retail_amount'), 
+
+        return_data = SalesReportOnSales.objects.filter(doc_type_name='Возврат',
+                realizationreport_id=report['realizationreport_id']).aggregate( 
                     for_pay=Sum('ppvz_for_pay'),
                     deduction=Sum('penalty'),
                     ppvz_reward=Sum('ppvz_reward'),
@@ -104,9 +94,7 @@ def report_reconciliation():
         storage_fee = round((easy_data['storage_fee'] if easy_data['storage_fee'] else 0), 2)
         total_paid = ppvz_for_pay - delivery_rub - storage_fee - acceptance_goods - deduction - common_penalty
         total_paid = round(total_paid, 2)
-        print(report['realizationreport_id'], 'ppvz_for_pay', ppvz_for_pay)
-        print(report['realizationreport_id'], 'ppvz_retail', ppvz_retail, easy_data['for_pay'])
-        print(report['realizationreport_id'], 'ppvz_return', ppvz_return)
+
         if not CommonSalesReportData.objects.filter(
             realizationreport_id=report['realizationreport_id'],
             date_from=report['date_from'],
@@ -260,88 +248,19 @@ def write_sales_report_data_to_database(data):
     """
     Записывает полученные данные из еженедельного отчета реализации в базуданных
     """
-    if data['brand_name'] in BRAND_LIST:
-        if SalesReportOnSales.objects.filter(
-                    realizationreport_id=data['realizationreport_id'],
-                    date_from=data['date_from'],
-                    date_to=data['date_to'],
-                    rrd_id=data['rrd_id']).exists():
-            SalesReportOnSales.objects.filter(
+    if SalesReportOnSales.objects.filter(
                 realizationreport_id=data['realizationreport_id'],
                 date_from=data['date_from'],
                 date_to=data['date_to'],
-                rrd_id=data['rrd_id']).update(
-                    create_dt=data['create_dt'],
-                    currency_name=data['currency_name'],
-                    suppliercontract_code=data['suppliercontract_code'],
-                    gi_id=data['gi_id'],
-                    subject_name=data['subject_name'],
-                    nm_id=data['nm_id'],
-                    brand_name=data['brand_name'],
-                    sa_name=data['sa_name'],
-                    ts_name=data['ts_name'],
-                    barcode=data['barcode'],
-                    doc_type_name=data['doc_type_name'],
-                    quantity=data['quantity'],
-                    retail_price=data['retail_price'],
-                    retail_amount=data['retail_amount'],
-                    sale_percent=data['sale_percent'],
-                    commission_percent=data['commission_percent'],
-                    office_name=data['office_name'],
-                    supplier_oper_name=data['supplier_oper_name'],
-                    order_dt=data['order_dt'],
-                    sale_dt=data['sale_dt'],
-                    rr_dt=data['rr_dt'],
-                    shk_id=data['shk_id'],
-                    retail_price_withdisc_rub=data['retail_price_withdisc_rub'],
-                    delivery_amount=data['delivery_amount'],
-                    return_amount=data['return_amount'],
-                    delivery_rub=data['delivery_rub'],
-                    gi_box_type_name=data['gi_box_type_name'],
-                    product_discount_for_report=data['product_discount_for_report'],
-                    supplier_promo=data['supplier_promo'],
-                    rid=data['rid'],
-                    ppvz_spp_prc=data['ppvz_spp_prc'],
-                    ppvz_kvw_prc_base=data['ppvz_kvw_prc_base'],
-                    ppvz_kvw_prc=data['ppvz_kvw_prc'],
-                    sup_rating_prc_up=data['sup_rating_prc_up'],
-                    is_kgvp_v2=data['is_kgvp_v2'],
-                    ppvz_sales_commission=data['ppvz_sales_commission'],
-                    ppvz_for_pay=data['ppvz_for_pay'],
-                    ppvz_reward=data['ppvz_reward'],
-                    acquiring_fee=data['acquiring_fee'],
-                    acquiring_bank=data['acquiring_bank'],
-                    ppvz_vw=data['ppvz_vw'],
-                    ppvz_vw_nds=data['ppvz_vw_nds'],
-                    ppvz_office_id=data['ppvz_office_id'],
-                    ppvz_office_name=data['ppvz_office_name'],
-                    ppvz_supplier_id=data['ppvz_supplier_id'],
-                    ppvz_supplier_name=data['ppvz_supplier_name'],
-                    ppvz_inn=data['ppvz_inn'],
-                    declaration_number=data['declaration_number'],
-                    bonus_type_name=data.get('bonus_type_name', ''),
-                    sticker_id=data['sticker_id'],
-                    site_country=data['site_country'],
-                    penalty=data['penalty'],
-                    additional_payment=data['additional_payment'],
-                    rebill_logistic_cost=data.get('rebill_logistic_cost', 0),
-                    rebill_logistic_org=data.get('rebill_logistic_org', ''),
-                    kiz=data.get('kiz', ''),
-                    storage_fee=data['storage_fee'],
-                    deduction=data['deduction'],
-                    acceptance=data['acceptance'],
-                    srid=data['srid'],
-                    report_type=data['report_type']
-                )
-        else:
-            SalesReportOnSales(
-                realizationreport_id=data['realizationreport_id'],
-                date_from=data['date_from'],
-                date_to=data['date_to'],
+                rrd_id=data['rrd_id']).exists():
+        SalesReportOnSales.objects.filter(
+            realizationreport_id=data['realizationreport_id'],
+            date_from=data['date_from'],
+            date_to=data['date_to'],
+            rrd_id=data['rrd_id']).update(
                 create_dt=data['create_dt'],
                 currency_name=data['currency_name'],
                 suppliercontract_code=data['suppliercontract_code'],
-                rrd_id=data['rrd_id'],
                 gi_id=data['gi_id'],
                 subject_name=data['subject_name'],
                 nm_id=data['nm_id'],
@@ -400,7 +319,75 @@ def write_sales_report_data_to_database(data):
                 acceptance=data['acceptance'],
                 srid=data['srid'],
                 report_type=data['report_type']
-            ).save()
+            )
+    else:
+        SalesReportOnSales(
+            realizationreport_id=data['realizationreport_id'],
+            date_from=data['date_from'],
+            date_to=data['date_to'],
+            create_dt=data['create_dt'],
+            currency_name=data['currency_name'],
+            suppliercontract_code=data['suppliercontract_code'],
+            rrd_id=data['rrd_id'],
+            gi_id=data['gi_id'],
+            subject_name=data['subject_name'],
+            nm_id=data['nm_id'],
+            brand_name=data['brand_name'],
+            sa_name=data['sa_name'],
+            ts_name=data['ts_name'],
+            barcode=data['barcode'],
+            doc_type_name=data['doc_type_name'],
+            quantity=data['quantity'],
+            retail_price=data['retail_price'],
+            retail_amount=data['retail_amount'],
+            sale_percent=data['sale_percent'],
+            commission_percent=data['commission_percent'],
+            office_name=data['office_name'],
+            supplier_oper_name=data['supplier_oper_name'],
+            order_dt=data['order_dt'],
+            sale_dt=data['sale_dt'],
+            rr_dt=data['rr_dt'],
+            shk_id=data['shk_id'],
+            retail_price_withdisc_rub=data['retail_price_withdisc_rub'],
+            delivery_amount=data['delivery_amount'],
+            return_amount=data['return_amount'],
+            delivery_rub=data['delivery_rub'],
+            gi_box_type_name=data['gi_box_type_name'],
+            product_discount_for_report=data['product_discount_for_report'],
+            supplier_promo=data['supplier_promo'],
+            rid=data['rid'],
+            ppvz_spp_prc=data['ppvz_spp_prc'],
+            ppvz_kvw_prc_base=data['ppvz_kvw_prc_base'],
+            ppvz_kvw_prc=data['ppvz_kvw_prc'],
+            sup_rating_prc_up=data['sup_rating_prc_up'],
+            is_kgvp_v2=data['is_kgvp_v2'],
+            ppvz_sales_commission=data['ppvz_sales_commission'],
+            ppvz_for_pay=data['ppvz_for_pay'],
+            ppvz_reward=data['ppvz_reward'],
+            acquiring_fee=data['acquiring_fee'],
+            acquiring_bank=data['acquiring_bank'],
+            ppvz_vw=data['ppvz_vw'],
+            ppvz_vw_nds=data['ppvz_vw_nds'],
+            ppvz_office_id=data['ppvz_office_id'],
+            ppvz_office_name=data['ppvz_office_name'],
+            ppvz_supplier_id=data['ppvz_supplier_id'],
+            ppvz_supplier_name=data['ppvz_supplier_name'],
+            ppvz_inn=data['ppvz_inn'],
+            declaration_number=data['declaration_number'],
+            bonus_type_name=data.get('bonus_type_name', ''),
+            sticker_id=data['sticker_id'],
+            site_country=data['site_country'],
+            penalty=data['penalty'],
+            additional_payment=data['additional_payment'],
+            rebill_logistic_cost=data.get('rebill_logistic_cost', 0),
+            rebill_logistic_org=data.get('rebill_logistic_org', ''),
+            kiz=data.get('kiz', ''),
+            storage_fee=data['storage_fee'],
+            deduction=data['deduction'],
+            acceptance=data['acceptance'],
+            srid=data['srid'],
+            report_type=data['report_type']
+        ).save()
     
 
 def rewrite_sales_order(date_from, date_to, realizationreport_id):

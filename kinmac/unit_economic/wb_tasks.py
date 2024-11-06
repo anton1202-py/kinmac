@@ -1,5 +1,5 @@
 from api_requests.wb_requests import wb_article_data_from_api, wb_comissions, wb_logistic
-from kinmac.constants_file import BRAND_LIST, wb_headers
+from kinmac.constants_file import wb_headers
 from database.models import Articles
 from unit_economic.models import WbLogisticTariffs
 from unit_economic.supplyment import add_marketplace_comission_to_db, add_marketplace_logistic_to_db
@@ -32,7 +32,7 @@ def wb_comission_add_to_db():
                 'dbs_commission': data['kgvpSupplier'],
                 'fbs_express_commission': data['kgvpSupplierExpress']
             }
-        goods_list = Articles.objects.filter(brand__in=BRAND_LIST)
+        goods_list = Articles.objects.all()
         for good_data in goods_list:
             fbs_commission = wb_comission_dict[good_data.category.category_number]['fbs_commission']
             fbo_commission = wb_comission_dict[good_data.category.category_number]['fbo_commission']

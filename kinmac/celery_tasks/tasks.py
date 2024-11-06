@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from kinmac.constants_file import (BRAND_LIST, TELEGRAM_ADMIN_CHAT_ID,
+from kinmac.constants_file import (TELEGRAM_ADMIN_CHAT_ID,
                                    bot, wb_headers)
 
 load_dotenv()

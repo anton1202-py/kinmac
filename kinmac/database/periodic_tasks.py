@@ -3,7 +3,7 @@ import time
 from api_requests.wb_requests import get_check_storage_cost_report_status, get_create_storage_cost_report, get_storage_cost_report_data, wb_article_data_from_api
 from celery_tasks.celery import app
 
-from kinmac.constants_file import BRAND_LIST, wb_headers
+from kinmac.constants_file import wb_headers
 
 
 from .models import Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
@@ -81,11 +81,10 @@ def calculate_storage_cost() -> None:
         status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
     costs_data = get_storage_cost_report_data(wb_headers, report_number)
     for data in costs_data:
-        if data['brand'] in BRAND_LIST: 
-            if data['nmId'] in article_storagecost:
-                article_storagecost[data['nmId']] += data['warehousePrice']
-            else:
-                article_storagecost[data['nmId']] = data['warehousePrice']
+        if data['nmId'] in article_storagecost:
+            article_storagecost[data['nmId']] += data['warehousePrice']
+        else:
+            article_storagecost[data['nmId']] = data['warehousePrice']
     for article, amount in article_storagecost.items():
         if Articles.objects.filter(nomenclatura_wb=article).exists():
             article_obj = Articles.objects.get(nomenclatura_wb=article)

@@ -40,8 +40,6 @@ def common_sales_analytic(request):
 def add_costprice_article(request):
     """Страница с добавлением себестоимости артикула"""
     page_name = 'Себестоимость товаров'
-    
-
     articles_data = Articles.objects.filter(brand__in=BRAND_LIST)
 
     for article in articles_data:

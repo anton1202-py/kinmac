@@ -33,11 +33,9 @@ def check_report(request):
         elif 'import_file' in request.FILES:
             errors_list = download_report_data_for_check(request.FILES['import_file'])
         elif 'reload_zip' in request.FILES:
-            print(request.POST)
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
-            print(report_date_from, report_date_to, report_number)
             rewrite_sales_order_from_zip(report_date_from, report_date_to, report_number, request.FILES['reload_zip'])
             
             
