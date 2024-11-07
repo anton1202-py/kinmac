@@ -4,7 +4,7 @@ import pandas as pd
 from celery_tasks.tasks import (add_data_sales, add_data_stock_api,
                                 add_stock_data_site, delivery_statistic,
                                 orders_statistic, sales_report_statistic)
-from database.periodic_tasks import calculate_storage_cost, update_info_about_articles
+from database.periodic_tasks import article_storage_cost, calculate_storage_cost, update_info_about_articles
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -33,7 +33,7 @@ def database_home(request):
     context = {
         'data': data,
     }       
-
+    article_storage_cost()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
         empexceldata = pd.read_excel(myfile)

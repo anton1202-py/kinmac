@@ -6,7 +6,7 @@ from celery_tasks.celery import app
 from kinmac.constants_file import wb_headers
 
 
-from .models import Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
+from .models import ArticleStorageCost, Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
 
 
 @app.task
@@ -63,11 +63,6 @@ def update_info_about_articles():
 def calculate_storage_cost() -> None:
     """
     Рассчитывает стоимость хранения товара за входящие даны на ВБ
-    Входящие переменные
-    date_start - дата начала периода хранения
-    date_finish - дата завершения периода хранения
-
-    Возвращает словарь типа {nm_id: summ}
     """
     date = datetime.now().date()
     article_storagecost = {}
@@ -94,4 +89,59 @@ def calculate_storage_cost() -> None:
                 defaults=defaults, **search_params
             )
 
-    
+
+@app.task
+def article_storage_cost() -> None:
+    """
+    Записывает стоимость хранения товара за входящую дату на ВБ
+    """
+    for i in range(1, 312):
+        date_stat = (datetime.now() - timedelta(days=i)).date()
+        print('date', date_stat)
+        date_stat = str(date_stat)
+        report_number = get_create_storage_cost_report(wb_headers, date_stat, date_stat)['data']['taskId']
+        time.sleep(15)
+        status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
+        while status != 'done':
+            time.sleep(10)
+            status = get_check_storage_cost_report_status(wb_headers, report_number)['data']['status']
+        costs_data = get_storage_cost_report_data(wb_headers, report_number)
+        for data in costs_data:
+
+            if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
+                article_obj = Articles.objects.filter(nomenclatura_wb=data['nmId']).first()
+
+                search_params = {
+                    'article': article_obj, 
+                    'date': data["date"],
+                    'warehouse': data["warehouse"],
+                    'office_id': data["officeId"],
+                    'gi_id': data["giId"],
+                }
+
+                defaults = {
+                    'log_warehouse_coef': data["logWarehouseCoef"],                
+                    'warehouse_coef': data["warehouseCoef"],
+                    'chrt_id': data["chrtId"],
+                    'size': data["size"],
+                    'barcode': data["barcode"],
+                    'subject': data["subject"],
+                    'brand': data["brand"],
+                    'vendor_code': data["vendorCode"],
+                    'nm_id': data["nmId"],
+                    'volume': data["volume"],
+                    'calc_type': data["calcType"],
+                    'warehouse_price': data["warehousePrice"],
+                    'barcodes_count': data["barcodesCount"],
+                    'pallet_place_code': data["palletPlaceCode"],
+                    'pallet_count': data["palletCount"],
+                    'original_date': data["originalDate"],
+                    'loyalty_discount': data["loyaltyDiscount"],
+                    'tariffFix_date': data["tariffFixDate"],
+                    'tariff_lower_date': data["tariffLowerDate"]
+                }
+
+                ArticleStorageCost.objects.update_or_create(
+                    defaults=defaults, **search_params
+                )
+        print('загрузил', date_stat)

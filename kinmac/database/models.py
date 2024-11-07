@@ -1100,7 +1100,7 @@ class StorageCost(models.Model):
         Articles,
         verbose_name='Артикул',
         on_delete=models.SET_NULL,
-        related_name='article_storage_cost',
+        related_name='storage_cost',
         blank=True,
         null=True,
     )
@@ -1111,6 +1111,123 @@ class StorageCost(models.Model):
     )
     storage_cost = models.FloatField(
         verbose_name='Затраты на хранение',
+    )
+    
+    class Meta:
+        verbose_name = 'Стоимость хранения артикулов по датам'
+        verbose_name_plural = 'Стоимость хранения артикулов по датам'
+
+
+class ArticleStorageCost(models.Model):
+    """Стоимость хранения артикулов по датам"""
+    article = models.ForeignKey(
+        Articles,
+        verbose_name='Артикул',
+        on_delete=models.SET_NULL,
+        related_name='article_storage_cost',
+        blank=True,
+        null=True,
+    )
+    date = models.DateField(
+        verbose_name='Дата, за которую был расчёт или перерасчёт',
+        null=True,
+        blank=True,
+    )
+    log_warehouse_coef = models.FloatField(
+        verbose_name='Коэффициент логистики и хранения',
+    )
+    office_id = models.IntegerField(
+        verbose_name='ID склада',
+    )
+    warehouse = models.CharField(
+        verbose_name='Название склада',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    warehouse_coef = models.FloatField(
+        verbose_name='Коэффициент склада',
+    )
+    gi_id = models.IntegerField(
+        verbose_name='ID поставки',
+    )
+    chrt_id = models.IntegerField(
+        verbose_name='ID размера для этого артикула WB',
+    )
+    size = models.CharField(
+        verbose_name='Размер (techSize в карточке товара)',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    barcode = models.CharField(
+        verbose_name='Баркод',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    subject = models.CharField(
+        verbose_name='Предмет',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    brand = models.CharField(
+        verbose_name='Бренд',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    vendor_code = models.CharField(
+        verbose_name='Артикул продавца',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    nm_id = models.IntegerField(
+        verbose_name='Артикул WB',
+    )
+    volume = models.FloatField(
+        verbose_name='Объём товара',
+    )
+    calc_type = models.CharField(
+        verbose_name='Способ расчёта',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    warehouse_price = models.FloatField(
+        verbose_name='Сумма хранения',
+    )
+    barcodes_count = models.IntegerField(
+        verbose_name='Количество единиц товара (штук), подлежащих тарифицированию за расчётные сутки',
+    )
+    pallet_place_code = models.IntegerField(
+        verbose_name='Код паллетоместа',
+    )
+    pallet_count = models.FloatField(
+        verbose_name='Количество паллет',
+    )
+    original_date = models.CharField(
+        verbose_name='Если был перерасчёт, это дата первоначального расчёта. Если перерасчёта не было, совпадает с date',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    loyalty_discount = models.FloatField(
+        verbose_name='Скидка программы лояльности, ₽',
+    )
+    tariffFix_date = models.CharField(
+        verbose_name='Дата фиксации тарифа',
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    tariff_lower_date = models.CharField(
+        verbose_name='Дата понижения тарифа',
+        max_length=300,
+        null=True,
+        blank=True,
     )
     
     class Meta:
