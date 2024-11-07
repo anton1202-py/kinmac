@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db.models import Case, Count, IntegerField, Q, Sum, When
-from database.models import Articles, CodingMarketplaces, CostPrice, SalesReportOnSales, StorageCost, WeeklyReportInDatabase
+from database.models import ArticleStorageCost, Articles, CodingMarketplaces, CostPrice, SalesReportOnSales, WeeklyReportInDatabase
 from kinmac.constants_file import BRAND_LIST, bot, TELEGRAM_ADMIN_CHAT_ID
 from reklama.models import ArticleDailyCostToAdv
 from sales_analytics.models import ArticleSaleAnalytic
@@ -37,7 +37,7 @@ def articles_analytics_data(report_number):
     for nm_id_dict in nm_ids_list:
         if Articles.objects.filter(nomenclatura_wb=nm_id_dict['nm_id']).exists():
             article = Articles.objects.get(nomenclatura_wb=nm_id_dict['nm_id'])
-            costs_data = StorageCost.objects.filter(article=article, start_date__range=[date_start, date_finish]).aggregate(storage_cost=Sum('storage_cost'))
+            costs_data = ArticleStorageCost.objects.filter(article=article, date__range=[date_start, date_finish]).aggregate(storage_cost=Sum('warehouse_price'))
             marketplace = CodingMarketplaces.objects.get(marketpalce='Wildberries')
             main_queryset = SalesReportOnSales.objects.filter(
                 realizationreport_id=report_number,
