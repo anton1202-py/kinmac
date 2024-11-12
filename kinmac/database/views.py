@@ -16,6 +16,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from check_report.signals import articles_analytics_data
+from action.periodic_tasks import add_article_in_actions_info, add_new_actions_wb_to_db
 from kinmac.constants_file import BRAND_LIST
 from unit_economic.periodic_tasks import update_tariffs_and_logistic
 from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost, write_daily_adv_statistic
@@ -32,8 +33,10 @@ def database_home(request):
     data = Articles.objects.filter(brand__in=BRAND_LIST)
     context = {
         'data': data,
-    }       
-    article_storage_cost()
+    }
+    # add_new_actions_wb_to_db()
+    add_article_in_actions_info()
+    # article_storage_cost()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
         empexceldata = pd.read_excel(myfile)
@@ -91,9 +94,8 @@ def database_stock_api(request):
         return redirect('login')
     control_date_stock = date.today() - timedelta(days=3)
     articles = Articles.objects.all()
-    data = StocksApi.objects.filter(Q(pub_date__gte=
-        control_date_stock
-        ))
+    data = StocksApi.objects.filter(Q(pub_date__gte=control_date_stock
+                                      ))
     form = SelectDateForm(request.POST or None)
     datestart = control_date_stock
     datefinish = control_date_stock
@@ -165,9 +167,8 @@ def database_sales(request):
         return redirect('login')
     control_date_sale = date.today() - timedelta(days=3)
     seller_articles = Articles.objects.all()
-    data = Sales.objects.filter(Q(pub_date__gte=
-        control_date_sale
-       ))
+    data = Sales.objects.filter(Q(pub_date__gte=control_date_sale
+                                  ))
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_sale
@@ -199,8 +200,8 @@ def database_deliveries(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_delivery = date.today() - timedelta(days=30)
-    data = Deliveries.objects.filter(Q(delivery_date__gte=
-        control_date_delivery)).order_by('delivery_date')
+    data = Deliveries.objects.filter(
+        Q(delivery_date__gte=control_date_delivery)).order_by('delivery_date')
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_delivery
@@ -232,9 +233,8 @@ def database_orders(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
-    data = Orders.objects.filter(Q(order_date__gte=
-        control_date_orders
-        )).order_by('order_date')
+    data = Orders.objects.filter(Q(order_date__gte=control_date_orders
+                                   )).order_by('order_date')
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_orders
@@ -266,7 +266,8 @@ def sales_report(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
     control_date_orders = date.today() - timedelta(days=30)
-    all_data = SalesReportOnSales.objects.all().values('realizationreport_id').distinct()
+    all_data = SalesReportOnSales.objects.all().values(
+        'realizationreport_id').distinct()
     data = SalesReportOnSales.objects.filter(Q(date_from__range=[
         control_date_orders,
         date.today()])).order_by('-realizationreport_id')
@@ -279,9 +280,9 @@ def sales_report(request):
         datestart = request.POST.get("datestart")
         datefinish = request.POST.get("datefinish")
         article_filter = request.POST.get("article_filter")
-        
-        report_number_filter=request.POST.get("report_number_filter")
-        line_number_filter=request.POST.get("line_number_filter")
+
+        report_number_filter = request.POST.get("report_number_filter")
+        line_number_filter = request.POST.get("line_number_filter")
         data = SalesReportOnSales.objects.filter().order_by('-realizationreport_id')
         if datestart:
             data = SalesReportOnSales.objects.filter(
@@ -303,9 +304,11 @@ def sales_report(request):
     try:
         page_obj = paginator.get_page(page_number)
     except PageNotAnInteger:
-        page_obj = paginator.get_page(1)  # Если номер страницы не целый, возвращаем первую страницу
+        # Если номер страницы не целый, возвращаем первую страницу
+        page_obj = paginator.get_page(1)
     except EmptyPage:
-        page_obj = paginator.get_page(paginator.num_pages)  # Если страница выходит за пределы, возвращаем последнюю страницу
+        # Если страница выходит за пределы, возвращаем последнюю страницу
+        page_obj = paginator.get_page(paginator.num_pages)
     context = {
         'form': form,
         'data': data,
@@ -314,17 +317,16 @@ def sales_report(request):
     return render(request, 'database/database_sales_report.html', context)
 
 
-
 def weekly_sales_data(request):
     """Функция отвечает за отображение данных недельных продаж"""
 
     sales = Sales.objects.filter(finished_price__gte=0,
-        brand='KINMAC').annotate(
+                                 brand='KINMAC').annotate(
         week=ExtractWeek('pub_date'),
         year=ExtractYear('pub_date')
     ).values('supplier_article', 'barcode', 'week', 'year').annotate(
         count=Count(Case(When(finished_price__gte=0, then=1),
-                         
+
                     output_field=IntegerField()))
     ).order_by('supplier_article', 'barcode', 'year', 'week')
 
@@ -345,9 +347,9 @@ def weekly_sales_data(request):
     for tim in sales_data:
         week_year = f"{tim['week']}-{tim['year']}"
         week_data.append(week_year)
-        #week_data.append('3-2024')
+        # week_data.append('3-2024')
     unique_week = list(set(week_data))
-    #sorted_list = sorted(unique_week, key=lambda x: (x['name'], x['age']))
+    # sorted_list = sorted(unique_week, key=lambda x: (x['name'], x['age']))
     unique_week.sort()
     for sale in sales:
         supplier_article = sale['supplier_article']
@@ -439,9 +441,9 @@ class DatabaseWeeklySalesDetailView(ListView):
                 year=ExtractYear('pub_date')
         ).values('supplier_article', 'barcode', 'week', 'year').annotate(
             count=Count(Case(When(finished_price__gte=0, then=1),
-            output_field=IntegerField()))
+                             output_field=IntegerField()))
         ).order_by('supplier_article', 'barcode', 'year', 'week')
-        
+
         sales_data = Sales.objects.filter(
             Q(finished_price__gte=0)).annotate(
                 week=ExtractWeek('pub_date'),
@@ -455,8 +457,8 @@ class DatabaseWeeklySalesDetailView(ListView):
                 week=ExtractWeek('pub_date'),
                 year=ExtractYear('pub_date')
         ).values('warehouse_name', 'week', 'year'
-                ).annotate(week_sales=Count('id', filter=Q(sales_date__gte=TruncWeek('sales_date')))
-                ).order_by('warehouse_name')
+                 ).annotate(week_sales=Count('id', filter=Q(sales_date__gte=TruncWeek('sales_date')))
+                            ).order_by('warehouse_name')
         warehouses_list = []
         # Находим склады с которых были продажи и выводим в один список
         for warehouse in warehouses:
@@ -481,7 +483,7 @@ class DatabaseWeeklySalesDetailView(ListView):
             if key not in data:
                 data[key] = {}
             data[key][week_year] = count
-        
+
         # Формирую новый словарь с данными по складам, что не
         # съезжали данные по неделям
         warehouses_data = {}
@@ -489,12 +491,12 @@ class DatabaseWeeklySalesDetailView(ListView):
             key = stock['warehouse_name']
             if key not in warehouses_data.keys():
                 warehouses_data[key] = {}
-            #if key in warehouses_data.keys():
-            if  f"{stock['week']}-{stock['year']}" in warehouses_data[key].keys():
+            # if key in warehouses_data.keys():
+            if f"{stock['week']}-{stock['year']}" in warehouses_data[key].keys():
                 warehouses_data[key][f"{stock['week']}-{stock['year']}"] += stock['week_sales']
             else:
                 warehouses_data[key][f"{stock['week']}-{stock['year']}"] = stock['week_sales']
-        
+
         # Добавляем недостающие недели со значением 0
         for warehouse_name, amount in warehouses_data.items():
             for week in unique_week:

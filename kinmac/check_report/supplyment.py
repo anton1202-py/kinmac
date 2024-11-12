@@ -501,7 +501,8 @@ def add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationrepor
         'Итоговый кВВ без НДС, %', 
         'Вознаграждение с продаж до вычета услуг поверенного, без НДС', 
         'Возмещение за выдачу и возврат товаров на ПВЗ', 
-        'Возмещение издержек по эквайрингу', 
+        # 'Возмещение издержек по эквайрингу',
+        'Эквайринг/Комиссии за организацию платежей',
         'Размер комиссии за эквайринг, %', 
         'Вознаграждение Вайлдберриз (ВВ), без НДС', 
         'НДС с Вознаграждения Вайлдберриз', 
@@ -562,7 +563,7 @@ def add_data_to_db_from_analytic_report_zip(date_from, date_to, realizationrepor
     ppvz_kvw_prc = excel_data['Итоговый кВВ без НДС, %'].to_list()
     ppvz_sales_commission = excel_data['Вознаграждение с продаж до вычета услуг поверенного, без НДС'].to_list()
     ppvz_reward = excel_data['Возмещение за выдачу и возврат товаров на ПВЗ'].to_list()
-    acquiring_fee = excel_data['Возмещение издержек по эквайрингу'].to_list()
+    acquiring_fee = excel_data['Эквайринг/Комиссии за организацию платежей'].to_list()
     # = excel_data['Размер комиссии за эквайринг, %'].to_list()
     ppvz_vw = excel_data['Вознаграждение Вайлдберриз (ВВ), без НДС'].to_list()
     ppvz_vw_nds = excel_data['НДС с Вознаграждения Вайлдберриз'].to_list()
