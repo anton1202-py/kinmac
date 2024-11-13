@@ -66,11 +66,13 @@ def add_article_in_actions_info():
     # Получаем информацию по новым акциям
     actions = Action.objects.filter(date_finish__gt=datetime.now())
     for action_obj in actions:
+        print(action_obj)
         # Получаем инормацию по артикулам, которые могут участвовать в акции
         if action_obj.action_type != 'auto':
             article_action_data = wb_articles_in_action(
                 wb_headers, action_obj.action_number)
         else:
+            print('Достаю Excel')
             article_action_data = get_excel_data_from_front(
                 action_obj.action_number, action_obj.period)
         # Сохраняем артикулы, которые могут участвовать в акции
