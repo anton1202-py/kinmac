@@ -97,18 +97,18 @@ app.conf.beat_schedule = {
     # ========== UNIT_ECONOMICS ========== #
     "tariffs_and_logistic": {
         "task": "unit_economic.periodic_tasks.update_tariffs_and_logistic",
-        "schedule": crontab(hour='6', minute=2)
+        "schedule": crontab(hour=6, minute=2)
     },
     # ========== КОНЕЦ UNIT_ECONOMICS ========== #
 
     # ========== ACTIONS ========== #
     "actions_new_actions": {
         "task": "action.periodic_tasks.add_new_actions_wb_to_db",
-        "schedule": crontab(hour='7', minute=20)
+        "schedule": crontab(hour=7, minute=30)
     },
     "actions_article_in_actions": {
         "task": "action.periodic_tasks.add_article_in_actions_info",
-        "schedule": crontab(hour='7', minute=30)
+        "schedule": crontab(hour=7, minute=35)
     },
     # ========== КОНЕЦ ACTIONS ========== #
 
