@@ -17,6 +17,7 @@ def add_new_actions_wb_to_db():
     """Добавляет новую акцию ВБ в базу данных"""
     # Получаем информацию по новым акциям
     actions_data = wb_actions_first_list(wb_headers)
+    print(actions_data)
     actions_not_exist_str = ''
     if actions_data:
         actions_info = actions_data['data']['promotions']
