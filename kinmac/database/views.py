@@ -34,8 +34,8 @@ def database_home(request):
     context = {
         'data': data,
     }
-    # add_new_actions_wb_to_db()
-    add_article_in_actions_info()
+    add_new_actions_wb_to_db()
+    # add_article_in_actions_info()
     # article_storage_cost()
     if request.method == 'POST' and request.FILES['myarticles']:
         myfile = request.FILES['myarticles']
