@@ -43,7 +43,7 @@ def wb_article_data_from_api(header, update_date=None, mn_id=0, common_data=None
     )
     response = requests.request(
         "POST", url, headers=header, data=payload)
-
+    print(response.status_code)
     counter += 1
     if response.status_code == 200:
         all_data = json.loads(response.text)["cards"]

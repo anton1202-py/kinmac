@@ -17,7 +17,7 @@ from api_requests.wb_requests import (get_report_detail_by_period,
                                       wb_article_data_from_api)
 from celery_tasks.celery import app
 from check_report.supplyment import report_reconciliation, write_sales_report_data_to_database
-from database.models import SalesReportOnSales, WeeklyReportInDatabase
+from database.models import Articles, SalesReportOnSales, WeeklyReportInDatabase
 from database.supplyment import (add_data_delivery_to_db,
                                  add_data_orders_from_site_to_db,
                                  add_data_sales_to_db, add_data_stock_from_api,
@@ -240,10 +240,13 @@ def add_stock_data_site():
     control_date = now.strftime("%Y-%m-%d %H:%M:%S")
     URL = 'https://card.wb.ru/cards/detail?appType=0&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
     article_data = wb_article_data_from_api(wb_headers)
+    article_data = Articles.objects.all()
+    print(article_data)
+
     # print(article_data)
     article_dict = {}
-    for article in article_data:
-        article_dict[article['nmID']] = article['vendorCode']
+    for article_obj in article_data:
+        article_dict[article_obj.nomenclatura_wb] = article_obj.common_article
     iter_amount = len(article_dict.keys()) // 70
     for k in range(iter_amount+1):
         print(k)
