@@ -98,7 +98,7 @@ def article_storage_cost() -> None:
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-    for i in range(2, 320):
+    for i in range(7, 320):
         date_stat = (datetime.now() - timedelta(days=i)).date()
         print('date', date_stat)
         date_stat = str(date_stat)
@@ -120,7 +120,6 @@ def article_storage_cost() -> None:
         print('******************')
         print(costs_data)
         for data in costs_data:
-            print(data)
 
             if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
                 article_obj = Articles.objects.filter(
