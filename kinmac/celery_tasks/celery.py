@@ -104,11 +104,11 @@ app.conf.beat_schedule = {
     # ========== ACTIONS ========== #
     "actions_new_actions": {
         "task": "action.periodic_tasks.add_new_actions_wb_to_db",
-        "schedule": crontab(hour=10, minute=36)
+        "schedule": crontab(hour=12, minute=50)
     },
     "actions_article_in_actions": {
         "task": "action.periodic_tasks.add_article_in_actions_info",
-        "schedule": crontab(hour=10, minute=40)
+        "schedule": crontab(hour=12, minute=55)
     },
     # ========== КОНЕЦ ACTIONS ========== #
 
