@@ -116,7 +116,11 @@ def article_storage_cost() -> None:
             status = get_check_storage_cost_report_status(
                 wb_headers, report_number)['data']['status']
         costs_data = get_storage_cost_report_data(wb_headers, report_number)
+
+        print('******************')
+        print(costs_data)
         for data in costs_data:
+            print(data)
 
             if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
                 article_obj = Articles.objects.filter(
