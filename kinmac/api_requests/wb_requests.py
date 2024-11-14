@@ -43,7 +43,7 @@ def wb_article_data_from_api(header, update_date=None, mn_id=0, common_data=None
     )
     response = requests.request(
         "POST", url, headers=header, data=payload)
-    print(response.status_code)
+    print(f'{response.status_code}, {counter}, {len(common_data)}')
     counter += 1
     if response.status_code == 200:
         all_data = json.loads(response.text)["cards"]
@@ -52,8 +52,10 @@ def wb_article_data_from_api(header, update_date=None, mn_id=0, common_data=None
             common_data.append(data)
         if len(json.loads(response.text)["cards"]) == 100:
             # time.sleep(1)
+            print('Перезапрашиваю')
             return wb_article_data_from_api(header,
                                             check_amount['updatedAt'], check_amount['nmID'], common_data, counter)
+        print(f'Должен вернуть данные {len(common_data)}')
         return common_data
     elif response.status_code != 200 and counter <= 50:
         return wb_article_data_from_api(header, update_date, mn_id, common_data, counter)
