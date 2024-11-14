@@ -243,6 +243,7 @@ def add_stock_data_site():
     # article_data = wb_article_data_from_api(wb_headers)
     print('Прошел article_data из АПИ')
     article_data = Articles.objects.all()
+    print(f'{len(article_data)}')
     print('Прошел article_data из базы данных')
     print(article_data)
 
