@@ -240,7 +240,9 @@ def add_stock_data_site():
     control_date = now.strftime("%Y-%m-%d %H:%M:%S")
     URL = 'https://card.wb.ru/cards/detail?appType=0&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
     article_data = wb_article_data_from_api(wb_headers)
+    print('Прошел article_data из АПИ')
     article_data = Articles.objects.all()
+    print('Прошел article_data из базы данных')
     print(article_data)
 
     # print(article_data)

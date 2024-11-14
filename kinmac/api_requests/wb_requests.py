@@ -84,7 +84,7 @@ def get_stock_from_webpage_api(nom_id):
     Остатки товаров на складах WB. Из неофициального АПИ
     """
     # time.sleep(61)
-    url = f"https://card.wb.ru/cards/detail?appType=0&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm={nom_id}"
+    url = f"https://card.wb.ru/cards/detail?appType=0&dest=-2133464&nm={nom_id}"
     response = requests.request("GET", url)
     return response
 
