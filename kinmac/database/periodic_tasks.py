@@ -93,12 +93,12 @@ def calculate_storage_cost() -> None:
             )
 
 
-@app.task
-def article_storage_cost() -> None:
+# @app.task
+def article_storage_cost():
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-    for i in range(11, 320):
+    for i in range(12, 320):
         date_stat = (datetime.now() - timedelta(days=i)).date()
         print('date', date_stat)
         date_stat = str(date_stat)
