@@ -260,6 +260,8 @@ def add_stock_data_site():
             helper += str(i)+';'
 
         data = get_stock_from_webpage_api(str(helper))
+        print('ПРошел get_stock_from_webpage_api')
+        print(data)
         main_data = data['data']['products']
         for j in main_data:
             print('j', j)
