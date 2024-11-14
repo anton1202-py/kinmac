@@ -120,7 +120,7 @@ def article_storage_cost() -> None:
         print('******************')
         print(costs_data)
         for data in costs_data:
-
+            print(data)
             if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
                 article_obj = Articles.objects.filter(
                     nomenclatura_wb=data['nmId']).first()
