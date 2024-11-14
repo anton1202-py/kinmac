@@ -163,10 +163,10 @@ def get_create_storage_cost_report(header, date_from, date_to):
     Можно получить отчёт максимум за 8 дней. 
     Максимум 1 запрос в минуту
     """
-    print('зашел в get_create_storage_cost_report. Ждем 50 сек',
+    print('зашел в get_create_storage_cost_report. Ждем 40 сек',
           datetime.now().time())
-    time.sleep(50)
-    print('Закончили ждать 50 сек')
+    time.sleep(40)
+    print('Закончили ждать 40 сек')
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?dateFrom={date_from}&dateTo={date_to}"
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
