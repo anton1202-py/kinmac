@@ -181,7 +181,10 @@ def get_check_storage_cost_report_status(header, report_id):
     """
     print('get_check_storage_cost_report_status',
           datetime.now().time())
+    print(report_id)
+
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/status"
+    print(url)
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
     return json.loads(response.text)
@@ -194,7 +197,9 @@ def get_storage_cost_report_data(header, report_id):
     Максимум 1 запрос в минуту
     """
     print('get_storage_cost_report_data')
+    print(report_id)
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/download"
+    print(url)
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
     return json.loads(response.text)
