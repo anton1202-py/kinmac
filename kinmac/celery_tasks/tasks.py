@@ -252,8 +252,9 @@ def add_stock_data_site():
         article_dict[int(article_obj.nomenclatura_wb)
                      ] = article_obj.common_article
     iter_amount = math.ceil(len(article_dict.keys()) / 70)
+    print(f'iter_amount: {iter_amount}')
     for k in range(iter_amount):
-        print(k)
+        print(f'({k}, {iter_amount})')
         start_point = k*70
         finish_point = (k+1)*70
         nom_info_list = list(article_dict.keys())[start_point:finish_point]
