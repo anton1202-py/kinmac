@@ -67,7 +67,7 @@ def get_excel_data_from_front(action_number, action_period):
         )
         articles_action_data = []
         for i, article in enumerate(wb_article_list):
-            print('article', article)
+            # print('article', article)
             if Articles.objects.filter(
                     nomenclatura_wb=article).exists():
                 inner_dict = {}

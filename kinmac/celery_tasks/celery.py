@@ -108,7 +108,7 @@ app.conf.beat_schedule = {
     },
     "actions_article_in_actions": {
         "task": "action.periodic_tasks.add_article_in_actions_info",
-        "schedule": crontab(hour=12, minute=55)
+        "schedule": crontab(hour=13, minute=0)
     },
     # ========== КОНЕЦ ACTIONS ========== #
 

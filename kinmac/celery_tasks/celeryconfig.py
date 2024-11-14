@@ -3,4 +3,5 @@ task_serializer = 'json'
 result_serializer = 'json'
 accept_content = ['json']
 timezone = 'Europe/Moscow'
+broker_connection_retry_on_startup = True
 # enable_utc = True
