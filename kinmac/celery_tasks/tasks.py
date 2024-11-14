@@ -263,8 +263,8 @@ def add_stock_data_site():
         data = get_stock_from_webpage_api(str(helper))
         print('ПРошел get_stock_from_webpage_api')
         main_data = data['data']['products']
-        for j in main_data:
-            print('j', j)
+        for i, j in enumerate(main_data):
+            print(f'{i}, {len(main_data)}')
             if 'priceU' in j:
                 data_for_db = {}
                 amount = 0
@@ -292,7 +292,7 @@ def add_stock_data_site():
                     data_for_db['quantity'] = quantity
                     add_data_stock_from_web_api(data_for_db)
 
-                sleep(1)
+                # sleep(1)
 
     # except Exception as e:
     #     # обработка ошибки и отправка сообщения через бота
