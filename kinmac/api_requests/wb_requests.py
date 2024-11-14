@@ -163,7 +163,10 @@ def get_create_storage_cost_report(header, date_from, date_to):
     Можно получить отчёт максимум за 8 дней. 
     Максимум 1 запрос в минуту
     """
+    print('зашел в get_create_storage_cost_report. Ждем 30 сек',
+          datetime.now().time())
     time.sleep(30)
+    print('Закончили ждать 30 сек')
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?dateFrom={date_from}&dateTo={date_to}"
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
@@ -176,9 +179,11 @@ def get_check_storage_cost_report_status(header, report_id):
     Возвращает статус задания на генерацию. 
     Максимум 1 запрос в 5 секунд
     """
-    # time.sleep(61)
+    print('get_check_storage_cost_report_status',
+          datetime.now().time())
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/status"
     response = requests.request("GET", url, headers=header)
+    print(response.status_code)
     return response
 
 
@@ -188,8 +193,10 @@ def get_storage_cost_report_data(header, report_id):
     Возвращает отчёт по ID задания. 
     Максимум 1 запрос в минуту
     """
+    print('get_storage_cost_report_data')
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/download"
     response = requests.request("GET", url, headers=header)
+    print(response.status_code)
     return response
 
 

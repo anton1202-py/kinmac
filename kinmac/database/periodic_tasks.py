@@ -104,11 +104,15 @@ def article_storage_cost() -> None:
         date_stat = str(date_stat)
         report_number = get_create_storage_cost_report(
             wb_headers, date_stat, date_stat)['data']['taskId']
+        print('Ждем 15 сек')
         time.sleep(15)
+        print('Закончили ждать 15 сек')
         status = get_check_storage_cost_report_status(
             wb_headers, report_number)['data']['status']
         while status != 'done':
+            print('Ждем 10 сек')
             time.sleep(10)
+            print('Закончили ждать 10 сек')
             status = get_check_storage_cost_report_status(
                 wb_headers, report_number)['data']['status']
         costs_data = get_storage_cost_report_data(wb_headers, report_number)
