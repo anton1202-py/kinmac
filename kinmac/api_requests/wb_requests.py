@@ -156,7 +156,7 @@ def get_report_detail_by_period(header, date_from, date_to):
 # ========= ЗАПРОСЫ АНАЛИТИКИ ========== #
 
 
-@api_retry_decorator
+# @api_retry_decorator
 def get_create_storage_cost_report(header, date_from, date_to):
     """
     Создаёт задание на генерацию отчёта. 
@@ -170,10 +170,10 @@ def get_create_storage_cost_report(header, date_from, date_to):
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?dateFrom={date_from}&dateTo={date_to}"
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
-    return response
+    return json.loads(response.text)
 
 
-@api_retry_decorator
+# @api_retry_decorator
 def get_check_storage_cost_report_status(header, report_id):
     """
     Возвращает статус задания на генерацию. 
@@ -184,10 +184,10 @@ def get_check_storage_cost_report_status(header, report_id):
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/status"
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
-    return response
+    return json.loads(response.text)
 
 
-@api_retry_decorator
+# @api_retry_decorator
 def get_storage_cost_report_data(header, report_id):
     """
     Возвращает отчёт по ID задания. 
@@ -197,7 +197,7 @@ def get_storage_cost_report_data(header, report_id):
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/{report_id}/download"
     response = requests.request("GET", url, headers=header)
     print(response.status_code)
-    return response
+    return json.loads(response.text)
 
 
 # ========= ЗАПРОСЫ РЕКЛАМЫ ========== #
