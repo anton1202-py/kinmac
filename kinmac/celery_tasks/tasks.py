@@ -262,6 +262,7 @@ def add_stock_data_site():
         data = get_stock_from_webpage_api(str(helper))
         main_data = data['data']['products']
         for j in main_data:
+            print('j', j)
             if 'priceU' in j:
                 data_for_db = {}
                 amount = 0

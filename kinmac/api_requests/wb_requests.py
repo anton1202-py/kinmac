@@ -88,6 +88,7 @@ def get_stock_from_webpage_api(nom_id):
     # time.sleep(61)
     url = f"https://card.wb.ru/cards/detail?appType=0&dest=-2133464&nm={nom_id}"
     response = requests.request("GET", url)
+    print(response.status_code)
     return response
 
 
