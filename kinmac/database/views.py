@@ -92,6 +92,7 @@ def database_home(request):
 def database_stock_api(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
+    article_storage_cost()
     control_date_stock = date.today() - timedelta(days=3)
     articles = Articles.objects.all()
     data = StocksApi.objects.filter(Q(pub_date__gte=control_date_stock
