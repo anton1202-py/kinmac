@@ -50,7 +50,7 @@ app.conf.beat_schedule = {
     },
     "add_stock_data_site3": {
         "task": "celery_tasks.tasks.add_stock_data_site",
-        "schedule": crontab(hour=13, minute=44)
+        "schedule": crontab(hour=13, minute=48)
     },
     "add_stock_data_site4": {
         "task": "celery_tasks.tasks.add_stock_data_site",

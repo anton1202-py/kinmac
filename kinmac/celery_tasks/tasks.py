@@ -248,7 +248,8 @@ def add_stock_data_site():
     # print(article_data)
     article_dict = {}
     for article_obj in article_data:
-        article_dict[article_obj.nomenclatura_wb] = article_obj.common_article
+        article_dict[int(article_obj.nomenclatura_wb)
+                     ] = article_obj.common_article
     iter_amount = len(article_dict.keys()) // 70
     for k in range(iter_amount+1):
         print(k)
@@ -261,7 +262,6 @@ def add_stock_data_site():
 
         data = get_stock_from_webpage_api(str(helper))
         print('ПРошел get_stock_from_webpage_api')
-        print(data)
         main_data = data['data']['products']
         for j in main_data:
             print('j', j)
