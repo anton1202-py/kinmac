@@ -36,6 +36,7 @@ CHAT_ID = os.getenv('CHAT_ID')
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
+
 def error_message(function_name: str, function, error_text: str) -> str:
     """
     Формирует текст ошибки и выводит информацию в модальном окне
@@ -50,13 +51,14 @@ def error_message(function_name: str, function, error_text: str) -> str:
                      f'Техническая информация:\n {tb_str}')
     return message_error
 
+
 @app.task
 def check_wb_toket_expire():
     """
     Проверяет срок годности токена.
     Если срок годности меньше 5 дней - отправляет сообщение в ТГ
     """
-    
+
     api_key = wb_headers['Authorization']
     decoded = jwt.decode(api_key, options={"verify_signature": False})
     timestamp = decoded['exp']
@@ -69,17 +71,20 @@ def check_wb_toket_expire():
         bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
                          text=message)
 
+
 @app.task
 def add_data_stock_api():
     try:
         control_date_stock = date.today() - timedelta(days=1)
         data_stock = get_statistic_stock_api(wb_headers, control_date_stock)
         for data in data_stock:
-            add_data_stock_from_api(data)        
+            add_data_stock_from_api(data)
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
-        message_text = error_message('add_data_stock_api', add_data_stock_api, e)
-        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message_text, parse_mode='HTML')
+        message_text = error_message(
+            'add_data_stock_api', add_data_stock_api, e)
+        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
+                         text=message_text, parse_mode='HTML')
 
 
 @app.task
@@ -88,15 +93,17 @@ def add_data_sales():
         control_date_sales = date.today() - timedelta(days=1)
         data_sales = get_statistic_sales_api(wb_headers, control_date_sales)
         for data in data_sales:
-            add_data_sales_to_db(data)  
+            add_data_sales_to_db(data)
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
         message_text = error_message('add_data_sales', add_data_sales, e)
-        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message_text, parse_mode='HTML')
+        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
+                         text=message_text, parse_mode='HTML')
+
 
 @app.task
 def add_stock_data_site():
-    #try:
+    # try:
     wb_stock_id_name = {
         507: 'Коледино', 686: 'Новосибирск', 1193: 'Хабаровск', 1733: 'Екатеринбург',
         2737: 'Санкт-Петербург', 115651: 'FBS Тамбов', 117392: 'FBS Владимир',
@@ -237,10 +244,11 @@ def add_stock_data_site():
     article_dict = {}
     for article in article_data:
         article_dict[article['nmID']] = article['vendorCode']
-    iter_amount = len(article_dict.keys()) // 15
+    iter_amount = len(article_dict.keys()) // 70
     for k in range(iter_amount+1):
-        start_point = k*15
-        finish_point = (k+1)*15
+        print(k)
+        start_point = k*70
+        finish_point = (k+1)*70
         nom_info_list = list(article_dict.keys())[start_point:finish_point]
         helper = ''
         for i in nom_info_list:
@@ -269,16 +277,15 @@ def add_stock_data_site():
                         warehouse = i['wh']
                     else:
                         warehouse = wb_stock_id_name[i['wh']]
-                    
+
                     quantity = i['qty']
                     amount += i["qty"]
                     data_for_db['warehouse'] = warehouse
                     data_for_db['quantity'] = quantity
                     add_data_stock_from_web_api(data_for_db)
-                    
-                
+
                 sleep(1)
-    
+
     # except Exception as e:
     #     # обработка ошибки и отправка сообщения через бота
     #     message_text = error_message('add_stock_data_site', add_stock_data_site, e)
@@ -290,15 +297,19 @@ def delivery_statistic():
     """Добавляет данные по поставкам в базу данных"""
     try:
         control_date_delivery = date.today() - timedelta(days=2)
-        data_deliveries = get_statistic_delivery_api(wb_headers, control_date_delivery)
+        data_deliveries = get_statistic_delivery_api(
+            wb_headers, control_date_delivery)
 
         if data_deliveries:
             for data in data_deliveries:
                 add_data_delivery_to_db(data)
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
-        message_text = error_message('delivery_statistic', delivery_statistic, e)
-        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message_text, parse_mode='HTML')
+        message_text = error_message(
+            'delivery_statistic', delivery_statistic, e)
+        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
+                         text=message_text, parse_mode='HTML')
+
 
 @app.task
 def orders_statistic():
@@ -309,16 +320,18 @@ def orders_statistic():
         for data in data_orders:
             add_data_orders_from_site_to_db(data)
     except Exception as e:
-       # обработка ошибки и отправка сообщения через бота
-       message_text = error_message('delivery_statistic', orders_statistic, e)
-       bot.send_message(chat_id=CHAT_ID, text=message_text)
+        # обработка ошибки и отправка сообщения через бота
+        message_text = error_message('delivery_statistic', orders_statistic, e)
+        bot.send_message(chat_id=CHAT_ID, text=message_text)
+
 
 @app.task
 def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     start_date = date.today() - timedelta(days=90)
     finish_date = date.today() - timedelta(days=1)
-    common_data = get_report_detail_by_period(wb_headers, start_date, finish_date)
+    common_data = get_report_detail_by_period(
+        wb_headers, start_date, finish_date)
     if common_data:
         reports_data = {}
         for data in common_data:
