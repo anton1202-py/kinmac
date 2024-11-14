@@ -13,7 +13,7 @@ app = Celery('celery_tasks',
                       'reklama.periodic_tasks',
                       'unit_economic.periodic_tasks',])
 app.config_from_object('celery_tasks.celeryconfig')
-
+app.conf.task_time_limit = 1000  # Глобальный таймаут для всех задач
 
 app.conf.beat_schedule = {
     "check_token_life": {
@@ -50,7 +50,7 @@ app.conf.beat_schedule = {
     },
     "add_stock_data_site3": {
         "task": "celery_tasks.tasks.add_stock_data_site",
-        "schedule": crontab(hour=13, minute=58)
+        "schedule": crontab(hour=14, minute=3)
     },
     "add_stock_data_site4": {
         "task": "celery_tasks.tasks.add_stock_data_site",
