@@ -80,7 +80,7 @@ def get_statistic_stock_api(header, control_date_stock):
     return response
 
 
-@api_retry_decorator
+# @api_retry_decorator
 def get_stock_from_webpage_api(nom_id):
     """
     Остатки товаров на складах WB. Из неофициального АПИ

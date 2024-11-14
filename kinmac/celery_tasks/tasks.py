@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import traceback
 from datetime import date, datetime, timedelta
@@ -250,8 +251,8 @@ def add_stock_data_site():
     for article_obj in article_data:
         article_dict[int(article_obj.nomenclatura_wb)
                      ] = article_obj.common_article
-    iter_amount = len(article_dict.keys()) // 70
-    for k in range(iter_amount+1):
+    iter_amount = math.ceil(len(article_dict.keys()) / 70)
+    for k in range(iter_amount):
         print(k)
         start_point = k*70
         finish_point = (k+1)*70
