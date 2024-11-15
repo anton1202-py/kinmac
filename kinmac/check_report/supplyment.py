@@ -557,7 +557,7 @@ def rewrite_sales_order(date_from, date_to, realizationreport_id):
                     'create_dt': data['create_dt']
                 }
             write_sales_report_data_to_database(data)
-            one_report_reconciliation(data['realizationreport_id'])
+        report_reconciliation()
         if reports_data:
             for report_number, info in reports_data.items():
                 update_weekly_data = WeeklyReportInDatabase.objects.filter(
