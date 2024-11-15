@@ -239,23 +239,13 @@ def add_stock_data_site():
     }
     now = datetime.now()
     control_date = now.strftime("%Y-%m-%d %H:%M:%S")
-    URL = 'https://card.wb.ru/cards/detail?appType=0&regions=80,38,4,64,83,33,68,70,69,30,86,75,40,1,66,110,22,31,48,71,114&dest=-2133464&nm='
-    # article_data = wb_article_data_from_api(wb_headers)
-    print('Прошел article_data из АПИ')
     article_data = Articles.objects.all()
-    print(f'{len(article_data)}')
-    print('Прошел article_data из базы данных')
-    print(article_data)
-
-    # print(article_data)
     article_dict = {}
     for article_obj in article_data:
         article_dict[int(article_obj.nomenclatura_wb)
                      ] = article_obj.common_article
     iter_amount = math.ceil(len(article_dict.keys()) / 70)
-    print(f'iter_amount: {iter_amount}')
     for k in range(iter_amount):
-        print(f'({k}, {iter_amount})')
         start_point = k*70
         finish_point = (k+1)*70
         nom_info_list = list(article_dict.keys())[start_point:finish_point]
@@ -264,10 +254,8 @@ def add_stock_data_site():
             helper += str(i)+';'
 
         data = get_stock_from_webpage_api(str(helper))
-        print('ПРошел get_stock_from_webpage_api')
         main_data = data['data']['products']
         for i, j in enumerate(main_data):
-            print(f'{i}, {len(main_data)}')
             if 'priceU' in j:
                 data_for_db = {}
                 amount = 0

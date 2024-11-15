@@ -93,70 +93,57 @@ def calculate_storage_cost() -> None:
             )
 
 
-# @app.task
+@app.task
 def article_storage_cost():
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-    for i in range(12, 320):
-        date_stat = (datetime.now() - timedelta(days=i)).date()
-        print('date', date_stat)
-        date_stat = str(date_stat)
-        report_number = get_create_storage_cost_report(
-            wb_headers, date_stat, date_stat)['data']['taskId']
-        print('Ждем 20 сек')
-        time.sleep(20)
-        print('Закончили ждать 20 сек')
+
+    date_stat = (datetime.now() - timedelta(days=1)).date()
+    date_stat = str(date_stat)
+    report_number = get_create_storage_cost_report(
+        wb_headers, date_stat, date_stat)['data']['taskId']
+    time.sleep(20)
+    status = get_check_storage_cost_report_status(
+        wb_headers, report_number)['data']['status']
+    while status != 'done':
+        time.sleep(10)
         status = get_check_storage_cost_report_status(
             wb_headers, report_number)['data']['status']
-        print(status)
-        while status != 'done':
-            print('Ждем 10 сек')
-            time.sleep(10)
-            print('Закончили ждать 10 сек')
-            status = get_check_storage_cost_report_status(
-                wb_headers, report_number)['data']['status']
-        costs_data = get_storage_cost_report_data(wb_headers, report_number)
-
-        print('******************')
-        print(costs_data)
-        for data in costs_data:
-            print(data)
-            if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
-                article_obj = Articles.objects.filter(
-                    nomenclatura_wb=data['nmId']).first()
-
-                search_params = {
-                    'article': article_obj,
-                    'date': data["date"],
-                    'warehouse': data["warehouse"],
-                    'office_id': data["officeId"],
-                    'gi_id': data["giId"],
-                }
-
-                defaults = {
-                    'log_warehouse_coef': data["logWarehouseCoef"],
-                    'warehouse_coef': data["warehouseCoef"],
-                    'chrt_id': data["chrtId"],
-                    'size': data["size"],
-                    'barcode': data["barcode"],
-                    'subject': data["subject"],
-                    'brand': data["brand"],
-                    'vendor_code': data["vendorCode"],
-                    'nm_id': data["nmId"],
-                    'volume': data["volume"],
-                    'calc_type': data["calcType"],
-                    'warehouse_price': data["warehousePrice"],
-                    'barcodes_count': data["barcodesCount"],
-                    'pallet_place_code': data["palletPlaceCode"],
-                    'pallet_count': data["palletCount"],
-                    'original_date': data["originalDate"],
-                    'loyalty_discount': data["loyaltyDiscount"],
-                    'tariffFix_date': data["tariffFixDate"],
-                    'tariff_lower_date': data["tariffLowerDate"]
-                }
-
-                ArticleStorageCost.objects.update_or_create(
-                    defaults=defaults, **search_params
-                )
-        print('загрузил', date_stat)
+    costs_data = get_storage_cost_report_data(wb_headers, report_number)
+    for data in costs_data:
+        if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
+            article_obj = Articles.objects.filter(
+                nomenclatura_wb=data['nmId']).first()
+            search_params = {
+                'article': article_obj,
+                'date': data["date"],
+                'warehouse': data["warehouse"],
+                'office_id': data["officeId"],
+                'gi_id': data["giId"],
+            }
+            defaults = {
+                'log_warehouse_coef': data["logWarehouseCoef"],
+                'warehouse_coef': data["warehouseCoef"],
+                'chrt_id': data["chrtId"],
+                'size': data["size"],
+                'barcode': data["barcode"],
+                'subject': data["subject"],
+                'brand': data["brand"],
+                'vendor_code': data["vendorCode"],
+                'nm_id': data["nmId"],
+                'volume': data["volume"],
+                'calc_type': data["calcType"],
+                'warehouse_price': data["warehousePrice"],
+                'barcodes_count': data["barcodesCount"],
+                'pallet_place_code': data["palletPlaceCode"],
+                'pallet_count': data["palletCount"],
+                'original_date': data["originalDate"],
+                'loyalty_discount': data["loyaltyDiscount"],
+                'tariffFix_date': data["tariffFixDate"],
+                'tariff_lower_date': data["tariffLowerDate"]
+            }
+            ArticleStorageCost.objects.update_or_create(
+                defaults=defaults, **search_params
+            )
+    print('загрузил', date_stat)

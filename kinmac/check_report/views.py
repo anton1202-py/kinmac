@@ -31,22 +31,22 @@ def check_report(request):
         if 'reconciliation' in request.POST:
             report_reconciliation()
         elif 'import_file' in request.FILES:
-            errors_list = download_report_data_for_check(request.FILES['import_file'])
+            errors_list = download_report_data_for_check(
+                request.FILES['import_file'])
         elif 'reload_zip' in request.FILES:
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
-            rewrite_sales_order_from_zip(report_date_from, report_date_to, report_number, request.FILES['reload_zip'])
-            
-            
+            rewrite_sales_order_from_zip(
+                report_date_from, report_date_to, report_number, request.FILES['reload_zip'])
+
             data = CommonSalesReportData.objects.all().order_by('realizationreport_id')
-    
-    
+
     context = {
         'page_name': page_name,
         'data': data,
     }
-    
+
     return render(request, 'check_report/common_report.html', context)
 
 
@@ -64,25 +64,29 @@ def compair_report(request):
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
-            rewrite_sales_order(report_date_from, report_date_to, report_number)
+            rewrite_sales_order(
+                report_date_from, report_date_to, report_number)
             db_report_data = CommonSalesReportData.objects.all()
         elif 'reload_zip' in request.FILES:
             report_date_from = request.POST.get('report_date_from')
             report_date_to = request.POST.get('report_date_to')
             report_number = request.POST.get('report_number')
-            rewrite_sales_order_from_zip(report_date_from, report_date_to, report_number, request.FILES['reload_zip'])
+            rewrite_sales_order_from_zip(
+                report_date_from, report_date_to, report_number, request.FILES['reload_zip'])
             db_report_data = CommonSalesReportData.objects.all()
         elif 'import_file' in request.FILES:
-            errors_list = add_data_to_db_from_excel(request.FILES['import_file'])
+            errors_list = add_data_to_db_from_excel(
+                request.FILES['import_file'])
     db_data_dict = {}
     for db_data in db_report_data:
-        db_data_dict[db_data.realizationreport_id] = [float(db_data.retail_without_return), float(db_data.ppvz_for_pay), db_data.check_ppvz_for_pay, db_data.delivery_rub, db_data.storage_fee, db_data.penalty, db_data.total_paid]
+        db_data_dict[db_data.realizationreport_id] = [float(db_data.retail_without_return), float(
+            db_data.ppvz_for_pay), db_data.check_ppvz_for_pay, db_data.delivery_rub, db_data.storage_fee, db_data.penalty, db_data.total_paid]
     context = {
         'page_name': page_name,
         'excel_data': excel_data,
         'db_data_dict': db_data_dict
     }
-    
+
     return render(request, 'check_report/compair_report.html', context)
 
 
