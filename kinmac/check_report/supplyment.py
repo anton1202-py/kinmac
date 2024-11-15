@@ -28,6 +28,8 @@ def report_reconciliation():
         storage_sum = ArticleStorageCost.objects.filter(date__gte=report['date_from'], date__lte=report['date_to']).aggregate(
             result_data=Sum('warehouse_price')
         )
+        if report['realizationreport_id'] == 282605747:
+            print(storage_sum, report['date_from'], report['date_to'])
         easy_data = SalesReportOnSales.objects.filter(
             realizationreport_id=report['realizationreport_id']).aggregate(
             delivery_rub=Sum('delivery_rub'),
