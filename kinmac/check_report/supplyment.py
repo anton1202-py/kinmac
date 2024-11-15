@@ -168,7 +168,7 @@ def one_report_reconciliation(realizationreport_id):
         result_data=Sum('warehouse_price')
     )
     easy_data = SalesReportOnSales.objects.filter(
-        realizationreport_id=report['realizationreport_id']).aggregate(
+        realizationreport_id=realizationreport_id).aggregate(
         delivery_rub=Sum('delivery_rub'),
         storage_fee=Sum('storage_fee'),
         deduction=Sum('penalty'),
@@ -182,7 +182,7 @@ def one_report_reconciliation(realizationreport_id):
         ppvz_vw_nds=Sum('ppvz_vw_nds'))
 
     sale_data = SalesReportOnSales.objects.filter(doc_type_name='Продажа',
-                                                  realizationreport_id=report['realizationreport_id']).aggregate(
+                                                  realizationreport_id=realizationreport_id).aggregate(
         for_pay=Sum('ppvz_for_pay'),
         ppvz_reward=Sum('ppvz_reward'),
         acquiring_fee=Sum('acquiring_fee'),
@@ -191,7 +191,7 @@ def one_report_reconciliation(realizationreport_id):
         retail_amount=Sum('retail_amount'),
         ppvz_vw_nds=Sum('ppvz_vw_nds'))
     return_data = SalesReportOnSales.objects.filter(doc_type_name='Возврат',
-                                                    realizationreport_id=report['realizationreport_id']).aggregate(
+                                                    realizationreport_id=realizationreport_id).aggregate(
         for_pay=Sum('ppvz_for_pay'),
         deduction=Sum('penalty'),
         ppvz_reward=Sum('ppvz_reward'),
@@ -239,15 +239,15 @@ def one_report_reconciliation(realizationreport_id):
         acceptance_goods - deduction - common_penalty
     total_paid = round(total_paid, 2)
     if not CommonSalesReportData.objects.filter(
-            realizationreport_id=report['realizationreport_id'],
-            date_from=report['date_from'],
-            date_to=report['date_to'],
-            create_dt=report['create_dt']).exists():
+            realizationreport_id=realizationreport_id,
+            date_from=report.date_from,
+            date_to=report.date_to,
+            create_dt=report.create_dt).exists():
         CommonSalesReportData(
-            realizationreport_id=report['realizationreport_id'],
-            date_from=report['date_from'],
-            date_to=report['date_to'],
-            create_dt=report['create_dt'],
+            realizationreport_id=realizationreport_id,
+            date_from=report.date_from,
+            date_to=report.date_to,
+            create_dt=report.create_dt,
             retail_without_return=retail_without_return,
             retail_amount=retail_amount,
             return_amount=return_amount,
@@ -266,10 +266,10 @@ def one_report_reconciliation(realizationreport_id):
         ).save()
     else:
         CommonSalesReportData.objects.filter(
-            realizationreport_id=report['realizationreport_id'],
-            date_from=report['date_from'],
-            date_to=report['date_to'],
-            create_dt=report['create_dt']).update(
+            realizationreport_id=realizationreport_id,
+            date_from=report.date_from,
+            date_to=report.date_to,
+            create_dt=report.create_dt).update(
                 retail_without_return=retail_without_return,
                 retail_amount=retail_amount,
                 return_amount=return_amount,
