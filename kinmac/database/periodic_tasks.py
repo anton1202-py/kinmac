@@ -98,72 +98,72 @@ def article_storage_cost():
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-    # date_stat = (datetime.now() - timedelta(days=1)).date()
-    date_stat = '2024-10-21'
-    date_stat = str(date_stat)
-    report_number = get_create_storage_cost_report(
-        wb_headers, date_stat, date_stat)['data']['taskId']
-    time.sleep(20)
-    status = get_check_storage_cost_report_status(
-        wb_headers, report_number)['data']['status']
-    while status != 'done':
-        time.sleep(10)
+    for i in range(1, 350):
+        date_stat = (datetime.now() - timedelta(days=i)).date()
+        date_stat = str(date_stat)
+        report_number = get_create_storage_cost_report(
+            wb_headers, date_stat, date_stat)['data']['taskId']
+        time.sleep(20)
         status = get_check_storage_cost_report_status(
             wb_headers, report_number)['data']['status']
-    costs_data = get_storage_cost_report_data(wb_headers, report_number)
-    print(len(costs_data))
-    for data in costs_data:
-        if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
-            article_obj = Articles.objects.filter(
-                nomenclatura_wb=data['nmId']).first()
-            search_params = {
-                'article': article_obj,
-                'date': data["date"],
-                'warehouse': data["warehouse"],
-                'office_id': data["officeId"],
-                'gi_id': data["giId"],
-                'log_warehouse_coef': data["logWarehouseCoef"],
-                'warehouse_coef': data["warehouseCoef"],
-                'chrt_id': data["chrtId"],
-                'size': data["size"],
-                'barcode': data["barcode"],
-                'subject': data["subject"],
-                'brand': data["brand"],
-                'vendor_code': data["vendorCode"],
-                'nm_id': data["nmId"],
-                'volume': data["volume"],
-                'calc_type': data["calcType"],
-                'warehouse_price': data["warehousePrice"],
-                'barcodes_count': data["barcodesCount"],
-                'pallet_place_code': data["palletPlaceCode"],
-                'pallet_count': data["palletCount"],
-                'original_date': data["originalDate"],
-                'loyalty_discount': data["loyaltyDiscount"],
-                'tariffFix_date': data["tariffFixDate"],
-                'tariff_lower_date': data["tariffLowerDate"]
-            }
-            defaults = {
-                'log_warehouse_coef': data["logWarehouseCoef"],
-                'warehouse_coef': data["warehouseCoef"],
-                'chrt_id': data["chrtId"],
-                'size': data["size"],
-                'barcode': data["barcode"],
-                'subject': data["subject"],
-                'brand': data["brand"],
-                'vendor_code': data["vendorCode"],
-                'nm_id': data["nmId"],
-                'volume': data["volume"],
-                'calc_type': data["calcType"],
-                'warehouse_price': data["warehousePrice"],
-                'barcodes_count': data["barcodesCount"],
-                'pallet_place_code': data["palletPlaceCode"],
-                'pallet_count': data["palletCount"],
-                'original_date': data["originalDate"],
-                'loyalty_discount': data["loyaltyDiscount"],
-                'tariffFix_date': data["tariffFixDate"],
-                'tariff_lower_date': data["tariffLowerDate"]
-            }
-            ArticleStorageCost.objects.update_or_create(
-                defaults=defaults, **search_params
-            )
-    print('загрузил', date_stat)
+        while status != 'done':
+            time.sleep(10)
+            status = get_check_storage_cost_report_status(
+                wb_headers, report_number)['data']['status']
+        costs_data = get_storage_cost_report_data(wb_headers, report_number)
+        print(len(costs_data))
+        for data in costs_data:
+            if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
+                article_obj = Articles.objects.filter(
+                    nomenclatura_wb=data['nmId']).first()
+                search_params = {
+                    'article': article_obj,
+                    'date': data["date"],
+                    'warehouse': data["warehouse"],
+                    'office_id': data["officeId"],
+                    'gi_id': data["giId"],
+                    'log_warehouse_coef': data["logWarehouseCoef"],
+                    'warehouse_coef': data["warehouseCoef"],
+                    'chrt_id': data["chrtId"],
+                    'size': data["size"],
+                    'barcode': data["barcode"],
+                    'subject': data["subject"],
+                    'brand': data["brand"],
+                    'vendor_code': data["vendorCode"],
+                    'nm_id': data["nmId"],
+                    'volume': data["volume"],
+                    'calc_type': data["calcType"],
+                    'warehouse_price': data["warehousePrice"],
+                    'barcodes_count': data["barcodesCount"],
+                    'pallet_place_code': data["palletPlaceCode"],
+                    'pallet_count': data["palletCount"],
+                    'original_date': data["originalDate"],
+                    'loyalty_discount': data["loyaltyDiscount"],
+                    'tariffFix_date': data["tariffFixDate"],
+                    'tariff_lower_date': data["tariffLowerDate"]
+                }
+                defaults = {
+                    'log_warehouse_coef': data["logWarehouseCoef"],
+                    'warehouse_coef': data["warehouseCoef"],
+                    'chrt_id': data["chrtId"],
+                    'size': data["size"],
+                    'barcode': data["barcode"],
+                    'subject': data["subject"],
+                    'brand': data["brand"],
+                    'vendor_code': data["vendorCode"],
+                    'nm_id': data["nmId"],
+                    'volume': data["volume"],
+                    'calc_type': data["calcType"],
+                    'warehouse_price': data["warehousePrice"],
+                    'barcodes_count': data["barcodesCount"],
+                    'pallet_place_code': data["palletPlaceCode"],
+                    'pallet_count': data["palletCount"],
+                    'original_date': data["originalDate"],
+                    'loyalty_discount': data["loyaltyDiscount"],
+                    'tariffFix_date': data["tariffFixDate"],
+                    'tariff_lower_date': data["tariffLowerDate"]
+                }
+                ArticleStorageCost.objects.update_or_create(
+                    defaults=defaults, **search_params
+                )
+        print('загрузил', date_stat)
