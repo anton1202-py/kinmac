@@ -98,8 +98,8 @@ def article_storage_cost():
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-
-    date_stat = (datetime.now() - timedelta(days=1)).date()
+    # date_stat = (datetime.now() - timedelta(days=1)).date()
+    date_stat = '2024-10-21'
     date_stat = str(date_stat)
     report_number = get_create_storage_cost_report(
         wb_headers, date_stat, date_stat)['data']['taskId']
@@ -111,6 +111,7 @@ def article_storage_cost():
         status = get_check_storage_cost_report_status(
             wb_headers, report_number)['data']['status']
     costs_data = get_storage_cost_report_data(wb_headers, report_number)
+    print(len(costs_data))
     for data in costs_data:
         if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
             article_obj = Articles.objects.filter(
