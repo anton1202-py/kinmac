@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'api_requests',
     'main',
     'database',
+    'google_table',
     'payment',
     'telegram_working',
     'planning',

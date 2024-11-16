@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import models
 from django.urls import reverse
 
+
 class MarketplaceChoices(models.IntegerChoices):
     WILDBERRIES = 1, 'Wildberries'
     OZON = 2, 'OZON'
@@ -14,7 +15,8 @@ class MarketplaceChoices(models.IntegerChoices):
 class Platform(models.Model):
     """Платформа, на которой находятся товары"""
 
-    name = models.CharField(max_length=100, null=False, verbose_name="Название")
+    name = models.CharField(max_length=100, null=False,
+                            verbose_name="Название")
 
     platform_type = models.IntegerField(
         choices=MarketplaceChoices.choices,
@@ -37,6 +39,7 @@ class MarketplaceCategory(models.Model):
     class Meta:
         verbose_name = "Категория на Маркетплейсе"
         verbose_name_plural = "Категория на Маркетплейсе"
+
 
 class Articles(models.Model):
     common_article = models.CharField(
@@ -130,7 +133,6 @@ class CodingMarketplaces(models.Model):
     class Meta:
         verbose_name = 'Код маркетплейса'
         verbose_name_plural = 'Коды маркетплейсов'
-
 
 
 class CostPrice(models.Model):
@@ -706,7 +708,7 @@ class Orders(models.Model):
         max_length=80,
         null=True,
     )
-    
+
     class Meta:
         verbose_name = 'Заказы'
         verbose_name_plural = 'Заказы'
@@ -728,7 +730,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    date_to	= models.DateTimeField(
+    date_to = models.DateTimeField(
         verbose_name='Дата конца отчётного периода',
         null=True,
         blank=True,
@@ -760,7 +762,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    subject_name = 	models.CharField(
+    subject_name = models.CharField(
         verbose_name='Предмет',
         max_length=300,
         null=True,
@@ -783,7 +785,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    ts_name	= models.CharField(
+    ts_name = models.CharField(
         verbose_name='Размер',
         max_length=300,
         null=True,
@@ -826,7 +828,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    office_name	= models.CharField(
+    office_name = models.CharField(
         verbose_name='Склад',
         max_length=300,
         null=True,
@@ -837,13 +839,13 @@ class SalesReportOnSales(models.Model):
         max_length=300,
         null=True,
         blank=True,
-    )	
+    )
     order_dt = models.DateTimeField(
         verbose_name='Дата заказа',
         null=True,
         blank=True,
     )
-    sale_dt	= models.DateTimeField(
+    sale_dt = models.DateTimeField(
         verbose_name='Дата продажи',
         null=True,
         blank=True,
@@ -893,7 +895,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    rid	= models.BigIntegerField(
+    rid = models.BigIntegerField(
         verbose_name='Уникальный идентификатор заказа',
         null=True,
         blank=True,
@@ -933,7 +935,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    ppvz_reward	= models.FloatField(
+    ppvz_reward = models.FloatField(
         verbose_name='Возмещение за выдачу и возврат товаров на ПВЗ',
         null=True,
         blank=True,
@@ -948,12 +950,12 @@ class SalesReportOnSales(models.Model):
         max_length=300,
         blank=True,
     )
-    ppvz_vw	= models.FloatField(
+    ppvz_vw = models.FloatField(
         verbose_name='Вознаграждение WB без НДС',
         null=True,
         blank=True,
     )
-    ppvz_vw_nds	= models.FloatField(
+    ppvz_vw_nds = models.FloatField(
         verbose_name='НДС с вознаграждения WB',
         null=True,
         blank=True,
@@ -992,7 +994,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    bonus_type_name	= models.CharField(
+    bonus_type_name = models.CharField(
         verbose_name='Обоснование штрафов и доплат',
         max_length=200,
         null=True,
@@ -1010,7 +1012,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    penalty	= models.FloatField(
+    penalty = models.FloatField(
         verbose_name='Штрафы',
         null=True,
         blank=True,
@@ -1025,7 +1027,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
-    rebill_logistic_org	= models.CharField(
+    rebill_logistic_org = models.CharField(
         verbose_name='Организатор перевозки',
         max_length=150,
         null=True,
@@ -1063,6 +1065,7 @@ class SalesReportOnSales(models.Model):
         null=True,
         blank=True,
     )
+
     class Meta:
         verbose_name = 'Отчет о продажах по реализации'
         verbose_name_plural = 'Отчет о продажах по реализации'
@@ -1082,7 +1085,7 @@ class WeeklyReportInDatabase(models.Model):
         null=True,
         blank=True,
     )
-    date_to	= models.DateTimeField(
+    date_to = models.DateTimeField(
         verbose_name='Дата конца отчётного периода',
         null=True,
         blank=True,
@@ -1112,7 +1115,7 @@ class StorageCost(models.Model):
     storage_cost = models.FloatField(
         verbose_name='Затраты на хранение',
     )
-    
+
     class Meta:
         verbose_name = 'Стоимость хранения артикулов по датам'
         verbose_name_plural = 'Стоимость хранения артикулов по датам'
@@ -1229,7 +1232,7 @@ class ArticleStorageCost(models.Model):
         null=True,
         blank=True,
     )
-    
+
     class Meta:
         verbose_name = 'Стоимость хранения артикулов по датам'
         verbose_name_plural = 'Стоимость хранения артикулов по датам'

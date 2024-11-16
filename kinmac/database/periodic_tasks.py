@@ -120,54 +120,30 @@ def article_storage_cost():
             if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
                 article_obj = Articles.objects.filter(
                     nomenclatura_wb=data['nmId']).first()
-                search_params = {
-                    'article': article_obj,
-                    'date': data["date"],
-                    'warehouse': data["warehouse"],
-                    'office_id': data["officeId"],
-                    'gi_id': data["giId"],
-                    'log_warehouse_coef': data["logWarehouseCoef"],
-                    'warehouse_coef': data["warehouseCoef"],
-                    'chrt_id': data["chrtId"],
-                    'size': data["size"],
-                    'barcode': data["barcode"],
-                    'subject': data["subject"],
-                    'brand': data["brand"],
-                    'vendor_code': data["vendorCode"],
-                    'nm_id': data["nmId"],
-                    'volume': data["volume"],
-                    'calc_type': data["calcType"],
-                    'warehouse_price': data["warehousePrice"],
-                    'barcodes_count': data["barcodesCount"],
-                    'pallet_place_code': data["palletPlaceCode"],
-                    'pallet_count': data["palletCount"],
-                    'original_date': data["originalDate"],
-                    'loyalty_discount': data["loyaltyDiscount"],
-                    'tariffFix_date': data["tariffFixDate"],
-                    'tariff_lower_date': data["tariffLowerDate"]
-                }
-                defaults = {
-                    'log_warehouse_coef': data["logWarehouseCoef"],
-                    'warehouse_coef': data["warehouseCoef"],
-                    'chrt_id': data["chrtId"],
-                    'size': data["size"],
-                    'barcode': data["barcode"],
-                    'subject': data["subject"],
-                    'brand': data["brand"],
-                    'vendor_code': data["vendorCode"],
-                    'nm_id': data["nmId"],
-                    'volume': data["volume"],
-                    'calc_type': data["calcType"],
-                    'warehouse_price': data["warehousePrice"],
-                    'barcodes_count': data["barcodesCount"],
-                    'pallet_place_code': data["palletPlaceCode"],
-                    'pallet_count': data["palletCount"],
-                    'original_date': data["originalDate"],
-                    'loyalty_discount': data["loyaltyDiscount"],
-                    'tariffFix_date': data["tariffFixDate"],
-                    'tariff_lower_date': data["tariffLowerDate"]
-                }
-                ArticleStorageCost.objects.update_or_create(
-                    defaults=defaults, **search_params
+                ArticleStorageCost.objects.get_or_create(
+                    article=article_obj,
+                    date=data["date"],
+                    warehouse=data["warehouse"],
+                    office_id=data["officeId"],
+                    gi_id=data["giId"],
+                    log_warehouse_coef=data["logWarehouseCoef"],
+                    warehouse_coef=data["warehouseCoef"],
+                    chrt_id=data["chrtId"],
+                    size=data["size"],
+                    barcode=data["barcode"],
+                    subject=data["subject"],
+                    brand=data["brand"],
+                    vendor_code=data["vendorCode"],
+                    nm_id=data["nmId"],
+                    volume=data["volume"],
+                    calc_type=data["calcType"],
+                    warehouse_price=data["warehousePrice"],
+                    barcodes_count=data["barcodesCount"],
+                    pallet_place_code=data["palletPlaceCode"],
+                    pallet_count=data["palletCount"],
+                    original_date=data["originalDate"],
+                    loyalty_discount=data["loyaltyDiscount"],
+                    tariffFix_date=data["tariffFixDate"],
+                    tariff_lower_date=data["tariffLowerDate"]
                 )
         print('загрузил', date_stat)

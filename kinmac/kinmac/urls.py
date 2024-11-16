@@ -12,9 +12,8 @@ urlpatterns = [
     path('bag_photo/', include('bag_photo.urls')),
     path('sales_analytics/', include('sales_analytics.urls')),
     path('position/', include('position.urls')),
-
-
-] 
+    path('api/', include('google_table.urls')),
+]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
