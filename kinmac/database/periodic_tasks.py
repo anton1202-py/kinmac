@@ -117,7 +117,8 @@ def article_storage_cost():
         costs_data = get_storage_cost_report_data(wb_headers, report_number)
         print(len(costs_data))
         for data in costs_data:
-            if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
+            try:
+                # if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
                 article_obj = Articles.objects.filter(
                     nomenclatura_wb=data['nmId']).first()
                 ArticleStorageCost.objects.get_or_create(
@@ -146,4 +147,6 @@ def article_storage_cost():
                     tariffFix_date=data["tariffFixDate"],
                     tariff_lower_date=data["tariffLowerDate"]
                 )
+            except:
+                print(f'Не нашел артикула {data['nmId']} в бд')
         print('загрузил', date_stat)
