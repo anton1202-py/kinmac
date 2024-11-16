@@ -98,7 +98,7 @@ def article_storage_cost():
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-    for i in range(1, 44):
+    for i in range(0, 44):
         date_stat = (datetime.now() - timedelta(days=i)).date()
         date_stat = str(date_stat)
         n = i*8
