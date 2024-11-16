@@ -148,5 +148,5 @@ def article_storage_cost():
                     tariff_lower_date=data["tariffLowerDate"]
                 )
             except:
-                print(f'Не нашел артикула {data["nmId"]} в бд')
+                print(f'{data} в бд')
         print('загрузил', date_stat)
