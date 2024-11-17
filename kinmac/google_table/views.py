@@ -171,10 +171,10 @@ class AdvertCostViewSet(viewsets.ViewSet):
         articles_data = Articles.objects.filter(brand__in=BRAND_LIST)
         for data in articles_data:
             returned_dict[data.common_article] = {
-                'sales_amount': sales_dict[data.nomenclatura_wb]['sales_amount'] if data.nomenclatura_wb in sales_dict else 0,
+                'sales_amount': sales_dict[data.nomenclatura_wb]['sales_amount'] if int(data.nomenclatura_wb) in sales_dict else 0,
                 'adv_cost_sum': adv_dict[data.nomenclatura_wb] if data.nomenclatura_wb in adv_dict else 0,
-                'adv_cost_per_sale': round(adv_dict[data.nomenclatura_wb]/sales_dict[data.nomenclatura_wb]['sales_amount'], 2) if data.nomenclatura_wb in sales_dict and data.nomenclatura_wb in adv_dict else 0,
-                'drr': round(adv_dict[data.nomenclatura_wb]/sales_dict[data.nomenclatura_wb]['sales_sum'], 4) * 100 if data.nomenclatura_wb in sales_dict and data.nomenclatura_wb in adv_dict else 0
+                'adv_cost_per_sale': round(adv_dict[data.nomenclatura_wb]/sales_dict[data.nomenclatura_wb]['sales_amount'], 2) if int(data.nomenclatura_wb) in sales_dict and data.nomenclatura_wb in adv_dict else 0,
+                'drr': round(adv_dict[data.nomenclatura_wb]/sales_dict[data.nomenclatura_wb]['sales_sum'], 4) * 100 if int(data.nomenclatura_wb) in sales_dict and data.nomenclatura_wb in adv_dict else 0
             }
 
         return Response(returned_dict)
