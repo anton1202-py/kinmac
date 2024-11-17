@@ -1,28 +1,18 @@
-import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
-import tempfile
-from openpyxl.styles import Alignment, Border, Side
-from django.http import FileResponse, HttpResponse, JsonResponse
-from openpyxl import Workbook
-import requests
-from django.db import transaction
-from django.db.models import Count, Prefetch, Q, Case, When, Value, BooleanField, Sum, F
-from django.utils import timezone
+from django.db.models import Count, Prefetch, Q, Case, When, Value, BooleanField, Sum, F, OuterRef, Subquery
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.generics import GenericAPIView, ListAPIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
-import telegram
 
-from database.models import Articles
-from google_table.serializers import ActionArticlesSerializer, ProductInfoSerializer
+
+from database.models import ArticlePriceStock, ArticleStorageCost, Articles, SalesReportOnSales
+from google_table.serializers import ActionArticlesSerializer, MarketplaceCommissionSerializer, ProductInfoSerializer, SppPriceStockDataSerializer
 from action.models import ArticleForAction
 from kinmac.constants_file import BRAND_LIST
+from database.periodic_tasks import update_info_about_articles
+from reklama.models import ArticleDailyCostToAdv
+from unit_economic.wb_tasks import wb_comission_add_to_db, wb_logistic_add_to_db
+from unit_economic.models import MarketplaceCommission
 
 
 logger = logging.getLogger(__name__)
@@ -53,18 +43,137 @@ class ActionArticleViewSet(viewsets.ViewSet):
         """Получеине данных а цене артикула в акции"""
         articles_for_actions = ArticleForAction.objects.select_related(
             'action').filter(article__brand__in=BRAND_LIST, action__date_finish__gte=datetime.now())
-
         # Структура для хранения результата
         result = {}
-
         for article_for_action in articles_for_actions:
             action_name = article_for_action.action.name
 
             if action_name not in result:
                 result[action_name] = []
-
-            # Используем сериализатор для получения данных
             serializer = ActionArticlesSerializer(article_for_action)
             result[action_name].append(serializer.data)
-
         return Response(result)
+
+
+class MarketplaceCommissionViewSet(viewsets.ViewSet):
+    """Отдает комиссии"""
+    queryset = MarketplaceCommission.objects.all()
+    serializer_class = MarketplaceCommissionSerializer
+
+    def list(self, request):
+        """Получеине данных а цене артикула в акции"""
+        comissions = MarketplaceCommission.objects.filter(
+            marketplace_product__brand__in=BRAND_LIST)
+        print(len(comissions))
+        serializer = MarketplaceCommissionSerializer(comissions, many=True)
+        return Response(serializer.data)
+
+
+class ArticleLogisticCostViewSet(viewsets.ViewSet):
+    """Стоимость логистики каждого артикула за определенный период"""
+    queryset = SalesReportOnSales.objects.all()
+    # serializer_class = MarketplaceCommissionSerializer
+
+    def post(self, request, *args, **kwargs):
+        """Входящие данные - количество недель за которые нужно отдать данные"""
+
+    def list(self, request):
+        """Входящие данные - количество недель за которые нужно отдать данные"""
+
+        weeks_amount = int(request.query_params.get('weeks'))
+        end_date = datetime.now()
+        # Дата начала периода (начало num_weeks назад)
+        start_date = end_date - timedelta(weeks=weeks_amount)
+
+        logistic_cost = {}
+        sales_dict = {}
+        storage_cost = {}
+
+        storage_data = ArticleStorageCost.objects.filter(date__gte=start_date,
+                                                         date__lte=end_date,
+                                                         article__brand__in=BRAND_LIST).values('article__common_article').annotate(storage_cost=Sum('warehouse_price'))
+        for data in storage_data:
+            storage_cost[data['article__common_article'].upper()
+                         ] = round(data['storage_cost'], 2)
+
+        logistic_data = SalesReportOnSales.objects.filter(
+            date_from__gte=start_date,
+            date_to__lte=end_date,
+            brand_name__in=BRAND_LIST).values('sa_name').annotate(
+                logistic_cost=Sum('delivery_rub')
+        )
+        sale_data = SalesReportOnSales.objects.filter(
+            doc_type_name='Продажа',
+            date_from__gte=start_date,
+            date_to__lte=end_date,
+            brand_name__in=BRAND_LIST).values('sa_name').annotate(sales_amount=Count('retail_amount'))
+        for data in sale_data:
+            sales_dict[data['sa_name']] = data['sales_amount']
+        print(logistic_data)
+        for data in logistic_data:
+            if data['sa_name'] in sales_dict:
+                logistic_cost[data['sa_name']] = {'logistic_cost': round(
+                    data['logistic_cost'], 2), 'sales_amount': sales_dict[data['sa_name']],
+                    'storage_cost': storage_cost[data['sa_name'].upper()] if data['sa_name'].upper() in storage_cost else 0,
+                    'storage_per_sale': round(storage_cost[data['sa_name'].upper()]/sales_dict[data['sa_name']], 2) if data['sa_name'].upper() in storage_cost else 0,
+                    'logistic_per_sale': round(data['logistic_cost']/sales_dict[data['sa_name']], 2)}
+            else:
+                logistic_cost[data['sa_name']] = {'logistic_cost': round(
+                    data['logistic_cost'], 2), 'sales_amount': 0,
+                    'storage_cost': storage_cost[data['sa_name']] if data['sa_name'] in storage_cost else 0,
+                    'storage_per_sale': storage_cost[data['sa_name'].upper()] if data['sa_name'].upper() in storage_cost else 0,
+                    'logistic_per_sale': round(data['logistic_cost'], 2)}
+
+        return Response(logistic_cost)
+
+
+class SppPriceStockDataViewSet(viewsets.ViewSet):
+    """Отдает данные по SPP, остаткам, цене"""
+    queryset = ArticlePriceStock.objects.all()
+    serializer_class = SppPriceStockDataSerializer
+
+    def list(self, request):
+        """Получеине данных а цене артикула в акции"""
+        data = ArticlePriceStock.objects.filter(
+            article__brand__in=BRAND_LIST)
+        print(len(data))
+        serializer = SppPriceStockDataSerializer(data, many=True)
+        return Response(serializer.data)
+
+
+class AdvertCostViewSet(viewsets.ViewSet):
+    """Отдает расходы рекламы на каждую продажу."""
+    queryset = ArticleDailyCostToAdv.objects.all()
+    serializer_class = SppPriceStockDataSerializer
+
+    def list(self, request):
+        """Получеине данных а цене артикула в акции"""
+        weeks_amount = int(request.query_params.get('weeks'))
+        end_date = datetime.now()
+        # Дата начала периода (начало num_weeks назад)
+        start_date = end_date - timedelta(weeks=weeks_amount)
+        sales_dict = {}
+        adv_dict = {}
+        adv_data = ArticleDailyCostToAdv.objects.filter(cost_date__gte=start_date, cost_date__lte=end_date,
+                                                        article__brand__in=BRAND_LIST).values('article__nomenclatura_wb').annotate(sum_cost=Sum('cost'))
+        for data in adv_data:
+            adv_dict[data['article__nomenclatura_wb']] = data['sum_cost']
+        sale_data = SalesReportOnSales.objects.filter(
+            doc_type_name='Продажа',
+            date_from__gte=start_date,
+            date_to__lte=end_date,
+            brand_name__in=BRAND_LIST).values('nm_id').annotate(sales_amount=Count('retail_amount'))
+        for data in sale_data:
+            if data['nm_id'] in adv_dict:
+                sales_dict[data['nm_id']] = {
+                    'sales_amount': data['sales_amount'],
+                    'adv_cost_sum': adv_dict[data['nm_id']],
+                    'adv_cost_per_sale': round(adv_dict[data['nm_id']]/data['sales_amount'], 2)
+                }
+            else:
+                sales_dict[data['nm_id']] = {
+                    'sales_amount': data['sales_amount'],
+                    'adv_cost_sum': 0,
+                    'adv_cost_per_sale': 0
+                }
+        return Response(sales_dict)

@@ -1236,3 +1236,54 @@ class ArticleStorageCost(models.Model):
     class Meta:
         verbose_name = 'Стоимость хранения артикулов по датам'
         verbose_name_plural = 'Стоимость хранения артикулов по датам'
+
+
+class ArticlePriceStock(models.Model):
+    """Содержит данные об общих остатках каждого артикула, цене продавца и СПП"""
+    article = models.ForeignKey(
+        Articles,
+        verbose_name='Артикул',
+        on_delete=models.SET_NULL,
+        related_name='article_pricestock',
+        blank=True,
+        null=True,
+    )
+    date = models.DateField(
+        verbose_name='Дата обновления информации',
+        null=True,
+        blank=True,
+    )
+    common_stock = models.IntegerField(
+        verbose_name='общий остаток на всех складах',
+        null=True,
+        blank=True,
+    )
+    price_in_page = models.FloatField(
+        verbose_name='Цена товара на странице ВБ',
+        null=True,
+        blank=True,
+    )
+    price_after_seller_disc = models.FloatField(
+        verbose_name='Цена товара после скидки продавца',
+        null=True,
+        blank=True,
+    )
+    price_before_seller_disc = models.FloatField(
+        verbose_name='Цена товара до скидки продавца',
+        null=True,
+        blank=True,
+    )
+    seller_disc = models.FloatField(
+        verbose_name='Скидка продавца',
+        null=True,
+        blank=True,
+    )
+    spp = models.FloatField(
+        verbose_name='Скидка маркетплейса',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Данные об общих остатках каждого артикула, цене продавца и СПП'
+        verbose_name_plural = 'Данные об общих остатках каждого артикула, цене продавца и СПП'

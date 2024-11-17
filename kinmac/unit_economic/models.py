@@ -2,7 +2,6 @@ from django.db import models
 from database.models import Articles
 
 
-
 class MarketplaceCommission(models.Model):
     """Модель для хранения процента комиссии на разных платформах"""
     marketplace_product = models.OneToOneField(Articles, related_name='article_comission', on_delete=models.CASCADE,
@@ -30,32 +29,30 @@ class WbLogisticTariffs(models.Model):
     хранения на складе WB
     """
     box_delivery_and_storage_expr = models.FloatField(
-        verbose_name='Коэффициент, %. На него умножается стоимость доставки и хранения.', 
+        verbose_name='Коэффициент, %. На него умножается стоимость доставки и хранения.',
         null=True, blank=True)
     box_delivery_base = models.FloatField(
-        verbose_name='Доставка 1 литра, ₽', 
+        verbose_name='Доставка 1 литра, ₽',
         null=True, blank=True)
     box_delivery_liter = models.FloatField(
-        verbose_name='Доставка каждого дополнительного литра, ₽', 
+        verbose_name='Доставка каждого дополнительного литра, ₽',
         null=True, blank=True)
     box_storage_base = models.FloatField(
-        verbose_name='Хранение 1 литра, ₽', 
+        verbose_name='Хранение 1 литра, ₽',
         null=True, blank=True)
     box_storage_liter = models.FloatField(
-        verbose_name='Хранение каждого дополнительного литра, ₽', 
+        verbose_name='Хранение каждого дополнительного литра, ₽',
         null=True, blank=True)
     warehouseName = models.CharField(
         verbose_name='Название склада',
-        max_length=255, 
+        max_length=255,
         null=True, blank=True)
     date_start = models.DateField(
         verbose_name="Дата", null=True, blank=True)
-    
+
     class Meta:
         verbose_name = "КОэффициенты хранения складов"
         verbose_name_plural = "Коэффициенты хранения складов"
-    
-
 
 
 class MarketplaceLogistic(models.Model):

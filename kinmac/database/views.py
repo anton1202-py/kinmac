@@ -4,7 +4,7 @@ import pandas as pd
 from celery_tasks.tasks import (add_data_sales, add_data_stock_api,
                                 add_stock_data_site, delivery_statistic,
                                 orders_statistic, sales_report_statistic)
-from database.periodic_tasks import article_storage_cost, calculate_storage_cost, update_info_about_articles
+from database.periodic_tasks import article_storage_cost, calculate_storage_cost, update_info_about_articles, wb_article_price_stock_app_data
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -18,6 +18,7 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from check_report.signals import articles_analytics_data
 from action.periodic_tasks import add_article_in_actions_info, add_new_actions_wb_to_db
 from kinmac.constants_file import BRAND_LIST
+from database.supplyment import get_article_commot_stock_from_front
 from unit_economic.periodic_tasks import update_tariffs_and_logistic
 from reklama.periodic_tasks import campaign_list_to_db, update_daily_article_adv_cost, write_daily_adv_statistic
 
@@ -92,7 +93,7 @@ def database_home(request):
 def database_stock_api(request):
     if str(request.user) == 'AnonymousUser':
         return redirect('login')
-    article_storage_cost()
+    wb_article_price_stock_app_data()
     control_date_stock = date.today() - timedelta(days=3)
     articles = Articles.objects.all()
     data = StocksApi.objects.filter(Q(pub_date__gte=control_date_stock

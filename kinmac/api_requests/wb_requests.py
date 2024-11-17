@@ -43,7 +43,6 @@ def wb_article_data_from_api(header, update_date=None, mn_id=0, common_data=None
     )
     response = requests.request(
         "POST", url, headers=header, data=payload)
-    print(f'{response.status_code}, {counter}, {len(common_data)}')
     counter += 1
     if response.status_code == 200:
         all_data = json.loads(response.text)["cards"]
@@ -52,16 +51,37 @@ def wb_article_data_from_api(header, update_date=None, mn_id=0, common_data=None
             common_data.append(data)
         if len(json.loads(response.text)["cards"]) == 100:
             # time.sleep(1)
-            print('Перезапрашиваю')
             return wb_article_data_from_api(header,
                                             check_amount['updatedAt'], check_amount['nmID'], common_data, counter)
-        print(f'Должен вернуть данные {len(common_data)}')
         return common_data
     elif response.status_code != 200 and counter <= 50:
         return wb_article_data_from_api(header, update_date, mn_id, common_data, counter)
     else:
         message = f'статус код {response.status_code} у получения инфы всех артикулов api_request.wb_article_data'
         bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message)
+
+
+def wb_price_discount_info(header, limit=1000, offset=0, counter=0, article_adv_data=None):
+    """
+    Возвращает информацию о товаре по его артикулу.
+    Чтобы получить информацию обо всех товарах, оставьте артикул пустым
+    """
+    if not article_adv_data:
+        article_adv_data = []
+    url = f'https://discounts-prices-api.wildberries.ru/api/v2/list/goods/filter?limit={limit}&offset={offset}'
+    response = requests.request("GET", url, headers=header)
+    counter += 1
+    if response.status_code == 200:
+        articles_list = json.loads(response.text)['data']['listGoods']
+        for data in articles_list:
+            article_adv_data.append(data)
+        if len(articles_list) == limit:
+            offset = limit * counter
+            return wb_price_discount_info(header, limit, offset, counter, article_adv_data)
+        else:
+            return article_adv_data
+    else:
+        return None
 
 
 # ========= ЗАПРОСЫ СТАТИТСТИКИ ========== #

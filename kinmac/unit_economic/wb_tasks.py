@@ -34,18 +34,21 @@ def wb_comission_add_to_db():
             }
         goods_list = Articles.objects.all()
         for good_data in goods_list:
-            fbs_commission = wb_comission_dict[good_data.category.category_number]['fbs_commission']
-            fbo_commission = wb_comission_dict[good_data.category.category_number]['fbo_commission']
-            dbs_commission = wb_comission_dict[good_data.category.category_number]['dbs_commission']
-            fbs_express_commission = wb_comission_dict[
-                good_data.category.category_number]['fbs_express_commission']
-            add_marketplace_comission_to_db(
-                good_data,
-                fbs_commission,
-                fbo_commission,
-                dbs_commission,
-                fbs_express_commission
-            )
+            try:
+                fbs_commission = wb_comission_dict[good_data.category.category_number]['fbs_commission']
+                fbo_commission = wb_comission_dict[good_data.category.category_number]['fbo_commission']
+                dbs_commission = wb_comission_dict[good_data.category.category_number]['dbs_commission']
+                fbs_express_commission = wb_comission_dict[
+                    good_data.category.category_number]['fbs_express_commission']
+                add_marketplace_comission_to_db(
+                    good_data,
+                    fbs_commission,
+                    fbo_commission,
+                    dbs_commission,
+                    fbs_express_commission
+                )
+            except:
+                print('good_dataa')
 
 
 def wb_logistic_add_to_db():
@@ -57,7 +60,9 @@ def wb_logistic_add_to_db():
     """
     data_list = wb_logistic(wb_headers)
     if data_list:
+
         for data in data_list['warehouseList']:
+            print(data)
             try:
                 box_delivery_and_storage_expr = float(
                     str(data['boxDeliveryAndStorageExpr']).replace(',', '.'))
@@ -70,7 +75,7 @@ def wb_logistic_add_to_db():
                 box_delivery_base = None
             try:
                 box_delivery_liter = float(
-                str(data['boxDeliveryLiter']).replace(',', '.'))
+                    str(data['boxDeliveryLiter']).replace(',', '.'))
             except:
                 box_delivery_liter = None
             try:
@@ -80,10 +85,11 @@ def wb_logistic_add_to_db():
                 box_storage_base = None
             try:
                 box_storage_liter = float(
-                str(data['boxStorageLiter']).replace(',', '.'))
+                    str(data['boxStorageLiter']).replace(',', '.'))
             except:
                 box_storage_liter = None
-            WbLogisticTariffs.objects.get_or_create(
+
+            WbLogisticTariffs(
                 box_delivery_and_storage_expr=box_delivery_and_storage_expr,
                 box_delivery_base=box_delivery_base,
                 box_delivery_liter=box_delivery_liter,
@@ -91,7 +97,7 @@ def wb_logistic_add_to_db():
                 box_storage_liter=box_storage_liter,
                 warehouseName=data['warehouseName'],
                 date_start=data_list['dtTillMax']
-            )
+            ).save()
     # box_delivery_base = 0
     # box_delivery_liter = 0
     # comission = 0

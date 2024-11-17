@@ -4,9 +4,10 @@ from api_requests.wb_requests import get_check_storage_cost_report_status, get_c
 from celery_tasks.celery import app
 
 from kinmac.constants_file import wb_headers
+from database.supplyment import get_article_commot_stock_from_front, get_price_info_from_ofissial_api
 
 
-from .models import ArticleStorageCost, Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
+from .models import ArticlePriceStock, ArticleStorageCost, Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
 
 
 @app.task
@@ -98,55 +99,97 @@ def article_storage_cost():
     """
     Записывает стоимость хранения товара за входящую дату на ВБ
     """
-    for i in range(0, 44):
-        date_stat = (datetime.now() - timedelta(days=i)).date()
-        date_stat = str(date_stat)
-        n = i*8
-        m = (i + 1)*8
-        date_start = (datetime.now() - timedelta(days=m)).date()
-        date_end = (datetime.now() - timedelta(days=n)).date()
-        report_number = get_create_storage_cost_report(
-            wb_headers, date_start, date_end)['data']['taskId']
-        time.sleep(20)
+
+    date_start = (datetime.now() - timedelta(days=1)).date()
+    date_end = (datetime.now() - timedelta(days=1)).date()
+    report_number = get_create_storage_cost_report(
+        wb_headers, date_start, date_end)['data']['taskId']
+    time.sleep(20)
+    status = get_check_storage_cost_report_status(
+        wb_headers, report_number)['data']['status']
+    while status != 'done':
+        time.sleep(10)
         status = get_check_storage_cost_report_status(
             wb_headers, report_number)['data']['status']
-        while status != 'done':
-            time.sleep(10)
-            status = get_check_storage_cost_report_status(
-                wb_headers, report_number)['data']['status']
-        costs_data = get_storage_cost_report_data(wb_headers, report_number)
-        print(len(costs_data))
-        for data in costs_data:
-            try:
-                # if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
-                article_obj = Articles.objects.filter(
-                    nomenclatura_wb=data['nmId']).first()
-                ArticleStorageCost.objects.get_or_create(
-                    article=article_obj,
-                    date=data["date"],
-                    warehouse=data["warehouse"],
-                    office_id=data["officeId"],
-                    gi_id=data["giId"],
-                    log_warehouse_coef=data["logWarehouseCoef"],
-                    warehouse_coef=data["warehouseCoef"],
-                    chrt_id=data["chrtId"],
-                    size=data["size"],
-                    barcode=data["barcode"],
-                    subject=data["subject"],
-                    brand=data["brand"],
-                    vendor_code=data["vendorCode"],
-                    nm_id=data["nmId"],
-                    volume=data["volume"],
-                    calc_type=data["calcType"],
-                    warehouse_price=data["warehousePrice"],
-                    barcodes_count=data["barcodesCount"],
-                    pallet_place_code=data["palletPlaceCode"],
-                    pallet_count=data["palletCount"],
-                    original_date=data["originalDate"],
-                    loyalty_discount=data["loyaltyDiscount"],
-                    tariffFix_date=data["tariffFixDate"],
-                    tariff_lower_date=data["tariffLowerDate"]
-                )
-            except:
-                print(f'{data} в бд')
-        print('загрузил', date_stat)
+    costs_data = get_storage_cost_report_data(wb_headers, report_number)
+    print(len(costs_data))
+    for data in costs_data:
+        try:
+            # if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
+            article_obj = Articles.objects.filter(
+                nomenclatura_wb=data['nmId']).first()
+            ArticleStorageCost.objects.get_or_create(
+                article=article_obj,
+                date=data["date"],
+                warehouse=data["warehouse"],
+                office_id=data["officeId"],
+                gi_id=data["giId"],
+                log_warehouse_coef=data["logWarehouseCoef"],
+                warehouse_coef=data["warehouseCoef"],
+                chrt_id=data["chrtId"],
+                size=data["size"],
+                barcode=data["barcode"],
+                subject=data["subject"],
+                brand=data["brand"],
+                vendor_code=data["vendorCode"],
+                nm_id=data["nmId"],
+                volume=data["volume"],
+                calc_type=data["calcType"],
+                warehouse_price=data["warehousePrice"],
+                barcodes_count=data["barcodesCount"],
+                pallet_place_code=data["palletPlaceCode"],
+                pallet_count=data["palletCount"],
+                original_date=data["originalDate"],
+                loyalty_discount=data["loyaltyDiscount"],
+                tariffFix_date=data["tariffFixDate"],
+                tariff_lower_date=data["tariffLowerDate"]
+            )
+        except:
+            print(f'{data} в бд')
+    print('загрузил', date_end)
+
+
+@app.task
+def wb_article_price_stock_app_data() -> None:
+    """
+    Записывает данные в базу о СПП, остатке цене артикула.
+    Для последующей выдачи в АПИ для гугл таблицы (для расчета Юнит экономики)
+    """
+    spp_page_price_data = get_article_commot_stock_from_front()
+    price_discount_data = get_price_info_from_ofissial_api()
+
+    articles_data = Articles.objects.all()
+
+    for article_obj in articles_data:
+        if article_obj in spp_page_price_data:
+            price_on_page = spp_page_price_data[article_obj]['sale_price_u']
+            total_quantity = spp_page_price_data[article_obj]['total_quantity']
+        else:
+            price_on_page = 0
+            total_quantity = 0
+
+        if article_obj in price_discount_data:
+            seller_discount = price_discount_data[article_obj]['discount']
+            price_without_seller_discount = price_discount_data[article_obj]['price_without_discount']
+            price_with_seller_discount = price_discount_data[article_obj]['seller_price_with_discount']
+        else:
+            seller_discount = 0
+            price_without_seller_discount = 0
+            price_with_seller_discount = 0
+        spp = 0
+        if price_with_seller_discount != 0:
+            spp = int((1 - (price_on_page/price_without_seller_discount /
+                            (1 - seller_discount/100))) * 100)
+        defaults = {
+            'date': datetime.now().date(),
+            'common_stock': total_quantity,
+            'price_in_page': price_on_page,
+            'price_after_seller_disc': price_with_seller_discount,
+            'price_before_seller_disc': price_without_seller_discount,
+            'seller_disc': seller_discount,
+            'spp': spp
+        }
+        ArticlePriceStock.objects.update_or_create(
+            article=article_obj,
+            defaults=defaults
+        )
