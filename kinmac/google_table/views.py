@@ -164,18 +164,17 @@ class AdvertCostViewSet(viewsets.ViewSet):
             date_to__lte=end_date,
             brand_name__in=BRAND_LIST).values('nm_id').annotate(sales_amount=Count('retail_amount'), sales_sum=Sum('retail_amount'))
         for data in sale_data:
-            if data['nm_id'] in adv_dict:
-                sales_dict[data['nm_id']] = {
-                    'sales_amount': data['sales_amount'],
-                    'adv_cost_sum': adv_dict[data['nm_id']],
-                    'adv_cost_per_sale': round(adv_dict[data['nm_id']]/data['sales_amount'], 2),
-                    'drr': round(adv_dict[data['nm_id']]/data['sales_sum'], 4) * 100
-                }
-            else:
-                sales_dict[data['nm_id']] = {
-                    'sales_amount': data['sales_amount'],
-                    'adv_cost_sum': 0,
-                    'adv_cost_per_sale': 0,
-                    'drr': 0
-                }
-        return Response(sales_dict)
+            sales_dict[data['nm_id']] = {
+                'sales_amount': data['sales_amount'], 'sales_sum': data['sales_sum']}
+
+        returned_dict = {}
+        articles_data = Articles.objects.filter(brand__in=BRAND_LIST)
+        for data in articles_data:
+            returned_dict[data.common_article] = {
+                'sales_amount': sales_dict[data.nomenclatura_wb]['sales_amount'] if data.nomenclatura_wb in sales_dict else 0,
+                'adv_cost_sum': adv_dict[data.nomenclatura_wb] if data.nomenclatura_wb in adv_dict else 0,
+                'adv_cost_per_sale': round(adv_dict[data.nomenclatura_wb]/sales_dict[data.nomenclatura_wb]['sales_amount'], 2) if data.nomenclatura_wb in sales_dict and data.nomenclatura_wb in adv_dict else 0,
+                'drr': round(adv_dict[data.nomenclatura_wb]/sales_dict[data.nomenclatura_wb]['sales_sum'], 4) * 100 if data.nomenclatura_wb in sales_dict and data.nomenclatura_wb in adv_dict else 0
+            }
+
+        return Response(returned_dict)
