@@ -162,18 +162,20 @@ class AdvertCostViewSet(viewsets.ViewSet):
             doc_type_name='Продажа',
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).values('nm_id').annotate(sales_amount=Count('retail_amount'))
+            brand_name__in=BRAND_LIST).values('nm_id').annotate(sales_amount=Count('retail_amount'), sales_sum=Sum('retail_amount'))
         for data in sale_data:
             if data['nm_id'] in adv_dict:
                 sales_dict[data['nm_id']] = {
                     'sales_amount': data['sales_amount'],
                     'adv_cost_sum': adv_dict[data['nm_id']],
-                    'adv_cost_per_sale': round(adv_dict[data['nm_id']]/data['sales_amount'], 2)
+                    'adv_cost_per_sale': round(adv_dict[data['nm_id']]/data['sales_amount'], 2),
+                    'drr': round(adv_dict[data['nm_id']]/data['sales_sum'], 4) * 100
                 }
             else:
                 sales_dict[data['nm_id']] = {
                     'sales_amount': data['sales_amount'],
                     'adv_cost_sum': 0,
-                    'adv_cost_per_sale': 0
+                    'adv_cost_per_sale': 0,
+                    'drr': 0
                 }
         return Response(sales_dict)
