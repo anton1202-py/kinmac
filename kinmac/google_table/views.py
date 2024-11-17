@@ -172,9 +172,9 @@ class AdvertCostViewSet(viewsets.ViewSet):
         for data in articles_data:
             returned_dict[data.common_article] = {
                 'sales_amount': sales_dict[int(data.nomenclatura_wb)]['sales_amount'] if int(data.nomenclatura_wb) in sales_dict else 0,
-                'adv_cost_sum': adv_dict[data.nomenclatura_wb] if data.nomenclatura_wb in adv_dict else 0,
+                'adv_cost_sum': round(adv_dict[data.nomenclatura_wb], 2) if data.nomenclatura_wb in adv_dict else 0,
                 'adv_cost_per_sale': round(adv_dict[data.nomenclatura_wb]/sales_dict[int(data.nomenclatura_wb)]['sales_amount'], 2) if int(data.nomenclatura_wb) in sales_dict and data.nomenclatura_wb in adv_dict else 0,
-                'drr': round(adv_dict[data.nomenclatura_wb]/sales_dict[int(data.nomenclatura_wb)]['sales_sum'], 4) * 100 if int(data.nomenclatura_wb) in sales_dict and data.nomenclatura_wb in adv_dict else 0
+                'drr': round(adv_dict[data.nomenclatura_wb]/sales_dict[int(data.nomenclatura_wb)]['sales_sum'] * 100, 2) if int(data.nomenclatura_wb) in sales_dict and data.nomenclatura_wb in adv_dict else 0
             }
 
         return Response(returned_dict)
