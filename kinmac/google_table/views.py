@@ -43,7 +43,7 @@ class ActionArticleViewSet(viewsets.ViewSet):
         """Получеине данных а цене артикула в акции"""
         try:
             articles_for_actions = ArticleForAction.objects.select_related(
-                'action').filter(article__brand__in=BRAND_LIST, action__date_finish__gte=datetime.now())
+                'action').filter(article__brand__in=BRAND_LIST, action__date_finish__gte=datetime.now()).order_by('article__common_article')
             # Структура для хранения результата
             result = {}
             for article_for_action in articles_for_actions:
@@ -56,6 +56,8 @@ class ActionArticleViewSet(viewsets.ViewSet):
                         'date_start': date_start, 'date_finish': date_finish, 'articles': []}
                 serializer = ActionArticlesSerializer(article_for_action)
                 result[action_name]['articles'].append(serializer.data)
+
+            # Сортируем артикулы в акции по алфавиту
             return Response(result)
         except Exception as e:
             logger.error(f"Error occurred: {str(e)}")
@@ -70,8 +72,7 @@ class MarketplaceCommissionViewSet(viewsets.ViewSet):
     def list(self, request):
         """Получеине данных а цене артикула в акции"""
         comissions = MarketplaceCommission.objects.filter(
-            marketplace_product__brand__in=BRAND_LIST)
-        print(len(comissions))
+            marketplace_product__brand__in=BRAND_LIST).order_by('marketplace_product__common_article')
         serializer = MarketplaceCommissionSerializer(comissions, many=True)
         return Response(serializer.data)
 
@@ -95,7 +96,7 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
 
         storage_data = ArticleStorageCost.objects.filter(date__gte=start_date,
                                                          date__lte=end_date,
-                                                         article__brand__in=BRAND_LIST).values('article__common_article').annotate(storage_cost=Sum('warehouse_price'))
+                                                         article__brand__in=BRAND_LIST).order_by('article__common_article').values('article__common_article').annotate(storage_cost=Sum('warehouse_price'))
         for data in storage_data:
             storage_cost[data['article__common_article'].upper()
                          ] = round(data['storage_cost'], 2)
@@ -103,17 +104,16 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
         logistic_data = SalesReportOnSales.objects.filter(
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).values('sa_name').annotate(
+            brand_name__in=BRAND_LIST).order_by('sa_name').values('sa_name').annotate(
                 logistic_cost=Sum('delivery_rub')
         )
         sale_data = SalesReportOnSales.objects.filter(
             doc_type_name='Продажа',
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).values('sa_name').annotate(sales_amount=Count('retail_amount'))
+            brand_name__in=BRAND_LIST).order_by('sa_name').values('sa_name').annotate(sales_amount=Count('retail_amount'))
         for data in sale_data:
             sales_dict[data['sa_name']] = data['sales_amount']
-        print(logistic_data)
         for data in logistic_data:
             if data['sa_name'] in sales_dict:
                 logistic_cost[data['sa_name']] = {'logistic_cost': round(
@@ -139,7 +139,7 @@ class SppPriceStockDataViewSet(viewsets.ViewSet):
     def list(self, request):
         """Отдает данные по SPP, остаткам, цене"""
         data = ArticlePriceStock.objects.filter(
-            article__brand__in=BRAND_LIST)
+            article__brand__in=BRAND_LIST).order_by('article__common_article')
         serializer = SppPriceStockDataSerializer(data, many=True)
         return Response(serializer.data)
 
@@ -158,20 +158,21 @@ class AdvertCostViewSet(viewsets.ViewSet):
         sales_dict = {}
         adv_dict = {}
         adv_data = ArticleDailyCostToAdv.objects.filter(cost_date__gte=start_date, cost_date__lte=end_date,
-                                                        article__brand__in=BRAND_LIST).values('article__nomenclatura_wb').annotate(sum_cost=Sum('cost'))
+                                                        article__brand__in=BRAND_LIST).order_by('article__common_article').values('article__nomenclatura_wb').annotate(sum_cost=Sum('cost'))
         for data in adv_data:
             adv_dict[data['article__nomenclatura_wb']] = data['sum_cost']
         sale_data = SalesReportOnSales.objects.filter(
             doc_type_name='Продажа',
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).values('nm_id').annotate(sales_amount=Count('retail_amount'), sales_sum=Sum('retail_amount'))
+            brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(sales_amount=Count('retail_amount'), sales_sum=Sum('retail_amount'))
         for data in sale_data:
             sales_dict[data['nm_id']] = {
                 'sales_amount': data['sales_amount'], 'sales_sum': data['sales_sum']}
 
         returned_dict = {}
-        articles_data = Articles.objects.filter(brand__in=BRAND_LIST)
+        articles_data = Articles.objects.filter(
+            brand__in=BRAND_LIST).order_by('common_article')
         for data in articles_data:
             returned_dict[data.common_article] = {
                 'sales_amount': sales_dict[int(data.nomenclatura_wb)]['sales_amount'] if int(data.nomenclatura_wb) in sales_dict else 0,
