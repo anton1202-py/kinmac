@@ -24,10 +24,17 @@ class ActionArticlesSerializer(serializers.ModelSerializer):
 class MarketplaceCommissionSerializer(serializers.ModelSerializer):
     marketplace_product = serializers.CharField(
         source='marketplace_product.common_article')
+    width = serializers.CharField(
+        source='marketplace_product.width')
+    height = serializers.CharField(
+        source='marketplace_product.height')
+    length = serializers.CharField(
+        source='marketplace_product.length')
 
     class Meta:
         model = MarketplaceCommission
-        fields = ['marketplace_product', 'fbo_commission']
+        fields = ['marketplace_product',
+                  'fbo_commission', 'width', 'height', 'length']
 
 
 class SppPriceStockDataSerializer(serializers.ModelSerializer):

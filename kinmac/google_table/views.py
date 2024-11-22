@@ -41,18 +41,25 @@ class ActionArticleViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """Получеине данных а цене артикула в акции"""
-        articles_for_actions = ArticleForAction.objects.select_related(
-            'action').filter(article__brand__in=BRAND_LIST, action__date_finish__gte=datetime.now())
-        # Структура для хранения результата
-        result = {}
-        for article_for_action in articles_for_actions:
-            action_name = article_for_action.action.name
+        try:
+            articles_for_actions = ArticleForAction.objects.select_related(
+                'action').filter(article__brand__in=BRAND_LIST, action__date_finish__gte=datetime.now())
+            # Структура для хранения результата
+            result = {}
+            for article_for_action in articles_for_actions:
+                action_name = article_for_action.action.name
+                date_start = article_for_action.action.date_start
+                date_finish = article_for_action.action.date_finish
 
-            if action_name not in result:
-                result[action_name] = []
-            serializer = ActionArticlesSerializer(article_for_action)
-            result[action_name].append(serializer.data)
-        return Response(result)
+                if action_name not in result:
+                    result[action_name] = {
+                        'date_start': date_start, 'date_finish': date_finish, 'articles': []}
+                serializer = ActionArticlesSerializer(article_for_action)
+                result[action_name]['articles'].append(serializer.data)
+            return Response(result)
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return Response({'error': f'Произошла ошибка при получении данных.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MarketplaceCommissionViewSet(viewsets.ViewSet):
@@ -73,9 +80,6 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
     """Стоимость логистики каждого артикула за определенный период"""
     queryset = SalesReportOnSales.objects.all()
     # serializer_class = MarketplaceCommissionSerializer
-
-    def post(self, request, *args, **kwargs):
-        """Входящие данные - количество недель за которые нужно отдать данные"""
 
     def list(self, request):
         """Входящие данные - количество недель за которые нужно отдать данные"""
@@ -133,10 +137,9 @@ class SppPriceStockDataViewSet(viewsets.ViewSet):
     serializer_class = SppPriceStockDataSerializer
 
     def list(self, request):
-        """Получеине данных а цене артикула в акции"""
+        """Отдает данные по SPP, остаткам, цене"""
         data = ArticlePriceStock.objects.filter(
             article__brand__in=BRAND_LIST)
-        print(len(data))
         serializer = SppPriceStockDataSerializer(data, many=True)
         return Response(serializer.data)
 
