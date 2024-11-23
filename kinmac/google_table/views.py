@@ -104,28 +104,30 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
         logistic_data = SalesReportOnSales.objects.filter(
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).order_by('sa_name').values('sa_name').annotate(
+            brand_name__in=BRAND_LIST).order_by('nm_id').values('nm_id').annotate(
                 logistic_cost=Sum('delivery_rub')
         )
         sale_data = SalesReportOnSales.objects.filter(
             doc_type_name='Продажа',
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).order_by('sa_name').values('sa_name').annotate(sales_amount=Count('retail_amount'))
+            brand_name__in=BRAND_LIST).order_by('nm_id').values('nm_id').annotate(sales_amount=Count('retail_amount'))
         for data in sale_data:
-            sales_dict[data['sa_name']] = data['sales_amount']
+            sales_dict[data['nm_id']] = data['sales_amount']
         for data in logistic_data:
-            if data['sa_name'] in sales_dict:
-                logistic_cost[data['sa_name']] = {'logistic_cost': round(
-                    data['logistic_cost'], 2), 'sales_amount': sales_dict[data['sa_name']],
-                    'storage_cost': storage_cost[data['sa_name'].upper()] if data['sa_name'].upper() in storage_cost else 0,
-                    'storage_per_sale': round(storage_cost[data['sa_name'].upper()]/sales_dict[data['sa_name']], 2) if data['sa_name'].upper() in storage_cost else 0,
-                    'logistic_per_sale': round(data['logistic_cost']/sales_dict[data['sa_name']], 2)}
+            if data['nm_id'] in sales_dict:
+                article_obj = Articles.objects.filter(
+                    nomenclatura_wb=data['nm_id']).first()
+                logistic_cost[article_obj.common_article] = {
+                    'logistic_cost': round(data['logistic_cost'], 2), 'sales_amount': sales_dict[data['nm_id']],
+                    'storage_cost': storage_cost[data['nm_id']] if data['nm_id'] in storage_cost else 0,
+                    'storage_per_sale': round(storage_cost[data['nm_id']]/sales_dict[data['nm_id']], 2) if data['nm_id'] in storage_cost else 0,
+                    'logistic_per_sale': round(data['logistic_cost']/sales_dict[data['nm_id']], 2)}
             else:
-                logistic_cost[data['sa_name']] = {'logistic_cost': round(
-                    data['logistic_cost'], 2), 'sales_amount': 0,
-                    'storage_cost': storage_cost[data['sa_name']] if data['sa_name'] in storage_cost else 0,
-                    'storage_per_sale': storage_cost[data['sa_name'].upper()] if data['sa_name'].upper() in storage_cost else 0,
+                logistic_cost[article_obj.common_article] = {
+                    'logistic_cost': round(data['logistic_cost'], 2), 'sales_amount': 0,
+                    'storage_cost': storage_cost[data['nm_id']] if data['nm_id'] in storage_cost else 0,
+                    'storage_per_sale': storage_cost[data['nm_id']] if data['nm_id'] in storage_cost else 0,
                     'logistic_per_sale': round(data['logistic_cost'], 2)}
 
         return Response(logistic_cost)
