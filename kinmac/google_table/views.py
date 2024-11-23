@@ -104,14 +104,14 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
         logistic_data = SalesReportOnSales.objects.filter(
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).order_by('nm_id').values('nm_id').annotate(
+            brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(
                 logistic_cost=Sum('delivery_rub')
         )
         sale_data = SalesReportOnSales.objects.filter(
             doc_type_name='Продажа',
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).order_by('nm_id').values('nm_id').annotate(sales_amount=Count('retail_amount'))
+            brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(sales_amount=Count('retail_amount'))
         for data in sale_data:
             sales_dict[data['nm_id']] = data['sales_amount']
         for data in logistic_data:
