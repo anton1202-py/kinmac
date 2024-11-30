@@ -94,19 +94,24 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
         sales_dict = {}
         storage_cost = {}
 
+        main_returned_dict = {}
+
         storage_data = ArticleStorageCost.objects.filter(date__gte=start_date,
                                                          date__lte=end_date,
-                                                         article__brand__in=BRAND_LIST).order_by('article__common_article').values('article__common_article').annotate(storage_cost=Sum('warehouse_price'))
-        for data in storage_data:
-            storage_cost[data['article__common_article'].upper()
-                         ] = round(data['storage_cost'], 2)
+                                                         article__brand__in=BRAND_LIST).order_by('article__common_article').values('article__nomenclatura_wb').annotate(storage_cost=Sum('warehouse_price'))
 
+        for data in storage_data:
+            storage_cost[int(data['article__nomenclatura_wb'])
+                         ] = round(data['storage_cost'], 2)
         logistic_data = SalesReportOnSales.objects.filter(
             date_from__gte=start_date,
             date_to__lte=end_date,
             brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(
                 logistic_cost=Sum('delivery_rub')
         )
+        for data in logistic_data:
+            logistic_cost[data['nm_id']] = round(data['logistic_cost'], 2)
+
         sale_data = SalesReportOnSales.objects.filter(
             doc_type_name='Продажа',
             date_from__gte=start_date,
@@ -114,23 +119,26 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
             brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(sales_amount=Count('retail_amount'))
         for data in sale_data:
             sales_dict[data['nm_id']] = data['sales_amount']
-        for data in logistic_data:
-            if data['nm_id'] in sales_dict:
-                article_obj = Articles.objects.filter(
-                    nomenclatura_wb=data['nm_id']).first()
-                logistic_cost[article_obj.common_article] = {
-                    'logistic_cost': round(data['logistic_cost'], 2), 'sales_amount': sales_dict[data['nm_id']],
-                    'storage_cost': storage_cost[data['nm_id']] if data['nm_id'] in storage_cost else 0,
-                    'storage_per_sale': round(storage_cost[data['nm_id']]/sales_dict[data['nm_id']], 2) if data['nm_id'] in storage_cost else 0,
-                    'logistic_per_sale': round(data['logistic_cost']/sales_dict[data['nm_id']], 2)}
-            else:
-                logistic_cost[article_obj.common_article] = {
-                    'logistic_cost': round(data['logistic_cost'], 2), 'sales_amount': 0,
-                    'storage_cost': storage_cost[data['nm_id']] if data['nm_id'] in storage_cost else 0,
-                    'storage_per_sale': storage_cost[data['nm_id']] if data['nm_id'] in storage_cost else 0,
-                    'logistic_per_sale': round(data['logistic_cost'], 2)}
 
-        return Response(logistic_cost)
+        for article_obj in Articles.objects.filter(brand__in=BRAND_LIST).order_by('common_article'):
+            article_wb = int(article_obj.nomenclatura_wb)
+            if article_wb in sales_dict:
+
+                main_returned_dict[article_obj.common_article] = {
+                    'logistic_cost': logistic_cost[article_wb] if article_wb in logistic_cost else 0,
+                    'sales_amount': sales_dict[article_wb],
+                    'storage_cost': storage_cost[article_wb] if article_wb in storage_cost else 0,
+                    'storage_per_sale': round(storage_cost[article_wb]/sales_dict[article_wb], 2) if article_wb in storage_cost else 0,
+                    'logistic_per_sale': round(logistic_cost[article_wb]/sales_dict[article_wb], 2) if article_wb in logistic_cost else 0, }
+            else:
+                main_returned_dict[article_obj.common_article] = {
+                    'logistic_cost': logistic_cost[article_wb] if article_wb in logistic_cost else 0,
+                    'sales_amount': 0,
+                    'storage_cost': storage_cost[article_wb] if article_wb in storage_cost else 0,
+                    'storage_per_sale': storage_cost[article_wb] if article_wb in storage_cost else 0,
+                    'logistic_per_sale': logistic_cost[article_wb] if article_wb in logistic_cost else 0, }
+
+        return Response(main_returned_dict)
 
 
 class SppPriceStockDataViewSet(viewsets.ViewSet):
