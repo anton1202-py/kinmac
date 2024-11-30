@@ -10,6 +10,7 @@ from google_table.serializers import ActionArticlesSerializer, MarketplaceCommis
 from action.models import ArticleForAction
 from kinmac.constants_file import BRAND_LIST
 from database.periodic_tasks import update_info_about_articles
+from google_table.logics import WbMarketplaceArticlesData
 from reklama.models import ArticleDailyCostToAdv
 from unit_economic.wb_tasks import wb_comission_add_to_db, wb_logistic_add_to_db
 from unit_economic.models import MarketplaceCommission
@@ -73,6 +74,7 @@ class MarketplaceCommissionViewSet(viewsets.ViewSet):
         """Получеине данных а цене артикула в акции"""
         comissions = MarketplaceCommission.objects.filter(
             marketplace_product__brand__in=BRAND_LIST).order_by('marketplace_product__common_article')
+        print(comissions)
         serializer = MarketplaceCommissionSerializer(comissions, many=True)
         return Response(serializer.data)
 
@@ -117,6 +119,7 @@ class ArticleLogisticCostViewSet(viewsets.ViewSet):
             date_from__gte=start_date,
             date_to__lte=end_date,
             brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(sales_amount=Count('retail_amount'))
+
         for data in sale_data:
             sales_dict[data['nm_id']] = data['sales_amount']
 
@@ -192,3 +195,24 @@ class AdvertCostViewSet(viewsets.ViewSet):
             }
 
         return Response(returned_dict)
+
+
+class ResponseWithAllViewSet(viewsets.ViewSet):
+    """Отдает расходы рекламы на каждую продажу."""
+
+    def list(self, request):
+        weeks_amount = int(request.query_params.get('weeks'))
+        common_data = WbMarketplaceArticlesData(weeks_amount)
+
+        comission_data = common_data.comission_data()
+        spp_data = common_data.spp_stock_data()
+        advert_info = common_data.advert_data()
+        log_stor_data = common_data.logistic_storage_cost()
+
+        for article, data in comission_data.items():
+
+            # Обновляем внутренний словарь значениями из inner_dict
+            data.update(spp_data[article])
+            data.update(advert_info[article])
+            data.update(log_stor_data[article])
+        return Response(comission_data)
