@@ -63,5 +63,5 @@ class TestViewSet(viewsets.ViewSet):
     def list(self, request):
         weeks_amount = int(request.query_params.get('weeks'))
         common_data = WbAnalyticalTableData(weeks_amount)
-
-        return Response(common_data)
+        data = common_data.daily_orders_data()
+        return Response(data)
