@@ -149,7 +149,7 @@ class WbAnalyticalTableData:
             brand__in=BRAND_LIST,
             order_date__gte=self.start_date,
             order_date__lte=self.end_date).order_by('supplier_article').annotate(order_day=TruncDate('order_date')
-                                                                                 ).values('order_day', 'supplier_article').annotate(total_count=Count('id')
+                                                                                 ).values('order_day', 'supplier_article').annotate(total_count=Count('id'), total_sum=Sum('finish_price')
                                                                                                                                     ).order_by('order_day', 'supplier_article')
         print('orders', orders)
         response_dict = {}
