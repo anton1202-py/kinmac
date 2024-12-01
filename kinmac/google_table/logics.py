@@ -190,7 +190,8 @@ class WbAnalyticalTableData:
         # ).order_by('order_day', 'supplier_article')
 
         # response_dict = {}
-        latest_stocks = StocksSite.objects.annotate(
+        latest_stocks = StocksSite.objects.filter(
+            pub_date__lte=self.end_date).annotate(
             # Обрезаем время, оставляя только дату
             pub_date_truncated=TruncDate('pub_date')
         ).values(
@@ -213,7 +214,7 @@ class WbAnalyticalTableData:
                 'warehouse')  # Фильтруем по складам
         ).order_by('pub_date', 'seller_article', 'warehouse')
 
-        final_stocks_list = list(final_stocks.values())[:10]
+        final_stocks_list = list(final_stocks.values())
         # for stock in final_stocks_list:
         #     print(stock)
         #     print('++++++++++++++++++++++++++++++++++')
