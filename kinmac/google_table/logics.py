@@ -202,7 +202,7 @@ class WbAnalyticalTableData:
         ).values(
             'pub_date_truncated', 'seller_article', 'warehouse', 'latest_pub_date'
         )
-
+        print('latest_stocks', latest_stocks)
         # Теперь получаем остатки для каждой самой поздней записи
         final_stocks = StocksSite.objects.filter(
             pub_date__in=latest_stocks.values(
@@ -212,4 +212,5 @@ class WbAnalyticalTableData:
             warehouse__in=latest_stocks.values(
                 'warehouse')  # Фильтруем по складам
         ).order_by('pub_date', 'seller_article', 'warehouse')
+        print('final_stocks', final_stocks)
         return final_stocks
