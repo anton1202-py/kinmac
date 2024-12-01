@@ -214,9 +214,9 @@ class WbAnalyticalTableData:
         ).order_by('pub_date', 'seller_article', 'warehouse')
 
         final_stocks_list = list(final_stocks.values())
-        for stock in final_stocks_list:
-            print(stock)
-            print('++++++++++++++++++++++++++++++++++')
+        # for stock in final_stocks_list:
+        #     print(stock)
+        #     print('++++++++++++++++++++++++++++++++++')
 
         # for stock in final_stocks:
         #     print(stock)
@@ -224,4 +224,4 @@ class WbAnalyticalTableData:
 
         # print('*************************')
         # print('final_stocks', final_stocks_list)
-        return {}
+        return list(final_stocks.values())
