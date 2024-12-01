@@ -178,18 +178,18 @@ class WbAnalyticalTableData:
         return response_dict
 
     def daily_stock_data(self):
-        orders = StocksSite.objects.filter(
-            pub_date__gte=self.start_date,
-            pub_date__lte=self.end_date).order_by('seller_article').annotate(
-            order_day=TruncDate('pub_date')
-        ).values('order_day', 'supplier_article').annotate(
-            total_count=Count('id'),
-            total_sum=Sum('finish_price')
-        ).annotate(
-            average_price=F('total_sum') / F('total_count')
-        ).order_by('order_day', 'supplier_article')
+        # orders = StocksSite.objects.filter(
+        #     pub_date__gte=self.start_date,
+        #     pub_date__lte=self.end_date).order_by('seller_article').annotate(
+        #     order_day=TruncDate('pub_date')
+        # ).values('order_day', 'seller_article').annotate(
+        #     total_count=Count('id'),
+        #     total_sum=Sum('finish_price')
+        # ).annotate(
+        #     average_price=F('total_sum') / F('total_count')
+        # ).order_by('order_day', 'supplier_article')
 
-        response_dict = {}
+        # response_dict = {}
         latest_stocks = StocksSite.objects.annotate(
             # Обрезаем время, оставляя только дату
             pub_date_truncated=TruncDate('pub_date')
