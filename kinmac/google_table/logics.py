@@ -224,4 +224,4 @@ class WbAnalyticalTableData:
 
         # print('*************************')
         # print('final_stocks', final_stocks_list)
-        return list(final_stocks.values())
+        return final_stocks_list
