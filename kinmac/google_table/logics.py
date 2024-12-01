@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from django.db.models import Count, Sum
-
-from database.models import ArticlePriceStock, ArticleStorageCost, Articles, SalesReportOnSales
+from django.db.models.functions import TruncDate
+from database.models import ArticlePriceStock, ArticleStorageCost, Articles, Orders, SalesReportOnSales
 from kinmac.constants_file import BRAND_LIST
 from reklama.models import ArticleDailyCostToAdv
 from unit_economic.models import MarketplaceCommission
@@ -134,3 +134,30 @@ class WbMarketplaceArticlesData:
                 'storage_per_sale': round(storage_cost[article_wb]/sales_amount, 2) if article_wb in storage_cost and sales_amount > 0 else 0,
                 'logistic_per_sale': round(logistic_cost[article_wb]/sales_amount, 2) if article_wb in logistic_cost and sales_amount > 0 else 0, }
         return main_returned_dict
+
+
+class WbAnalyticalTableData:
+    """Данные для аналитической таблицы"""
+
+    def __init__(self, weeks_amount):
+        self.weeks_amount = weeks_amount
+        self.end_date = datetime.now()
+        self.start_date = self.end_date - timedelta(weeks=self.weeks_amount)
+
+    def daily_orders_data(self):
+        orders = Orders.objects.filter(
+            brand__in=BRAND_LIST,
+            order_date__gte=self.start_date,
+            order_date__lte=self.end_date).order_by('supplier_article').annotate(order_day=TruncDate('order_date')
+                                                                                 ).values('order_day', 'nmid').annotate(total_count=Count('id')
+                                                                                                                        ).order_by('order_day', 'nmid')
+        print('orders', orders)
+        response_dict = {}
+        # for data in comissions:
+        #     response_dict[data.marketplace_product.common_article] = {
+        #         'fbo_commission': data.fbo_commission,
+        #         "width": data.marketplace_product.width,
+        #         "height": data.marketplace_product.height,
+        #         "length": data.marketplace_product.length
+        #     }
+        return response_dict

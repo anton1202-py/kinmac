@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from google_table.serializers import ActionArticlesSerializer
 from action.models import ArticleForAction
 from kinmac.constants_file import BRAND_LIST
-from google_table.logics import WbMarketplaceArticlesData
+from google_table.logics import WbAnalyticalTableData, WbMarketplaceArticlesData
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +55,13 @@ class ResponseWithAllViewSet(viewsets.ViewSet):
             data.update(advert_info[article])
             data.update(log_stor_data[article])
         return Response(comission_data)
+
+
+class TestViewSet(viewsets.ViewSet):
+    """Для тестов функций"""
+
+    def list(self, request):
+        weeks_amount = int(request.query_params.get('weeks'))
+        common_data = WbAnalyticalTableData(weeks_amount)
+
+        return Response(common_data)
