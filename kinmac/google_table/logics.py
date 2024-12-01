@@ -159,19 +159,21 @@ class WbAnalyticalTableData:
 
         response_dict = {}
         for data in orders:
+            total_sum = round(data['total_sum'])
+            average_price = round(data['average_price'])
             if data['supplier_article'] not in response_dict:
                 response_dict[data['supplier_article']] = {
                     str(data['order_day']): {
                         "total_count": data['total_count'],
-                        "total_sum": data['total_sum'],
-                        "average_price": data['average_price']
+                        "total_sum": total_sum,
+                        "average_price":  average_price
                     }
                 }
             else:
                 response_dict[data['supplier_article']][str(data['order_day'])] = {
                     "total_count": data['total_count'],
-                    "total_sum": data['total_sum'],
-                    "average_price": data['average_price']
+                    "total_sum": total_sum,
+                    "average_price":  average_price
                 }
 
         return response_dict
