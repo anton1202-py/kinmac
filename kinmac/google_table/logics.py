@@ -191,6 +191,7 @@ class WbAnalyticalTableData:
 
         # response_dict = {}
         latest_stocks = StocksSite.objects.filter(
+            pub_date__gte=self.start_date,
             pub_date__lte=self.end_date).annotate(
             # Обрезаем время, оставляя только дату
             pub_date_truncated=TruncDate('pub_date')
