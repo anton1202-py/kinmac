@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from django.db.models import Count, Sum
+from django.db.models import Count, F, Sum
 from django.db.models.functions import TruncDate
 from database.models import ArticlePriceStock, ArticleStorageCost, Articles, Orders, SalesReportOnSales
 from kinmac.constants_file import BRAND_LIST
@@ -148,9 +148,14 @@ class WbAnalyticalTableData:
         orders = Orders.objects.filter(
             brand__in=BRAND_LIST,
             order_date__gte=self.start_date,
-            order_date__lte=self.end_date).order_by('supplier_article').annotate(order_day=TruncDate('order_date')
-                                                                                 ).values('order_day', 'supplier_article').annotate(total_count=Count('id'), total_sum=Sum('finish_price')
-                                                                                                                                    ).order_by('order_day', 'supplier_article')
+            order_date__lte=self.end_date).order_by('supplier_article').annotate(
+            order_day=TruncDate('order_date')
+        ).values('order_day', 'supplier_article').annotate(
+            total_count=Count('id'),
+            total_sum=Sum('finish_price')
+        ).annotate(
+            average_price=F('total_sum') / F('total_count')
+        ).order_by('order_day', 'supplier_article')
         print('orders', orders)
         response_dict = {}
         # for data in comissions:
