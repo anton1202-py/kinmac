@@ -156,13 +156,22 @@ class WbAnalyticalTableData:
         ).annotate(
             average_price=F('total_sum') / F('total_count')
         ).order_by('order_day', 'supplier_article')
-        print('orders', orders)
+
         response_dict = {}
-        # for data in comissions:
-        #     response_dict[data.marketplace_product.common_article] = {
-        #         'fbo_commission': data.fbo_commission,
-        #         "width": data.marketplace_product.width,
-        #         "height": data.marketplace_product.height,
-        #         "length": data.marketplace_product.length
-        #     }
-        return orders
+        for data in orders:
+            if data['supplier_article'] not in response_dict:
+                response_dict[data['supplier_article']] = {
+                    data['order_day']: {
+                        "total_count": data['total_count'],
+                        "total_sum": data['total_sum'],
+                        "average_price": data['average_price']
+                    }
+                }
+            else:
+                response_dict[data['supplier_article']][data['order_day']] = {
+                    "total_count": data['total_count'],
+                    "total_sum": data['total_sum'],
+                    "average_price": data['average_price']
+                }
+
+        return response_dict
