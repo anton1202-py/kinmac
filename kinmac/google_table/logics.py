@@ -160,4 +160,4 @@ class WbAnalyticalTableData:
         #         "height": data.marketplace_product.height,
         #         "length": data.marketplace_product.length
         #     }
-        return response_dict
+        return orders
