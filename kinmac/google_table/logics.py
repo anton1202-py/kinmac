@@ -212,7 +212,7 @@ class WbAnalyticalTableData:
             warehouse__in=latest_stocks.values(
                 'warehouse')  # Фильтруем по складам
         ).order_by('pub_date', 'seller_article', 'warehouse')
-        final_stocks_list = str(final_stocks)
+        final_stocks_list = list(final_stocks)
         # print('*************************')
         # print('final_stocks', final_stocks_list)
         return final_stocks_list
