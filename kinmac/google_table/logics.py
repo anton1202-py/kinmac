@@ -161,14 +161,14 @@ class WbAnalyticalTableData:
         for data in orders:
             if data['supplier_article'] not in response_dict:
                 response_dict[data['supplier_article']] = {
-                    data['order_day']: {
+                    str(data['order_day']): {
                         "total_count": data['total_count'],
                         "total_sum": data['total_sum'],
                         "average_price": data['average_price']
                     }
                 }
             else:
-                response_dict[data['supplier_article']][data['order_day']] = {
+                response_dict[data['supplier_article']][str(data['order_day'])] = {
                     "total_count": data['total_count'],
                     "total_sum": data['total_sum'],
                     "average_price": data['average_price']
