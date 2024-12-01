@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
-from django.db.models import Count, F, Sum
+from django.db.models import Count, F, Sum, Max
 from django.db.models.functions import TruncDate
-from database.models import ArticlePriceStock, ArticleStorageCost, Articles, Orders, SalesReportOnSales
+from database.models import ArticlePriceStock, ArticleStorageCost, Articles, Orders, SalesReportOnSales, StocksSite
 from kinmac.constants_file import BRAND_LIST
 from reklama.models import ArticleDailyCostToAdv
 from unit_economic.models import MarketplaceCommission
@@ -175,5 +175,41 @@ class WbAnalyticalTableData:
                     "total_sum": total_sum,
                     "average_price":  average_price
                 }
-
         return response_dict
+
+    def daily_stock_data(self):
+        orders = StocksSite.objects.filter(
+            pub_date__gte=self.start_date,
+            pub_date__lte=self.end_date).order_by('seller_article').annotate(
+            order_day=TruncDate('pub_date')
+        ).values('order_day', 'supplier_article').annotate(
+            total_count=Count('id'),
+            total_sum=Sum('finish_price')
+        ).annotate(
+            average_price=F('total_sum') / F('total_count')
+        ).order_by('order_day', 'supplier_article')
+
+        response_dict = {}
+        latest_stocks = StocksSite.objects.annotate(
+            # Обрезаем время, оставляя только дату
+            pub_date_truncated=TruncDate('pub_date')
+        ).values(
+            # Группируем по дате, артикулу и складу
+            'pub_date_truncated', 'seller_article', 'warehouse'
+        ).annotate(
+            # Находим максимальную дату (самую позднюю запись)
+            latest_pub_date=Max('pub_date')
+        ).values(
+            'pub_date_truncated', 'seller_article', 'warehouse', 'latest_pub_date'
+        )
+
+        # Теперь получаем остатки для каждой самой поздней записи
+        final_stocks = StocksSite.objects.filter(
+            pub_date__in=latest_stocks.values(
+                'latest_pub_date'),  # Фильтруем по найденным датам
+            seller_article__in=latest_stocks.values(
+                'seller_article'),  # Фильтруем по артикулам
+            warehouse__in=latest_stocks.values(
+                'warehouse')  # Фильтруем по складам
+        ).order_by('pub_date', 'seller_article', 'warehouse')
+        return final_stocks
