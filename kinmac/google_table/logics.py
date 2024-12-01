@@ -213,14 +213,14 @@ class WbAnalyticalTableData:
                 'warehouse')  # Фильтруем по складам
         ).order_by('pub_date', 'seller_article', 'warehouse')
 
-        # final_stocks_list = list(final_stocks)
-        # for stock in final_stocks_list:
-        #     print(stock)
-        #     print('++++++++++++++++++++++++++++++++++')
-
-        for stock in final_stocks:
+        final_stocks_list = list(final_stocks.values())
+        for stock in final_stocks_list:
             print(stock)
-            print('==================================')
+            print('++++++++++++++++++++++++++++++++++')
+
+        # for stock in final_stocks:
+        #     print(stock)
+        #     print('==================================')
 
         # print('*************************')
         # print('final_stocks', final_stocks_list)
