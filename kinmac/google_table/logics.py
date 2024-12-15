@@ -23,7 +23,7 @@ class WbMarketplaceArticlesData:
             doc_type_name='Продажа',
             date_from__gte=start_date,
             date_to__lte=end_date,
-            brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(sales_amount=Count('retail_amount'), sales_sum=Sum('retail_amount'))
+            brand_name__in=BRAND_LIST).order_by('sa_name').values('nm_id').annotate(sales_amount=Count('retail_amount'), sales_sum=Sum('retail_price_withdisc_rub'))
         for data in sale_data:
             sales_dict[data['nm_id']] = {
                 'sales_amount': data['sales_amount'], 'sales_sum': data['sales_sum']}
@@ -86,7 +86,7 @@ class WbMarketplaceArticlesData:
             response_dict[data.common_article] = {
                 'sales_amount': sales_dict[int(data.nomenclatura_wb)]['sales_amount'],
                 'adv_cost_sum': round(adv_dict[data.nomenclatura_wb], 2) if data.nomenclatura_wb in adv_dict else 0,
-                'adv_cost_per_sale': round(adv_dict[data.nomenclatura_wb]/sales_dict[int(data.nomenclatura_wb)]['sales_amount'], 2) if data.nomenclatura_wb in adv_dict else 0,
+                # 'adv_cost_per_sale': round(adv_dict[data.nomenclatura_wb]/sales_dict[int(data.nomenclatura_wb)]['sales_amount'], 2) if data.nomenclatura_wb in adv_dict else 0,
                 'drr': round(adv_dict[data.nomenclatura_wb]/sales_dict[int(data.nomenclatura_wb)]['sales_sum'] * 100, 2) if data.nomenclatura_wb in adv_dict else 0
             }
         return response_dict
@@ -131,8 +131,9 @@ class WbMarketplaceArticlesData:
                 'logistic_cost': logistic_cost[article_wb] if article_wb in logistic_cost else 0,
                 'sales_amount': sales_amount,
                 'storage_cost': storage_cost[article_wb] if article_wb in storage_cost else 0,
-                'storage_per_sale': round(storage_cost[article_wb]/sales_amount, 2) if article_wb in storage_cost and sales_amount > 0 else 0,
-                'logistic_per_sale': round(logistic_cost[article_wb]/sales_amount, 2) if article_wb in logistic_cost and sales_amount > 0 else 0, }
+                # 'storage_per_sale': round(storage_cost[article_wb]/sales_amount, 2) if article_wb in storage_cost and sales_amount > 0 else 0,
+                # 'logistic_per_sale': round(logistic_cost[article_wb]/sales_amount, 2) if article_wb in logistic_cost and sales_amount > 0 else 0,
+            }
         return main_returned_dict
 
 
@@ -178,18 +179,6 @@ class WbAnalyticalTableData:
         return response_dict
 
     def daily_stock_data(self):
-        # orders = StocksSite.objects.filter(
-        #     pub_date__gte=self.start_date,
-        #     pub_date__lte=self.end_date).order_by('seller_article').annotate(
-        #     order_day=TruncDate('pub_date')
-        # ).values('order_day', 'seller_article').annotate(
-        #     total_count=Count('id'),
-        #     total_sum=Sum('finish_price')
-        # ).annotate(
-        #     average_price=F('total_sum') / F('total_count')
-        # ).order_by('order_day', 'supplier_article')
-
-        # response_dict = {}
         latest_stocks = StocksSite.objects.filter(
             pub_date__gte=self.start_date,
             pub_date__lte=self.end_date).annotate(
@@ -213,14 +202,4 @@ class WbAnalyticalTableData:
         ).filter(warehouse='Итого по складам')  # Фильтруем по названию склада
 
         final_stocks_list = list(final_stocks.values())
-        # for stock in final_stocks_list:
-        #     print(stock)
-        #     print('++++++++++++++++++++++++++++++++++')
-
-        # for stock in final_stocks:
-        #     print(stock)
-        #     print('==================================')
-
-        # print('*************************')
-        # print('final_stocks', final_stocks_list)
         return final_stocks_list
