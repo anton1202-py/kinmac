@@ -4,8 +4,8 @@
             "source.organizeImports": "explicit"
         },
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-python.autopep8"
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "python.formatting.provider": "none",
+    "python.formatting.provider": "ms-python.black-formatter",
     "python.terminal.activateEnvironment": true
 }
