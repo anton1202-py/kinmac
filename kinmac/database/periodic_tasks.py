@@ -1,13 +1,30 @@
 from datetime import datetime, timedelta
 import time
-from api_requests.wb_requests import get_check_storage_cost_report_status, get_create_storage_cost_report, get_storage_cost_report_data, wb_article_data_from_api
+from api_requests.wb_requests import (
+    get_check_storage_cost_report_status,
+    get_create_storage_cost_report,
+    get_storage_cost_report_data,
+    wb_article_data_from_api,
+)
 from celery_tasks.celery import app
 
+from api_requests.ozon_requests import ArticleDataRequest
 from kinmac.constants_file import wb_headers
-from database.supplyment import get_article_commot_stock_from_front, get_price_info_from_ofissial_api
+from database.supplyment import (
+    get_article_commot_stock_from_front,
+    get_price_info_from_ofissial_api,
+)
 
 
-from .models import ArticlePriceStock, ArticleStorageCost, Articles, MarketplaceCategory, MarketplaceChoices, Platform, StorageCost
+from .models import (
+    ArticlePriceStock,
+    ArticleStorageCost,
+    Articles,
+    MarketplaceCategory,
+    MarketplaceChoices,
+    Platform,
+    StorageCost,
+)
 
 
 @app.task
@@ -15,48 +32,45 @@ def update_info_about_articles():
     common_data = wb_article_data_from_api(wb_headers)
     if common_data:
         for data in common_data:
-            category_number = data['subjectID']
-            category_name = data['subjectName']
+            category_number = data["subjectID"]
+            category_name = data["subjectName"]
             platform_obj, created = Platform.objects.get_or_create(
-                platform_type=MarketplaceChoices.WILDBERRIES)
+                platform_type=MarketplaceChoices.WILDBERRIES
+            )
             category_obj, created = MarketplaceCategory.objects.get_or_create(
                 platform=platform_obj,
                 category_number=category_number,
-                category_name=category_name
+                category_name=category_name,
             )
-            if Articles.objects.filter(
-                nomenclatura_wb=data['nmID']
-            ).exists():
+            if Articles.objects.filter(nomenclatura_wb=data["nmID"]).exists():
 
-                Articles.objects.filter(
-                    nomenclatura_wb=data['nmID']
-                ).update(
-                    common_article=data['vendorCode'],
-                    brand=data['brand'],
-                    barcode=data['sizes'][0]['skus'][0],
-                    predmet=data['subjectName'],
-                    size=data['sizes'][0]['techSize'],
-                    name=data['title'],
+                Articles.objects.filter(nomenclatura_wb=data["nmID"]).update(
+                    common_article=data["vendorCode"],
+                    brand=data["brand"],
+                    barcode=data["sizes"][0]["skus"][0],
+                    predmet=data["subjectName"],
+                    size=data["sizes"][0]["techSize"],
+                    name=data["title"],
                     category=category_obj,
-                    width=data['dimensions']['width'],
-                    height=data['dimensions']['height'],
-                    length=data['dimensions']['length'],
-                    weight=0
+                    width=data["dimensions"]["width"],
+                    height=data["dimensions"]["height"],
+                    length=data["dimensions"]["length"],
+                    weight=0,
                 )
             else:
                 Articles(
-                    nomenclatura_wb=data['nmID'],
-                    common_article=data['vendorCode'],
-                    brand=data['brand'],
-                    barcode=data['sizes'][0]['skus'][0],
-                    predmet=data['subjectName'],
-                    size=data['sizes'][0]['techSize'],
-                    name=data['title'],
+                    nomenclatura_wb=data["nmID"],
+                    common_article=data["vendorCode"],
+                    brand=data["brand"],
+                    barcode=data["sizes"][0]["skus"][0],
+                    predmet=data["subjectName"],
+                    size=data["sizes"][0]["techSize"],
+                    name=data["title"],
                     category=category_obj,
-                    width=data['dimensions']['width'],
-                    height=data['dimensions']['height'],
-                    length=data['dimensions']['length'],
-                    weight=0
+                    width=data["dimensions"]["width"],
+                    height=data["dimensions"]["height"],
+                    length=data["dimensions"]["length"],
+                    weight=0,
                 ).save()
 
 
@@ -69,29 +83,30 @@ def calculate_storage_cost() -> None:
     article_storagecost = {}
 
     date = str(date)
-    report_number = get_create_storage_cost_report(
-        wb_headers, date, date)['data']['taskId']
+    report_number = get_create_storage_cost_report(wb_headers, date, date)["data"][
+        "taskId"
+    ]
     time.sleep(15)
-    status = get_check_storage_cost_report_status(
-        wb_headers, report_number)['data']['status']
-    while status != 'done':
+    status = get_check_storage_cost_report_status(wb_headers, report_number)["data"][
+        "status"
+    ]
+    while status != "done":
         time.sleep(10)
-        status = get_check_storage_cost_report_status(
-            wb_headers, report_number)['data']['status']
+        status = get_check_storage_cost_report_status(wb_headers, report_number)[
+            "data"
+        ]["status"]
     costs_data = get_storage_cost_report_data(wb_headers, report_number)
     for data in costs_data:
-        if data['nmId'] in article_storagecost:
-            article_storagecost[data['nmId']] += data['warehousePrice']
+        if data["nmId"] in article_storagecost:
+            article_storagecost[data["nmId"]] += data["warehousePrice"]
         else:
-            article_storagecost[data['nmId']] = data['warehousePrice']
+            article_storagecost[data["nmId"]] = data["warehousePrice"]
     for article, amount in article_storagecost.items():
         if Articles.objects.filter(nomenclatura_wb=article).exists():
             article_obj = Articles.objects.get(nomenclatura_wb=article)
-            defaults = {'storage_cost': amount}
-            search_params = {'article': article_obj, 'start_date': date}
-            StorageCost.objects.update_or_create(
-                defaults=defaults, **search_params
-            )
+            defaults = {"storage_cost": amount}
+            search_params = {"article": article_obj, "start_date": date}
+            StorageCost.objects.update_or_create(defaults=defaults, **search_params)
 
 
 @app.task
@@ -102,22 +117,24 @@ def article_storage_cost():
 
     date_start = (datetime.now() - timedelta(days=1)).date()
     date_end = (datetime.now() - timedelta(days=1)).date()
-    report_number = get_create_storage_cost_report(
-        wb_headers, date_start, date_end)['data']['taskId']
+    report_number = get_create_storage_cost_report(wb_headers, date_start, date_end)[
+        "data"
+    ]["taskId"]
     time.sleep(20)
-    status = get_check_storage_cost_report_status(
-        wb_headers, report_number)['data']['status']
-    while status != 'done':
+    status = get_check_storage_cost_report_status(wb_headers, report_number)["data"][
+        "status"
+    ]
+    while status != "done":
         time.sleep(10)
-        status = get_check_storage_cost_report_status(
-            wb_headers, report_number)['data']['status']
+        status = get_check_storage_cost_report_status(wb_headers, report_number)[
+            "data"
+        ]["status"]
     costs_data = get_storage_cost_report_data(wb_headers, report_number)
     print(len(costs_data))
     for data in costs_data:
         try:
             # if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
-            article_obj = Articles.objects.filter(
-                nomenclatura_wb=data['nmId']).first()
+            article_obj = Articles.objects.filter(nomenclatura_wb=data["nmId"]).first()
             ArticleStorageCost.objects.get_or_create(
                 article=article_obj,
                 date=data["date"],
@@ -142,11 +159,11 @@ def article_storage_cost():
                 original_date=data["originalDate"],
                 loyalty_discount=data["loyaltyDiscount"],
                 tariffFix_date=data["tariffFixDate"],
-                tariff_lower_date=data["tariffLowerDate"]
+                tariff_lower_date=data["tariffLowerDate"],
             )
         except:
-            print(f'{data} в бд')
-    print('загрузил', date_end)
+            print(f"{data} в бд")
+    print("загрузил", date_end)
 
 
 @app.task
@@ -162,34 +179,55 @@ def wb_article_price_stock_app_data() -> None:
 
     for article_obj in articles_data:
         if article_obj in spp_page_price_data:
-            price_on_page = spp_page_price_data[article_obj]['sale_price_u']
-            total_quantity = spp_page_price_data[article_obj]['total_quantity']
+            price_on_page = spp_page_price_data[article_obj]["sale_price_u"]
+            total_quantity = spp_page_price_data[article_obj]["total_quantity"]
         else:
             price_on_page = 0
             total_quantity = 0
 
         if article_obj in price_discount_data:
-            seller_discount = price_discount_data[article_obj]['discount']
-            price_without_seller_discount = price_discount_data[article_obj]['price_without_discount']
-            price_with_seller_discount = price_discount_data[article_obj]['seller_price_with_discount']
+            seller_discount = price_discount_data[article_obj]["discount"]
+            price_without_seller_discount = price_discount_data[article_obj][
+                "price_without_discount"
+            ]
+            price_with_seller_discount = price_discount_data[article_obj][
+                "seller_price_with_discount"
+            ]
         else:
             seller_discount = 0
             price_without_seller_discount = 0
             price_with_seller_discount = 0
         spp = 0
         if price_with_seller_discount != 0:
-            spp = int((1 - (price_on_page/price_without_seller_discount /
-                            (1 - seller_discount/100))) * 100)
+            spp = int(
+                (
+                    1
+                    - (
+                        price_on_page
+                        / price_without_seller_discount
+                        / (1 - seller_discount / 100)
+                    )
+                )
+                * 100
+            )
         defaults = {
-            'date': datetime.now().date(),
-            'common_stock': total_quantity,
-            'price_in_page': price_on_page,
-            'price_after_seller_disc': price_with_seller_discount,
-            'price_before_seller_disc': price_without_seller_discount,
-            'seller_disc': seller_discount,
-            'spp': spp
+            "date": datetime.now().date(),
+            "common_stock": total_quantity,
+            "price_in_page": price_on_page,
+            "price_after_seller_disc": price_with_seller_discount,
+            "price_before_seller_disc": price_without_seller_discount,
+            "seller_disc": seller_discount,
+            "spp": spp,
         }
         ArticlePriceStock.objects.update_or_create(
-            article=article_obj,
-            defaults=defaults
+            article=article_obj, defaults=defaults
         )
+
+
+@app.task
+def ozon_update_article_date() -> None:
+    """
+    Обновляет данные по артикулам ОЗОН
+    """
+    ozon_req = ArticleDataRequest()
+    product_ids = ozon_req.ozon_products_list()
