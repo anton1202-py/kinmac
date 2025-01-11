@@ -1295,6 +1295,7 @@ class ArticlesRealizationReportOzon(models.Model):
     )
     report = models.ForeignKey(
         RealizationReportOzon,
+        on_delete=models.CASCADE,
         verbose_name="Отчет",
         related_name="report_detalization",
     )
