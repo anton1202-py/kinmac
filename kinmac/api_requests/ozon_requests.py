@@ -19,11 +19,9 @@ class ArticleDataRequest:
             data_list = []
         payload = json.dumps(
             {
-                {
-                    "filter": {"offer_id": [], "product_id": [], "visibility": "ALL"},
-                    "last_id": last_id,
-                    "limit": limit,
-                }
+                "filter": {"offer_id": [], "product_id": [], "visibility": "ALL"},
+                "last_id": last_id,
+                "limit": limit,
             }
         )
         response = requests.request("POST", url, headers=header, data=payload)
@@ -45,6 +43,6 @@ class ArticleDataRequest:
         return self._post_recursion_template_req(url, header)
 
     def ozon_product_info(self, header: dict, products: list) -> dict:
-        url = f"{self.MAIN_URL}/v3/product/info/list"
-        payload = json.dumps({"offer_id": [], "product_id": [products], "sku": []})
+        url = f"{self.MAIN_URL}v3/product/info/list"
+        payload = json.dumps({"offer_id": [], "product_id": products, "sku": []})
         return self._post_template_req(url, header, payload)

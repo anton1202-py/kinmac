@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
 import time
 from api_requests.wb_requests import (
@@ -20,6 +21,7 @@ from .models import (
     ArticlePriceStock,
     ArticleStorageCost,
     Articles,
+    Company,
     MarketplaceCategory,
     MarketplaceChoices,
     Platform,
@@ -224,10 +226,50 @@ def wb_article_price_stock_app_data() -> None:
         )
 
 
+def split_list(input_list, chunk_size):
+    """Разделяет список на подсписки заданного размера."""
+    for i in range(0, len(input_list), chunk_size):
+        yield input_list[i : i + chunk_size]
+
+
 @app.task
 def ozon_update_article_date() -> None:
     """
     Обновляет данные по артикулам ОЗОН
     """
     ozon_req = ArticleDataRequest()
-    product_ids = ozon_req.ozon_products_list()
+    for company in Company.objects.filter(ozon_token__isnull=False):
+        header = company.ozon_header
+        product_id_list = []
+        product_ids = ozon_req.ozon_products_list(header)
+        for product_id in product_ids:
+            product_id_list.append(product_id.get("product_id"))
+        chunk_size = 1000
+        products_info = []
+        # Разделяем список и отправляем запросы
+        for chunk in split_list(product_id_list, chunk_size):
+            products = ozon_req.ozon_product_info(header, chunk)["items"]
+            products_info.extend(products)
+        for product in products_info:
+            if product["barcodes"]:
+                if Articles.objects.filter(barcode=product["barcodes"][0]):
+                    if product["sources"][0]["sku"]:
+                        article_obj = Articles.objects.filter(
+                            barcode=product["barcodes"][0]
+                        ).first()
+                elif Articles.objects.filter(common_article=product["offer_id"]):
+                    article_obj = Articles.objects.filter(
+                        common_article=product["offer_id"]
+                    ).first()
+                else:
+                    if len(product["barcodes"]) > 1:
+                        article_obj = Articles.objects.filter(
+                            barcode=product["barcodes"][1]
+                        ).first()
+
+                if article_obj:
+                    article_obj.ozon_product_id = product["id"]
+                    article_obj.ozon_seller_article = product["offer_id"]
+                    article_obj.ozon_sku = product["sources"][0]["sku"]
+                    article_obj.ozon_barcode = product["barcodes"][0]
+                    article_obj.save()

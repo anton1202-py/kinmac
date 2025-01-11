@@ -69,11 +69,11 @@ class Company(models.Model):
         }
 
     def __str__(self):
-        return self.ur_lice_name
+        return self.name
 
     class Meta:
-        verbose_name = "Юр. лицо"
-        verbose_name_plural = "Юр. лицо"
+        verbose_name = "Компания"
+        verbose_name_plural = "Компания"
 
 
 class MarketplaceChoices(models.IntegerChoices):
@@ -1195,3 +1195,216 @@ class ArticlePriceStock(models.Model):
         verbose_name_plural = (
             "Данные об общих остатках каждого артикула, цене продавца и СПП"
         )
+
+
+class RealizationReportOzon(models.Model):
+    """Ежемесячный отчет реализации Озон"""
+
+    contract_date = models.DateField(
+        verbose_name="Дата заключения договора.",
+        null=True,
+        blank=True,
+    )
+    contract_number = models.CharField(
+        verbose_name="Номер договора.",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    currency_sys_name = models.CharField(
+        verbose_name="Валюта.",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    doc_amount = models.FloatField(
+        verbose_name="Всего к начислению.",
+        null=True,
+        blank=True,
+    )
+    doc_date = models.DateField(
+        verbose_name="Дата формирования документа.",
+        null=True,
+        blank=True,
+    )
+    number = models.CharField(
+        verbose_name="Номер отчёта о реализации.",
+        max_length=255,
+        null=True,
+    )
+    payer_inn = models.CharField(
+        verbose_name="ИНН плательщика.",
+        max_length=255,
+        null=True,
+    )
+    payer_kpp = models.CharField(
+        verbose_name="КПП плательщика.",
+        max_length=255,
+        null=True,
+    )
+    payer_name = models.CharField(
+        verbose_name="Название плательщика.",
+        max_length=255,
+        null=True,
+    )
+    receiver_inn = models.CharField(
+        verbose_name="ИНН получателя.",
+        max_length=255,
+        null=True,
+    )
+    receiver_kpp = models.CharField(
+        verbose_name="КПП получателя.",
+        max_length=255,
+        null=True,
+    )
+    receiver_name = models.CharField(
+        verbose_name="Название получателя.",
+        max_length=255,
+        null=True,
+    )
+    start_date = models.DateField(
+        verbose_name="Начало периода.",
+        null=True,
+        blank=True,
+    )
+    stop_date = models.DateField(
+        verbose_name="Конец периода.",
+        null=True,
+        blank=True,
+    )
+    vat_amount = models.FloatField(
+        verbose_name="Итоговая сумма с НДС.",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Ежемесячный отчет реализации Озон"
+        verbose_name_plural = "Ежемесячный отчет реализации Озон"
+
+
+class ArticlesRealizationReportOzon(models.Model):
+    """Ежемесячный отчет о реализации Озон (деализация)"""
+
+    article = models.ForeignKey(
+        Articles,
+        verbose_name="Артикул",
+        on_delete=models.SET_NULL,
+        related_name="article_ozon_realization_report",
+        null=True,
+    )
+    report = models.ForeignKey(
+        RealizationReportOzon,
+        verbose_name="Отчет",
+        related_name="report_detalization",
+    )
+    row_number = models.IntegerField(verbose_name="Номер строки в отчете")
+    commission_ratio = models.FloatField(
+        verbose_name="Доля комиссии за продажу по категории."
+    )
+    seller_price_per_instance = models.FloatField(
+        verbose_name="Цена продавца с учётом скидки.",
+        null=True,
+    )
+    price_per_instance = models.FloatField(
+        verbose_name="Цена за экземпляр.",
+        null=True,
+    )
+    quantity = models.IntegerField(
+        verbose_name="Количество.",
+        null=True,
+    )
+    amount = models.FloatField(verbose_name="Сумма.", null=True)
+    compensation = models.FloatField(
+        verbose_name="Доплата за счет Озон.",
+        null=True,
+    )
+    commission = models.FloatField(
+        verbose_name="Итого комиссия с учётом скидок и наценки.",
+        null=True,
+    )
+    bonus = models.FloatField(
+        verbose_name="Баллы за скидки.",
+        null=True,
+    )
+    standard_fee = models.FloatField(
+        verbose_name="Базовое вознаграждение Ozon.",
+        null=True,
+    )
+    total = models.FloatField(
+        verbose_name="Итого к начислению.",
+        null=True,
+    )
+    stars = models.FloatField(
+        verbose_name="Выплаты по механикам лояльности партнёров: звёзды.",
+        null=True,
+    )
+    bank_coinvestment = models.FloatField(
+        verbose_name="Выплаты по механикам лояльности партнёров: зелёные цены.",
+        null=True,
+    )
+    pick_up_point_coinvestment = models.FloatField(
+        verbose_name="Выплаты по механикам лояльности партнёров: АПВЗ.",
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Детализация ежемесячного отчета Озон"
+        verbose_name_plural = "Детализация ежемесячного отчета Озон"
+
+
+class ReturnArticlesRealizationReportOzon(models.Model):
+    """Возвраты в Ежемесячном отчете о реализации Озон (деализация)"""
+
+    report_row = models.ForeignKey(
+        ArticlesRealizationReportOzon,
+        verbose_name="Строка отчета",
+        on_delete=models.SET_NULL,
+        related_name="report_row_return",
+        null=True,
+    )
+    price_per_instance = models.FloatField(
+        verbose_name="Цена за экземпляр.",
+        null=True,
+    )
+    quantity = models.IntegerField(
+        verbose_name="Количество.",
+        null=True,
+    )
+    amount = models.FloatField(verbose_name="Сумма.", null=True)
+    compensation = models.FloatField(
+        verbose_name="Доплата за счет Озон.",
+        null=True,
+    )
+    commission = models.FloatField(
+        verbose_name="Итого комиссия с учётом скидок и наценки.",
+        null=True,
+    )
+    bonus = models.FloatField(
+        verbose_name="Баллы за скидки.",
+        null=True,
+    )
+    standard_fee = models.FloatField(
+        verbose_name="Базовое вознаграждение Ozon.",
+        null=True,
+    )
+    total = models.FloatField(
+        verbose_name="Итого к начислению.",
+        null=True,
+    )
+    stars = models.FloatField(
+        verbose_name="Выплаты по механикам лояльности партнёров: звёзды.",
+        null=True,
+    )
+    bank_coinvestment = models.FloatField(
+        verbose_name="Выплаты по механикам лояльности партнёров: зелёные цены.",
+        null=True,
+    )
+    pick_up_point_coinvestment = models.FloatField(
+        verbose_name="Выплаты по механикам лояльности партнёров: АПВЗ.",
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Возвраты ежемесячного отчета Озон"
+        verbose_name_plural = "Возвраты ежемесячного отчета Озон"
