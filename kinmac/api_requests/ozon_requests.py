@@ -2,6 +2,14 @@ import json
 import requests
 
 
+class OzonTemplatesRequest:
+
+    def _post_template_req(self, url: str, header: dict, payload: str) -> dict:
+        response = requests.request("POST", url, headers=header, data=payload)
+        if response.status_code == 200:
+            return json.loads(response.text)
+
+
 class ArticleDataRequest:
 
     def __init__(self):
@@ -45,4 +53,15 @@ class ArticleDataRequest:
     def ozon_product_info(self, header: dict, products: list) -> dict:
         url = f"{self.MAIN_URL}v3/product/info/list"
         payload = json.dumps({"offer_id": [], "product_id": products, "sku": []})
+        return self._post_template_req(url, header, payload)
+
+
+class OzonSalesRequest(OzonTemplatesRequest):
+
+    def __init__(self):
+        self.MAIN_URL = "https://api-seller.ozon.ru/"
+
+    def realization_report(self, header: dict, month: int, year: int) -> dict:
+        url = f"{self.MAIN_URL}v2/finance/realization"
+        payload = json.dumps({"month": month, "year": year})
         return self._post_template_req(url, header, payload)

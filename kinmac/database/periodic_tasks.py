@@ -9,9 +9,10 @@ from api_requests.wb_requests import (
 )
 from celery_tasks.celery import app
 
-from api_requests.ozon_requests import ArticleDataRequest
+from api_requests.ozon_requests import ArticleDataRequest, OzonSalesRequest
 from kinmac.constants_file import wb_headers
 from database.supplyment import (
+    OzonSalesDataSave,
     get_article_commot_stock_from_front,
     get_price_info_from_ofissial_api,
 )
@@ -273,3 +274,33 @@ def ozon_update_article_date() -> None:
                     article_obj.ozon_sku = product["sources"][0]["sku"]
                     article_obj.ozon_barcode = product["barcodes"][0]
                     article_obj.save()
+
+
+@app.task
+def ozon_get_realization_report() -> None:
+    """
+    Загружает ежемесячный отчет по продажам в базу данных.
+    """
+    sales_data_req = OzonSalesRequest()
+    sales_data_saver = OzonSalesDataSave()
+
+    nessesary_date = datetime.now() - timedelta(days=20)
+    month_report = int(nessesary_date.strftime("%m"))
+    year_report = nessesary_date.strftime("%Y")
+    for company in Company.objects.all():
+        header = company.ozon_header
+        report_info = sales_data_req.realization_report(
+            header, month_report, year_report
+        ).get("result")
+        if report_info:
+            report_data = report_info.get("header")
+            report_obj = sales_data_saver.save_realization_report(
+                company=company, report_data=report_data
+            )
+
+            articles_report_data = report_info.get("rows")
+            for article_data in articles_report_data:
+                if article_data:
+                    sales_data_saver.save_article_in_realization_report(
+                        report=report_obj, article_report_data=article_data
+                    )

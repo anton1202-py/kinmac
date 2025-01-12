@@ -1200,6 +1200,14 @@ class ArticlePriceStock(models.Model):
 class RealizationReportOzon(models.Model):
     """Ежемесячный отчет реализации Озон"""
 
+    company = models.ForeignKey(
+        Company,
+        verbose_name="Компания",
+        on_delete=models.SET_NULL,
+        related_name="company_ozon_realization_report",
+        null=True,
+    )
+
     contract_date = models.DateField(
         verbose_name="Дата заключения договора.",
         null=True,
@@ -1286,13 +1294,6 @@ class RealizationReportOzon(models.Model):
 class ArticlesRealizationReportOzon(models.Model):
     """Ежемесячный отчет о реализации Озон (деализация)"""
 
-    company = models.ForeignKey(
-        Company,
-        verbose_name="Компания",
-        on_delete=models.SET_NULL,
-        related_name="company_ozon_realization_report",
-        null=True,
-    )
     article = models.ForeignKey(
         Articles,
         verbose_name="Артикул",
