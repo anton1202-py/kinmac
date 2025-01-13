@@ -1,12 +1,5 @@
 from datetime import date, timedelta
-
 import pandas as pd
-
-from database.periodic_tasks import (
-    ozon_get_realization_report,
-    ozon_update_article_date,
-    wb_article_price_stock_app_data,
-)
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -17,7 +10,6 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from kinmac.constants_file import BRAND_LIST
-
 
 from .forms import ArticlesForm, LoginUserForm, SelectDateForm, SelectDateStocksForm
 from .models import (
@@ -38,7 +30,6 @@ def database_home(request):
     context = {
         "data": data,
     }
-    # ozon_get_realization_report()
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)
