@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from database.models import Articles, CodingMarketplaces
+from database.models import Articles, Marketplace
 from django.db import models
 from django.urls import reverse
 
@@ -200,7 +200,7 @@ class ArticleSaleAnalytic(models.Model):
         blank=True,
     )
     marketplace = models.ForeignKey(
-        CodingMarketplaces,
+        Marketplace,
         verbose_name="Маркетплейс",
         on_delete=models.SET_NULL,
         related_name="article_sales_analytic_marketplace",

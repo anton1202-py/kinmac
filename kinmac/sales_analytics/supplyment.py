@@ -2,7 +2,7 @@ from datetime import datetime
 import pandas as pd
 
 import pandas as pd
-from database.models import Articles, CodingMarketplaces, CostPrice, SalesReportOnSales
+from database.models import Articles, Marketplace, CostPrice, SalesReportOnSales
 from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from django.http import HttpResponse
 from openpyxl import Workbook

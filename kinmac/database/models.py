@@ -217,7 +217,7 @@ class Articles(models.Model):
         verbose_name_plural = "Артикулы"
 
 
-class CodingMarketplaces(models.Model):
+class Marketplace(models.Model):
     name = models.CharField(
         verbose_name="Название маркетплейса",
         max_length=15,
@@ -1202,7 +1202,7 @@ class Cluster(models.Model):
 
     cluster_id = models.IntegerField(verbose_name="ID кластера")
     marketplace = models.ForeignKey(
-        CodingMarketplaces,
+        Marketplace,
         on_delete=models.CASCADE,
         verbose_name="Маркетплейс",
         related_name="cluster",

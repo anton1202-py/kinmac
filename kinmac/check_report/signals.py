@@ -5,7 +5,7 @@ from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from database.models import (
     ArticleStorageCost,
     Articles,
-    CodingMarketplaces,
+    Marketplace,
     CostPrice,
     SalesReportOnSales,
     WeeklyReportInDatabase,
@@ -70,7 +70,7 @@ def articles_analytics_data(report_number):
             costs_data = ArticleStorageCost.objects.filter(
                 article=article, date__range=[date_start, date_finish]
             ).aggregate(storage_cost=Sum("warehouse_price"))
-            marketplace = CodingMarketplaces.objects.get(name="Wildberries")
+            marketplace = Marketplace.objects.get(name="Wildberries")
             main_queryset = SalesReportOnSales.objects.filter(
                 realizationreport_id=report_number, nm_id=nm_id_dict["nm_id"]
             ).aggregate(

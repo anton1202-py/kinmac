@@ -1,5 +1,5 @@
 from django.db import models
-from database.models import CodingMarketplaces
+from database.models import Marketplace
 from database.models import Articles
 
 
@@ -7,7 +7,7 @@ class Action(models.Model):
     """Описывает акцию на маркетплейсе"""
 
     marketplace = models.ForeignKey(
-        CodingMarketplaces,
+        Marketplace,
         on_delete=models.SET_NULL,
         verbose_name="Маркетплейс",
         related_name="actions",
