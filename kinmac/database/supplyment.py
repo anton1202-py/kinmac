@@ -470,7 +470,7 @@ def get_price_info_from_ofissial_api() -> dict:
 
 class OzonSalesDataSave:
 
-    def _get_or_create_article(self, article_info: dict) -> Articles:
+    def _get_or_create_article(self, article_info: dict, article_obj=None) -> Articles:
 
         barcode = article_info.get("barcode")
         sku = article_info.get("sku")
@@ -487,6 +487,7 @@ class OzonSalesDataSave:
             article_obj = Articles.objects.filter(name=name).first()
 
         if not article_obj:
+            print(name, offer_id)
             article_obj = Articles.objects.create(
                 ozon_seller_article=offer_id,
                 ozon_sku=sku,
@@ -494,6 +495,7 @@ class OzonSalesDataSave:
                 name=name,
                 common_article=offer_id,
             )
+
         return article_obj
 
     def save_realization_report(
@@ -526,9 +528,10 @@ class OzonSalesDataSave:
         self, report: RealizationReportOzon, article_report_data: dict
     ) -> None:
         delivery_commission = article_report_data.get("delivery_commission")
+
+        article_info = article_report_data.get("item")
+        article = self._get_or_create_article(article_info)
         if delivery_commission:
-            article_info = article_report_data.get("item")
-            article = self._get_or_create_article(article_info)
             article_realization_obj, created = (
                 ArticlesRealizationReportOzon.objects.update_or_create(
                     article=article,
@@ -555,16 +558,24 @@ class OzonSalesDataSave:
                         "pick_up_point_coinvestment": delivery_commission.get(
                             "pick_up_point_coinvestment"
                         ),
-                        "commission_ratio": article_report_data.get("commission_ratio"),
                     },
                 )
             )
-            return_commission = article_report_data.get("return_commission")
-            if return_commission:
-                self._save_article_return_comission(
-                    report_row=article_realization_obj,
-                    return_commission=return_commission,
+        else:
+            article_realization_obj, created = (
+                ArticlesRealizationReportOzon.objects.update_or_create(
+                    article=article,
+                    report=report,
+                    row_number=article_report_data.get("rowNumber"),
+                    commission_ratio=article_report_data.get("commission_ratio"),
                 )
+            )
+        return_commission = article_report_data.get("return_commission")
+        if return_commission:
+            self._save_article_return_comission(
+                report_row=article_realization_obj,
+                return_commission=return_commission,
+            )
 
     def _save_article_return_comission(
         self, report_row: ArticlesRealizationReportOzon, return_commission: dict

@@ -2,16 +2,16 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import CodingMarketplaces, Company
+from .models import Marketplace, Company
 
 
-class CodingMarketplacesAdmin(admin.ModelAdmin):
-    list_display = ("id", "marketpalce")
+class MarketplaceAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
 
 
 class CompanyAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "english_name")
 
 
-admin.site.register(CodingMarketplaces, CodingMarketplacesAdmin)
+admin.site.register(Marketplace, MarketplaceAdmin)
 admin.site.register(Company, CompanyAdmin)

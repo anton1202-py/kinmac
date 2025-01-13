@@ -217,14 +217,14 @@ class Articles(models.Model):
         verbose_name_plural = "Артикулы"
 
 
-class CodingMarketplaces(models.Model):
-    marketpalce = models.CharField(
+class Marketplace(models.Model):
+    name = models.CharField(
         verbose_name="Название маркетплейса",
         max_length=15,
     )
 
     def __str__(self):
-        return self.marketpalce
+        return self.name
 
     class Meta:
         verbose_name = "Код маркетплейса"
@@ -1195,6 +1195,89 @@ class ArticlePriceStock(models.Model):
         verbose_name_plural = (
             "Данные об общих остатках каждого артикула, цене продавца и СПП"
         )
+
+
+class Cluster(models.Model):
+    """Кластеры Маркетплейса"""
+
+    cluster_id = models.IntegerField(verbose_name="ID кластера")
+    marketplace = models.ForeignKey(
+        Marketplace,
+        on_delete=models.CASCADE,
+        verbose_name="Маркетплейс",
+        related_name="cluster",
+    )
+    name = models.CharField(verbose_name="Название кластера", max_length=255)
+
+    def __str__(self):
+        return f"{self.marketplace.name} {self.name}"
+
+    class Meta:
+        verbose_name = "Кластеры маркетплейса"
+        verbose_name_plural = "Кластеры маркетплейса"
+
+
+class Warehouse(models.Model):
+    """Склады Озон"""
+
+
+class OzonStock(models.Model):
+    """Остатки на складах Озон"""
+
+    company = models.ForeignKey(
+        Company,
+        verbose_name="Компания",
+        on_delete=models.SET_NULL,
+        related_name="company_ozon_stock",
+        null=True,
+    )
+    article = models.ForeignKey(
+        Articles,
+        verbose_name="Артикул",
+        on_delete=models.SET_NULL,
+        related_name="article_ozon_stock",
+        null=True,
+    )
+    date = models.DateField(
+        verbose_name="Дата проверки.",
+        null=True,
+        blank=True,
+    )
+    item_name = models.CharField(
+        verbose_name="Название товара в системе Ozon.",
+        max_length=300,
+        null=True,
+        blank=True,
+    )
+    free_to_sell_amount = models.IntegerField(
+        verbose_name="Количество товара, доступное к продаже на Ozon.",
+        null=True,
+        blank=True,
+    )
+    promised_amount = models.IntegerField(
+        verbose_name="Количество товара, указанное в подтверждённых будущих поставках.",
+        null=True,
+        blank=True,
+    )
+    reserved_amount = models.IntegerField(
+        verbose_name="Количество товара, зарезервированное для покупки, возврата и перевозки между складами.",
+        null=True,
+        blank=True,
+    )
+    warehouse_name = models.ForeignKey(
+        Warehouse,
+        on_delete=models.CASCADE,
+        verbose_name="Название склада, где находится товар.",
+    )
+    idc = models.FloatField(
+        verbose_name="На сколько дней хватит остатка товара с учётом среднесуточных продаж.",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Остатки на складах Озон"
+        verbose_name_plural = "Остатки на складах Озон"
 
 
 class RealizationReportOzon(models.Model):
