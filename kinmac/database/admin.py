@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import Marketplace, Company
+from .models import CodingMarketplaces, Company
 
 
 class MarketplaceAdmin(admin.ModelAdmin):
@@ -13,5 +13,5 @@ class CompanyAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "english_name")
 
 
-admin.site.register(Marketplace, MarketplaceAdmin)
+admin.site.register(CodingMarketplaces, MarketplaceAdmin)
 admin.site.register(Company, CompanyAdmin)

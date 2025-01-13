@@ -60,7 +60,6 @@ def database_home(request):
         )
         barcode_list = load_excel_data_wb_stock["Баркод"].to_list()
         nomenclatura_wb_list = load_excel_data_wb_stock["Номенк WB"].to_list()
-        nomenclatura_ozon_list = load_excel_data_wb_stock["Номенк OZON"].to_list()
         common_article_list = load_excel_data_wb_stock["Арт"].to_list()
         brand_list = load_excel_data_wb_stock["Бренд"].to_list()
         predmet_list = load_excel_data_wb_stock["Предмет"].to_list()
@@ -75,7 +74,6 @@ def database_home(request):
                 Articles.objects.filter(common_article=common_article_list[i]).update(
                     barcode=barcode_list[i],
                     nomenclatura_wb=nomenclatura_wb_list[i],
-                    nomenclatura_ozon=nomenclatura_ozon_list[i],
                     brand=brand_list[i],
                     predmet=predmet_list[i],
                     size=size_list[i],
@@ -89,7 +87,6 @@ def database_home(request):
                     common_article=common_article_list[i],
                     barcode=barcode_list[i],
                     nomenclatura_wb=nomenclatura_wb_list[i],
-                    nomenclatura_ozon=nomenclatura_ozon_list[i],
                     brand=brand_list[i],
                     predmet=predmet_list[i],
                     size=size_list[i],

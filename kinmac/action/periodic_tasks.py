@@ -20,7 +20,7 @@ from kinmac.constants_file import (
     wb_header_with_lk_cookie,
     actions_info_users_list,
 )
-from database.models import Marketplace
+from database.models import CodingMarketplaces
 from database.models import Articles
 
 
@@ -55,7 +55,7 @@ def add_new_actions_wb_to_db():
                     articles_amount = len(article_action_data)
                 # Сохраняем новую акцию в базу
                 search_params = {
-                    "marketplace": Marketplace.objects.get(name="Wildberries"),
+                    "marketplace": CodingMarketplaces.objects.get(name="Wildberries"),
                     "action_number": detail["id"],
                 }
                 values_for_update = {
