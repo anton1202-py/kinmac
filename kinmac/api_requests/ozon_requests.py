@@ -85,7 +85,6 @@ class OzonWarehouseApiRequest:
             {"limit": limit, "offset": offset, "warehouse_type": "ALL"}
         )
         response = requests.request("POST", url, headers=header, data=payload)
-        print(response.status_code)
         if response.status_code == 200:
             main_data = json.loads(response.text)
             response_data = main_data["result"]["rows"]

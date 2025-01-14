@@ -62,9 +62,7 @@ class OzonWarehouseInfo:
 
     def save_ozon_fbo_warehouse_stock(self) -> None:
         """Сохраняет данные по остаткам на ФБО складах Озон"""
-        print(self.companies_list)
         for company in self.companies_list:
-            print(company)
             if company.ozon_token:
                 common_stock_info = self.request.warehouse_stock_req(
                     company.ozon_header
@@ -81,13 +79,13 @@ class OzonWarehouseInfo:
                         company, sku, ozon_seller_article
                     )
                     quantity = stock_info.get("free_to_sell_amount")
+                    idc = stock_info.get("idc")
 
                     if warehouse_obj and article_obj:
                         balance, created = WarehouseBalance.objects.update_or_create(
                             company=company,
-                            marketplace=self.marketplace_obj,
                             warehouse=warehouse_obj,
                             article=article_obj,
                             date=datetime.now().date(),
-                            defaults={"quantity": quantity},
+                            defaults={"quantity": quantity, "idc": idc},
                         )
