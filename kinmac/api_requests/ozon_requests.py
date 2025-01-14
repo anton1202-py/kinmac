@@ -69,7 +69,7 @@ class OzonSalesRequest(OzonTemplatesRequest):
 
 class OzonWarehouseApiRequest:
     def __init__(self):
-        self.MAIN_URL = "https://api-seller.ozon.ru/"
+        self.main_url = "https://api-seller.ozon.ru/"
 
     def _post_template_req(self, url: str, header: dict, payload: str) -> dict:
         response = requests.request("POST", url, headers=header, data=payload)
@@ -85,6 +85,7 @@ class OzonWarehouseApiRequest:
             {"limit": limit, "offset": offset, "warehouse_type": "ALL"}
         )
         response = requests.request("POST", url, headers=header, data=payload)
+        print(response.status_code)
         if response.status_code == 200:
             main_data = json.loads(response.text)
             response_data = main_data["result"]["rows"]
@@ -100,10 +101,10 @@ class OzonWarehouseApiRequest:
                 return data_list
 
     def cluster_warehouse_req(self, header: dict):
-        url = f"{self.MAIN_URL}v1/cluster/list"
+        url = f"{self.main_url}v1/cluster/list"
         payload = json.dumps({"cluster_type": "CLUSTER_TYPE_OZON"})
         return self._post_template_req(url, header, payload)
 
     def warehouse_stock_req(self, header: dict):
-        url = f"{self.MAIN_URL}v2/analytics/stock_on_warehouses"
+        url = f"{self.main_url}v2/analytics/stock_on_warehouses"
         return self._post_recursion_template_req(url, header)

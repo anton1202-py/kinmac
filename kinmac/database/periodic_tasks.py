@@ -310,5 +310,7 @@ def ozon_get_realization_report() -> None:
 @app.task
 def save_ozon_fbo_warehouses_balance():
     """Сохраняет остаток на ФБО складах ОЗОН"""
+    print("Сохранение кластеров")
     clusters = OzonWarehouseInfo()
+    clusters.save_ozon_clusters_warehouses_info()
     clusters.save_ozon_fbo_warehouse_stock()

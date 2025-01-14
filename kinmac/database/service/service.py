@@ -9,13 +9,11 @@ class ModelObjectService:
     ) -> Articles:
         """."""
         sku = int(sku)
-        article_obj = Articles.objects.filter(
-            company=company.name, ozon_sku=sku
-        ).first()
+        article_obj = Articles.objects.filter(ozon_sku=sku).first()
 
         if not article_obj:
             article_obj = Articles.objects.filter(
-                company=company.name, ozon_seller_article=ozon_seller_article
+                ozon_seller_article=ozon_seller_article
             ).first()
 
         return article_obj

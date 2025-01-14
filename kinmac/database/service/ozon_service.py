@@ -13,7 +13,7 @@ class OzonWarehouseInfo:
         self.request = OzonWarehouseApiRequest()
         self.company_obj = Company.objects.get(id=1)
         self.companies_list = Company.objects.filter(
-            ozon_perfomance_client_id__isnull=False
+            ozon_client_id__isnull=False
         ).order_by("id")
         self.marketplace_obj = Marketplace.objects.get(id=2)
         self.get_obj = ModelObjectService()
@@ -27,6 +27,7 @@ class OzonWarehouseInfo:
         cluster_obj, created = Cluster.objects.get_or_create(
             marketplace=marketplace_obj, id=int(cluster_id), name=name
         )
+        print("cluster_obj", cluster_obj)
         return cluster_obj
 
     def get_warehouse_obj(
@@ -56,12 +57,14 @@ class OzonWarehouseInfo:
                             marketplace=self.marketplace_obj,
                             warehouse_number=warehouse_number,
                             name=warehouse_name,
-                            defaults={"cluster": cluster_obj, "type": "fbo"},
+                            defaults={"cluster": cluster_obj},
                         )
 
     def save_ozon_fbo_warehouse_stock(self) -> None:
         """Сохраняет данные по остаткам на ФБО складах Озон"""
+        print(self.companies_list)
         for company in self.companies_list:
+            print(company)
             if company.ozon_token:
                 common_stock_info = self.request.warehouse_stock_req(
                     company.ozon_header
@@ -85,6 +88,6 @@ class OzonWarehouseInfo:
                             marketplace=self.marketplace_obj,
                             warehouse=warehouse_obj,
                             article=article_obj,
-                            check_date=datetime.now().date(),
+                            date=datetime.now().date(),
                             defaults={"quantity": quantity},
                         )
