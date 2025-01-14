@@ -1200,6 +1200,7 @@ class ArticlePriceStock(models.Model):
 # ========== КЛАСТЕРЫ. СКЛАДЫ. ОСТАТКИ. =========== #
 class Cluster(models.Model):
     """Кластеры Маркетплейса"""
+
     id = models.IntegerField(primary_key=True, verbose_name="ID кластера")
     marketplace = models.ForeignKey(
         Marketplace,
@@ -1225,6 +1226,8 @@ class Warehouse(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Маркетплейс",
         related_name="warehouse",
+        blank=True,
+        null=True,
     )
     cluster = models.ForeignKey(
         Cluster,
