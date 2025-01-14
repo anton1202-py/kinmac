@@ -1240,10 +1240,14 @@ class Warehouse(models.Model):
     warehouse_number = models.BigIntegerField(
         verbose_name="ID склада в системе маркетплейса",
         default=0,
+        blank=True,
+        null=True,
     )
     name = models.CharField(
         verbose_name="Название склада на маркетпелйсе",
         max_length=255,
+        blank=True,
+        null=True,
     )
 
     def __str__(self):
