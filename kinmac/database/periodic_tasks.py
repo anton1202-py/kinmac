@@ -16,6 +16,7 @@ from database.supplyment import (
     get_article_commot_stock_from_front,
     get_price_info_from_ofissial_api,
 )
+from database.service.ozon_service import OzonWarehouseInfo
 
 
 from .models import (
@@ -304,3 +305,10 @@ def ozon_get_realization_report() -> None:
                     sales_data_saver.save_article_in_realization_report(
                         report=report_obj, article_report_data=article_data
                     )
+
+
+@app.task
+def save_ozon_fbo_warehouses_balance():
+    """Сохраняет остаток на ФБО складах ОЗОН"""
+    clusters = OzonWarehouseInfo()
+    clusters.save_ozon_fbo_warehouse_stock()

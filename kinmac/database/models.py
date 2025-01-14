@@ -1197,10 +1197,10 @@ class ArticlePriceStock(models.Model):
         )
 
 
+# ========== КЛАСТЕРЫ. СКЛАДЫ. ОСТАТКИ. =========== #
 class Cluster(models.Model):
     """Кластеры Маркетплейса"""
-
-    cluster_id = models.IntegerField(verbose_name="ID кластера")
+    id = models.IntegerField(primary_key=True, verbose_name="ID кластера")
     marketplace = models.ForeignKey(
         Marketplace,
         on_delete=models.CASCADE,
@@ -1218,56 +1218,73 @@ class Cluster(models.Model):
 
 
 class Warehouse(models.Model):
-    """Склады Озон"""
+    """Склад Маркетплейса"""
+
+    marketplace = models.ForeignKey(
+        Marketplace,
+        on_delete=models.CASCADE,
+        verbose_name="Маркетплейс",
+        related_name="warehouse",
+    )
+    cluster = models.ForeignKey(
+        Cluster,
+        on_delete=models.SET_NULL,
+        verbose_name="Кластер",
+        related_name="warehouse",
+        blank=True,
+        null=True,
+    )
+    warehouse_number = models.BigIntegerField(
+        verbose_name="ID склада в системе маркетплейса",
+        default=0,
+    )
+    name = models.CharField(
+        verbose_name="Название склада на маркетпелйсе",
+        max_length=255,
+    )
+
+    def __str__(self):
+        return f"{self.marketplace.name} {self.name}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["marketplace", "warehouse_number", "name"],
+                name="unique_warehouse",
+            )
+        ]
+        verbose_name = "Склады маркетплейса"
+        verbose_name_plural = "Склады маркетплейса"
 
 
-class OzonStock(models.Model):
-    """Остатки на складах Озон"""
+class WarehouseBalance(models.Model):
+    """Остатки на складах маркетплейса"""
 
     company = models.ForeignKey(
         Company,
+        on_delete=models.CASCADE,
         verbose_name="Компания",
-        on_delete=models.SET_NULL,
-        related_name="company_ozon_stock",
-        null=True,
+        related_name="balance",
+    )
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.CASCADE,
+        verbose_name="Склад",
+        related_name="balance",
     )
     article = models.ForeignKey(
         Articles,
+        on_delete=models.CASCADE,
         verbose_name="Артикул",
-        on_delete=models.SET_NULL,
-        related_name="article_ozon_stock",
-        null=True,
+        related_name="balance",
     )
     date = models.DateField(
-        verbose_name="Дата проверки.",
+        verbose_name="Дата проверки",
         null=True,
-        blank=True,
     )
-    item_name = models.CharField(
-        verbose_name="Название товара в системе Ozon.",
-        max_length=300,
-        null=True,
-        blank=True,
-    )
-    free_to_sell_amount = models.IntegerField(
-        verbose_name="Количество товара, доступное к продаже на Ozon.",
-        null=True,
-        blank=True,
-    )
-    promised_amount = models.IntegerField(
-        verbose_name="Количество товара, указанное в подтверждённых будущих поставках.",
-        null=True,
-        blank=True,
-    )
-    reserved_amount = models.IntegerField(
-        verbose_name="Количество товара, зарезервированное для покупки, возврата и перевозки между складами.",
-        null=True,
-        blank=True,
-    )
-    warehouse_name = models.ForeignKey(
-        Warehouse,
-        on_delete=models.CASCADE,
-        verbose_name="Название склада, где находится товар.",
+    quantity = models.IntegerField(
+        verbose_name="Количество",
+        default=0,
     )
     idc = models.FloatField(
         verbose_name="На сколько дней хватит остатка товара с учётом среднесуточных продаж.",
@@ -1276,10 +1293,11 @@ class OzonStock(models.Model):
     )
 
     class Meta:
-        verbose_name = "Остатки на складах Озон"
-        verbose_name_plural = "Остатки на складах Озон"
+        verbose_name = "Остатки на складах маркетплейса"
+        verbose_name_plural = "Остатки на складах маркетплейса"
 
 
+# ========== ПРОДАЖИ ОЗОН =========== #
 class RealizationReportOzon(models.Model):
     """Ежемесячный отчет реализации Озон"""
 
