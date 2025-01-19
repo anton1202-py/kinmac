@@ -117,11 +117,11 @@ class OzonReklamaCampaign(models.Model):
         on_delete=models.CASCADE,
         related_name="ozon_adv_campaigns",
     )
-    number = models.IntegerField(verbose_name="ID кампании")
-    name = models.IntegerField(verbose_name="Название кампании")
-    type = models.IntegerField(verbose_name="Тип кампании")
-    status = models.IntegerField(verbose_name="Статус кампании")
-    date_start = models.DateTimeField(verbose_name="Дата создания кампании")
+    number = models.IntegerField(verbose_name="ID кампании", null=True)
+    name = models.CharField(verbose_name="Название кампании", max_length=255, null=True)
+    type = models.IntegerField(verbose_name="Тип кампании", null=True)
+    status = models.IntegerField(verbose_name="Статус кампании", null=True)
+    date_start = models.DateTimeField(verbose_name="Дата создания кампании", null=True)
     end_time = models.DateTimeField(
         verbose_name="Дата завершения кампании",
         blank=True,
@@ -132,7 +132,7 @@ class OzonReklamaCampaign(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Артикулы",
         related_name="ozon_adv_campaigns",
-        blank=True,
+        null=True,
     )
 
     class Meta:
