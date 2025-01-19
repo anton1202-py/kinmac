@@ -10,7 +10,10 @@ from api_requests.wb_requests import (
 from celery_tasks.celery import app
 
 
+from api_requests.ozon_requests import OzonAdvertismentApiRequest
 from kinmac.constants_file import TELEGRAM_ADMIN_CHAT_ID, wb_headers, bot
+from database.models import Company
+from reklama.services.ozon_serv import OzonAdvCampaignAndProducts
 from reklama.supplyment import get_daily_adv_statistic
 
 from .models import (
@@ -135,45 +138,62 @@ def write_daily_adv_statistic():
     # Достаю из БД активные РК.
     statistic_data = get_daily_adv_statistic()
 
-    # try:
-    for data in statistic_data:
-        campaign_number = data["advertId"]
-        campaign_obj = ReklamaCampaign.objects.get(campaign=campaign_number)
-        for stat in data["days"]:
-            request_date = stat["date"]
-            date_obj = datetime.fromisoformat(request_date)
-            # Форматируем дату в нужный формат
-            date = date_obj.strftime("%Y-%m-%d")
-            views = stat["views"]
-            clicks = stat["clicks"]
-            ctr = stat["ctr"]
-            cpc = stat["cpc"]
-            sum = stat["sum"]
-            atbs = stat["atbs"]
-            orders = stat["orders"]
-            cr = stat["cr"]
-            shks = stat["shks"]
-            sum_price = stat["sum_price"]
-            search_params = {
-                "campaign": campaign_obj,
-                "statistic_date": date,
-            }
-            defaults = {
-                "views": views,
-                "clicks": clicks,
-                "ctr": ctr,
-                "cpc": cpc,
-                "summ": sum,
-                "atbs": atbs,
-                "orders": orders,
-                "cr": cr,
-                "shks": shks,
-                "sum_price": sum_price,
-            }
-            CampaignDailyAdvStatistic.objects.update_or_create(
-                defaults=defaults, **search_params
-            )
-    # except:
-    #     message = f'Не получил статистику для кампаний на сегодня'
-    #     bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID,
-    #                      text=message[:4000])
+    try:
+        for data in statistic_data:
+            campaign_number = data["advertId"]
+            campaign_obj = ReklamaCampaign.objects.get(campaign=campaign_number)
+            for stat in data["days"]:
+                request_date = stat["date"]
+                date_obj = datetime.fromisoformat(request_date)
+                # Форматируем дату в нужный формат
+                date = date_obj.strftime("%Y-%m-%d")
+                views = stat["views"]
+                clicks = stat["clicks"]
+                ctr = stat["ctr"]
+                cpc = stat["cpc"]
+                sum = stat["sum"]
+                atbs = stat["atbs"]
+                orders = stat["orders"]
+                cr = stat["cr"]
+                shks = stat["shks"]
+                sum_price = stat["sum_price"]
+                search_params = {
+                    "campaign": campaign_obj,
+                    "statistic_date": date,
+                }
+                defaults = {
+                    "views": views,
+                    "clicks": clicks,
+                    "ctr": ctr,
+                    "cpc": cpc,
+                    "summ": sum,
+                    "atbs": atbs,
+                    "orders": orders,
+                    "cr": cr,
+                    "shks": shks,
+                    "sum_price": sum_price,
+                }
+                CampaignDailyAdvStatistic.objects.update_or_create(
+                    defaults=defaults, **search_params
+                )
+    except:
+        message = f"Не получил статистику для кампаний на сегодня"
+        bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
+
+
+@app.task
+def check_campaigns_and_status():
+    """Проверяет рекламные кампании и их статус"""
+    advert_req = OzonAdvertismentApiRequest()
+    adv_handler = OzonAdvCampaignAndProducts()
+    company_list = Company.objects.filter(
+        ozon_perfomance_client_id__isnull=False
+    ).order_by("id")
+    for company in company_list:
+        if company.ozon_token:
+            header = company.ozon_header
+            perfomance_header = company.ozon_perfomance_header
+            advert_list = advert_req.campaigns_list_req(header, perfomance_header)
+            if advert_list.get("list"):
+                for campaign_info in advert_list.get("list"):
+                    adv_handler.save_campaigns_to_database(company, campaign_info)
