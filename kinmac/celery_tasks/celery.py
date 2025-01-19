@@ -129,4 +129,13 @@ app.conf.beat_schedule = {
         "schedule": crontab(hour=13, minute=0),
     },
     # ========== КОНЕЦ ACTIONS ========== #
+    # ========== OZON РЕКЛАМА ========== #
+    "reklama_add_ozon_adv_campaigns": {
+        "task": "reklama.periodic_tasks.add_ozon_adv_campaigns",
+        "schedule": crontab(hour=23, minute=40),
+    },
+    "reklama_ozon_cost_adv_articles": {
+        "task": "reklama.periodic_tasks.ozon_cost_adv_articles",
+        "schedule": crontab(hour=23, minute=50),
+    },
 }

@@ -308,3 +308,12 @@ class OzonAdvertismentApiRequest:
         url = f"{self.main_url}api/client/search_promo/product/enable"
         payload = json.dumps({"skus": [sku]})
         return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+
+    def cost_statistic(
+        self, header: dict, perfomance_header: dict, date_from: str, date_to: str
+    ):
+        """
+        Статистика расходов рекламных кампаний
+        """
+        url = f"{self.main_url}api/client/statistics/expense/json?dateFrom={date_from}&dateTo={date_to}"
+        return self.get_proxy_auth_get_request(header, perfomance_header, url)

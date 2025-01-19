@@ -1,6 +1,6 @@
 from database.models import Articles, Company
 from database.service.service import ModelObjectService
-from reklama.models import OzonReklamaCampaign
+from reklama.models import OzonArticleDailyCostToAdv, OzonReklamaCampaign
 from api_requests.ozon_requests import OzonAdvertismentApiRequest
 
 
@@ -44,6 +44,37 @@ class OzonAdvCampaignAndProducts:
                 "date_start": campaign_info.get("createdAt"),
             },
         )
+
+    def article_adv_cost(self, company: Company, statistic: dict) -> None:
+        """
+        Сохранение расходов по рекламным кампаниям Озон
+        statistic:
+        {
+            "id": "5310115",
+            "date": "2025-01-01",
+            "title": "Продвижение в поиске — все товары",
+            "moneySpent": "563,20",
+            "bonusSpent": "0,00",
+            "prepaymentSpent": "0,00"
+        }
+        """
+        campaign_id = statistic["id"]
+        cost_date = statistic["date"]
+        cost = statistic["moneySpent"]
+
+        campaign = OzonReklamaCampaign.objects.filter(
+            company=company, number=int(campaign_id)
+        ).first()
+        if campaign:
+            article = campaign.article
+            if article:
+                cost = float(cost.replace(",", "."))
+                OzonArticleDailyCostToAdv.objects.update_or_create(
+                    campaign=campaign,
+                    article=article,
+                    cost_date=cost_date,
+                    defaults={"cost": float(cost)},
+                )
 
     def save_product_in_search_promo(
         self,

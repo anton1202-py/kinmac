@@ -182,7 +182,7 @@ def write_daily_adv_statistic():
 
 
 @app.task
-def add_ozon_adv_campaigns():
+def add_ozon_adv_campaigns() -> None:
     """Проверяет рекламные кампании и их статус"""
     advert_req = OzonAdvertismentApiRequest()
     adv_handler = OzonAdvCampaignAndProducts()
@@ -197,3 +197,30 @@ def add_ozon_adv_campaigns():
             if advert_list.get("list"):
                 for campaign_info in advert_list.get("list"):
                     adv_handler.save_campaigns_to_database(company, campaign_info)
+
+
+@app.task
+def ozon_cost_adv_articles() -> None:
+    """Рекламные расходы на артикул (Озон)"""
+    advert_req = OzonAdvertismentApiRequest()
+    adv_handler = OzonAdvCampaignAndProducts()
+    company_list = Company.objects.filter(
+        ozon_perfomance_client_id__isnull=False
+    ).order_by("id")
+    date_now = datetime.now()
+    date_to = date_now.date()
+    date_from = (date_now - timedelta(days=7)).date()
+    for company in company_list:
+        if company.ozon_token:
+            header = company.ozon_header
+            perfomance_header = company.ozon_perfomance_header
+
+            statistic_data = advert_req.cost_statistic(
+                header=header,
+                perfomance_header=perfomance_header,
+                date_from=date_from,
+                date_to=date_to,
+            ).get("rows")
+            if statistic_data:
+                for statistic in statistic_data:
+                    adv_handler.article_adv_cost(company=company, statistic=statistic)

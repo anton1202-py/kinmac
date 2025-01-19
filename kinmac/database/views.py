@@ -10,7 +10,6 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from kinmac.constants_file import BRAND_LIST
-from reklama.periodic_tasks import add_ozon_adv_campaigns
 
 from .forms import ArticlesForm, LoginUserForm, SelectDateForm, SelectDateStocksForm
 from .models import (
@@ -28,7 +27,6 @@ def database_home(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
     data = Articles.objects.filter(brand__in=BRAND_LIST)
-    add_ozon_adv_campaigns()
     context = {
         "data": data,
     }
