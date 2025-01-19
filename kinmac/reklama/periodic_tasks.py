@@ -182,7 +182,7 @@ def write_daily_adv_statistic():
 
 
 @app.task
-def check_campaigns_and_status():
+def add_ozon_adv_campaigns():
     """Проверяет рекламные кампании и их статус"""
     advert_req = OzonAdvertismentApiRequest()
     adv_handler = OzonAdvCampaignAndProducts()

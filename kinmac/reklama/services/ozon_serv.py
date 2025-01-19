@@ -1,8 +1,6 @@
-from datetime import datetime
 from database.models import Articles, Company
 from database.service.service import ModelObjectService
-from reklama.models import OzonReklamaCampaign, OzonSearchPromo
-
+from reklama.models import OzonReklamaCampaign
 from api_requests.ozon_requests import OzonAdvertismentApiRequest
 
 
@@ -100,7 +98,7 @@ class SupportQuery:
                 product = product_info.get("list")[0]
                 sku = product.get("id")
                 article_obj = self.get_obj.get_article_obj_from_ozon_data(
-                    company_obj=company, sku=sku
+                    company=company, sku=sku
                 )
                 return article_obj
 
@@ -118,7 +116,7 @@ class SupportQuery:
                 product = product_info.get("products")[0]
                 sku = product.get("sku")
                 article_obj = self.get_obj.get_article_obj_from_ozon_data(
-                    company_obj=company, sku=sku
+                    company=company, sku=sku
                 )
                 return article_obj
 
@@ -134,6 +132,6 @@ class SupportQuery:
                 product = product_info.get("products")[0]
                 sku = product.get("sku")
                 article_obj = self.get_obj.get_article_obj_from_ozon_data(
-                    company_obj=company, sku=sku
+                    company=company, sku=sku
                 )
                 return article_obj

@@ -127,8 +127,9 @@ class OzonReklamaCampaign(models.Model):
         blank=True,
         null=True,
     )
-    articles = models.ManyToManyField(
+    article = models.ForeignKey(
         Articles,
+        on_delete=models.CASCADE,
         verbose_name="Артикулы",
         related_name="ozon_adv_campaigns",
         blank=True,
