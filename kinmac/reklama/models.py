@@ -119,10 +119,10 @@ class OzonReklamaCampaign(models.Model):
     )
     number = models.IntegerField(verbose_name="ID кампании", null=True)
     name = models.CharField(verbose_name="Название кампании", max_length=255, null=True)
-    type = models.IntegerField(verbose_name="Тип кампании", null=True)
-    status = models.IntegerField(verbose_name="Статус кампании", null=True)
-    date_start = models.DateTimeField(verbose_name="Дата создания кампании", null=True)
-    end_time = models.DateTimeField(
+    type = models.CharField(verbose_name="Тип кампании", null=True)
+    status = models.CharField(verbose_name="Статус кампании", null=True)
+    date_start = models.DateField(verbose_name="Дата создания кампании", null=True)
+    end_time = models.DateField(
         verbose_name="Дата завершения кампании",
         blank=True,
         null=True,
