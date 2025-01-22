@@ -124,7 +124,7 @@ def add_new_actions_ozon_to_db():
         action_handler.hotsale_actions_save(company, hot_sale_actions_raw_data)
 
 
-@app.taskwww
+@app.task
 def products_in_action_ozon():
     """Сохраняет товары, которые могут участвовать в акциях Озон"""
     # Получаем информацию по новым акциям
