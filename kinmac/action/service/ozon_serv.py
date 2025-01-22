@@ -67,21 +67,21 @@ class OzonActionHandler:
         }
         """
         article = self.art_obj.get_article_obj_ozon_with_product_id(
-            company=company, product_id=product_raw_data['id']
+            company=company, product_id=product_raw_data["id"]
         )
         ArticleForAction.objects.update_or_create(
-                    action=action,
-                    article=article,
-                    in_action=,
-                    action_price=
-                    current_price
-                    discount
-                    plan_discount
-                    defaults={
-                        "date_start": action_info["date_start"],
-                        "date_finish": action_info["date_end"],
-                        "articles_amount": action_info["potential_products_count"],
-                        "description": action_info["description"],
-                        "action_type": action_info["action_type"],
-                    },
-                )
+            action=action,
+            article=article,
+            in_action=None,
+            action_price=None,
+            current_price=None,
+            discount=None,
+            plan_discount=None,
+            defaults={
+                "date_start": product_raw_data["date_start"],
+                "date_finish": product_raw_data["date_end"],
+                "articles_amount": product_raw_data["potential_products_count"],
+                "description": product_raw_data["description"],
+                "action_type": product_raw_data["action_type"],
+            },
+        )
