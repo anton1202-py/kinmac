@@ -6,9 +6,45 @@ from kinmac.constants_file import TELEGRAM_ADMIN_CHAT_ID, bot
 class OzonTemplatesRequest:
 
     def _post_template_req(self, url: str, header: dict, payload: str) -> dict:
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
+
+    def _get_template_req(self, url: str, header: dict) -> dict | str:
+        response = requests.get(url, headers=header)
+        if response.status_code == 200:
+            return json.loads(response.text)
+        else:
+
+            message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
+            bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
+            return message
+
+    def _post_recursion_template_last_id_req(
+        self, url: str, header: dict, limit=1000, last_id="", data_list=None
+    ) -> list:
+        if not data_list:
+            data_list = []
+        payload = json.dumps(
+            {
+                "filter": {"offer_id": [], "product_id": [], "visibility": "ALL"},
+                "last_id": last_id,
+                "limit": limit,
+            }
+        )
+        response = requests.request("POST", url, headers=header, data=payload)
+        if response.status_code == 200:
+            main_data = json.loads(response.text)
+            response_data = main_data["result"]["items"]
+            for data in response_data:
+                data_list.append(data)
+            if len(response_data) == limit:
+                last_id = main_data["result"]["last_id"]
+                return self._post_recursion_template_last_id_req(
+                    url, header, limit, last_id, data_list
+                )
+            else:
+                return data_list
 
 
 class ArticleDataRequest:
@@ -61,6 +97,57 @@ class ArticleDataRequest:
             sku = []
         payload = json.dumps({"offer_id": [], "product_id": products, "sku": sku})
         return self._post_template_req(url, header, payload)
+
+
+class ActionRequest(OzonTemplatesRequest):
+
+    def __init__(self):
+        self.MAIN_URL = "https://api-seller.ozon.ru/"
+
+    def _post_recursion_template_req_action(
+        self,
+        url: str,
+        header: dict,
+        action_id: int,
+        limit=1000,
+        offset=0,
+        attempt=1,
+        data_list=None,
+    ) -> list:
+        if not data_list:
+            data_list = []
+        payload = json.dumps({"limit": limit, "offset": offset, "action_id": action_id})
+        response = requests.request("POST", url, headers=header, data=payload)
+        if response.status_code == 200:
+            main_data = json.loads(response.text)
+            response_data = main_data["result"]["products"]
+            for data in response_data:
+                data_list.append(data)
+            if len(response_data) == limit:
+                offset = limit * attempt
+                attempt += 1
+                return self._post_recursion_template_req_action(
+                    url, header, limit, offset, attempt, data_list
+                )
+            else:
+                return data_list
+
+    def actions_list(self, header: dict) -> dict:
+        url = f"{self.MAIN_URL}/v1/actions"
+        return self._get_template_req(url, header)
+
+    def access_products_for_action(self, header: dict, action_id: int) -> list:
+        url = f"{self.MAIN_URL}/v1/actions/candidates"
+        return self._post_recursion_template_req_action(url, header, action_id)
+
+    def hotsale_actions_list(self, header: dict) -> dict:
+        url = f"{self.MAIN_URL}/v1/actions/hotsales/list"
+        payload = json.dumps({})
+        return self._post_template_req(url, header, payload)
+
+    def products_in_hotsale(self, header: dict, action_id: int) -> list:
+        url = f"{self.MAIN_URL}/v1/actions/hotsales/products"
+        return self._post_recursion_template_req_action(url, header, action_id)
 
 
 class OzonSalesRequest(OzonTemplatesRequest):

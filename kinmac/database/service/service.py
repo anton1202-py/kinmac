@@ -8,12 +8,14 @@ class ModelObjectService:
     def __init__(self):
         self.article_info = ArticleDataRequest()
 
-    def add_article_from_ozon(self, company: Company, sku: int):
+    def add_article_from_ozon(
+        self, company: Company, sku: list = None, products: list = None
+    ):
         """Добавляет артикул в систему, если не нашел"""
         header = company.ozon_header
 
         article_common_data = self.article_info.ozon_product_info(
-            header=header, sku=[sku]
+            header=header, sku=sku
         )
         article_info = article_common_data[0]
 
@@ -46,6 +48,20 @@ class ModelObjectService:
             ).first()
 
         if not article_obj:
-            article_obj = self.add_article_from_ozon(company, sku)
+            article_obj = self.add_article_from_ozon(company=company, sku=[sku])
+
+        return article_obj
+
+    def get_article_obj_ozon_with_product_id(
+        self, company: Company, product_id: int
+    ) -> Articles:
+        """."""
+        product_id = int(product_id)
+        article_obj = Articles.objects.filter(ozon_product_id=product_id).first()
+
+        if not article_obj:
+            article_obj = self.add_article_from_ozon(
+                company=company, products=[product_id]
+            )
 
         return article_obj

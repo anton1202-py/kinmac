@@ -414,25 +414,25 @@ def wb_action_info_from_front(cookie_auth, date_from, date_to):
         bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
 
 
-def create_excel_file_with_article_in_auto_actions(cookie_auth, period):
+def create_excel_file_with_article_in_auto_actions(wb_cookie_header, period):
     """
     Запускает формировани Excel файла с артикулами из авто акций
     """
     time.sleep(time_sleep_for_wb_request())
     url = f"https://discounts-prices.wildberries.ru/ns/calendar-api/dp-calendar/suppliers/api/v1/excel/create"
     payload = json.dumps({"periodID": period})
-    response = requests.request("POST", url, headers=cookie_auth, data=payload)
+    response = requests.request("POST", url, headers=wb_cookie_header, data=payload)
     time.sleep(time_sleep_for_wb_request())
     return response
 
 
-def take_excel_file_data_in_auto_actions(cookie_auth, action_number, period):
+def take_excel_file_data_in_auto_actions(wb_cookie_header, action_number, period):
     """
     Запускает формировани Excel файла с артикулами из авто акций
     """
     time.sleep(time_sleep_for_wb_request())
     url = f"https://discounts-prices.wildberries.ru/ns/calendar-api/dp-calendar/suppliers/api/v1/excel?periodID={period}"
-    response = requests.request("GET", url, headers=cookie_auth)
+    response = requests.request("GET", url, headers=wb_cookie_header)
     if response.status_code == 200:
         return json.loads(response.text)
     else:

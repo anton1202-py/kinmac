@@ -1,11 +1,20 @@
 from django.db import models
-from database.models import Marketplace
+from database.models import Company, Marketplace
 from database.models import Articles
 
 
 class Action(models.Model):
     """Описывает акцию на маркетплейсе"""
 
+    # TODO Возможно пондобится в модель добавить поле is_participating:
+    # Участвуете вы в этой акции или нет. И по нму фильтровать список акций ОЗОН
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        verbose_name="Компания",
+        related_name="actions",
+        default=1,
+    )
     marketplace = models.ForeignKey(
         Marketplace,
         on_delete=models.SET_NULL,
@@ -15,11 +24,18 @@ class Action(models.Model):
         null=True,
     )
     action_number = models.CharField(verbose_name="Номер акции", max_length=100)
-    name = models.CharField(verbose_name="Название акции", max_length=255)
+    name = models.CharField(verbose_name="Название акции", max_length=255, null=True,)
     description = models.TextField(verbose_name="Описание акции")
     date_start = models.DateTimeField(verbose_name="Дата начала акции")
-    date_finish = models.DateTimeField(verbose_name="Дата завершения акции")
-    action_type = models.CharField(verbose_name="Тип акции", max_length=100)
+    date_finish = models.DateTimeField(
+        verbose_name="Дата завершения акции",
+        null=True,
+    )
+    action_type = models.CharField(
+        verbose_name="Тип акции",
+        max_length=100,
+        null=True,
+    )
     articles_amount = models.IntegerField(
         verbose_name="Количество товаров, которые могут участвовать",
         null=True,

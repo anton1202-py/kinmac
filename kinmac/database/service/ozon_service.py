@@ -27,7 +27,6 @@ class OzonWarehouseInfo:
         cluster_obj, created = Cluster.objects.get_or_create(
             marketplace=marketplace_obj, id=int(cluster_id), name=name
         )
-        print("cluster_obj", cluster_obj)
         return cluster_obj
 
     def get_warehouse_obj(
