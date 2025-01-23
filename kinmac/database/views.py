@@ -9,12 +9,8 @@ from django.db.models.functions import ExtractWeek, ExtractYear, TruncWeek
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
-from action.periodic_tasks import (
-    add_new_actions_ozon_to_db,
-    products_in_action_ozon,
-)
+
 from kinmac.constants_file import BRAND_LIST
-from database.periodic_tasks import ozon_update_article_date
 
 from .forms import (
     ArticlesForm,
@@ -40,8 +36,6 @@ def database_home(request):
     context = {
         "data": data,
     }
-    ozon_update_article_date()
-    # products_in_action_ozon()
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)
