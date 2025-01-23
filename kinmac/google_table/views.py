@@ -30,7 +30,6 @@ class ActionArticleViewSet(viewsets.ViewSet):
             articles_for_actions = (
                 ArticleForAction.objects.select_related("action")
                 .filter(
-                    company__id=1,
                     article__brand__in=BRAND_LIST,
                     action__date_finish__gte=datetime.now(),
                     action__marketplace=Marketplace.objects.get(
