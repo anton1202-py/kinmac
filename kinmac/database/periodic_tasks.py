@@ -87,18 +87,18 @@ def calculate_storage_cost() -> None:
     article_storagecost = {}
 
     date = str(date)
-    report_number = get_create_storage_cost_report(wb_headers, date, date)["data"][
-        "taskId"
-    ]
+    report_number = get_create_storage_cost_report(wb_headers, date, date)[
+        "data"
+    ]["taskId"]
     time.sleep(15)
-    status = get_check_storage_cost_report_status(wb_headers, report_number)["data"][
-        "status"
-    ]
+    status = get_check_storage_cost_report_status(wb_headers, report_number)[
+        "data"
+    ]["status"]
     while status != "done":
         time.sleep(10)
-        status = get_check_storage_cost_report_status(wb_headers, report_number)[
-            "data"
-        ]["status"]
+        status = get_check_storage_cost_report_status(
+            wb_headers, report_number
+        )["data"]["status"]
     costs_data = get_storage_cost_report_data(wb_headers, report_number)
     for data in costs_data:
         if data["nmId"] in article_storagecost:
@@ -110,7 +110,9 @@ def calculate_storage_cost() -> None:
             article_obj = Articles.objects.get(nomenclatura_wb=article)
             defaults = {"storage_cost": amount}
             search_params = {"article": article_obj, "start_date": date}
-            StorageCost.objects.update_or_create(defaults=defaults, **search_params)
+            StorageCost.objects.update_or_create(
+                defaults=defaults, **search_params
+            )
 
 
 @app.task
@@ -121,24 +123,26 @@ def article_storage_cost():
 
     date_start = (datetime.now() - timedelta(days=1)).date()
     date_end = (datetime.now() - timedelta(days=1)).date()
-    report_number = get_create_storage_cost_report(wb_headers, date_start, date_end)[
-        "data"
-    ]["taskId"]
+    report_number = get_create_storage_cost_report(
+        wb_headers, date_start, date_end
+    )["data"]["taskId"]
     time.sleep(20)
-    status = get_check_storage_cost_report_status(wb_headers, report_number)["data"][
-        "status"
-    ]
+    status = get_check_storage_cost_report_status(wb_headers, report_number)[
+        "data"
+    ]["status"]
     while status != "done":
         time.sleep(10)
-        status = get_check_storage_cost_report_status(wb_headers, report_number)[
-            "data"
-        ]["status"]
+        status = get_check_storage_cost_report_status(
+            wb_headers, report_number
+        )["data"]["status"]
     costs_data = get_storage_cost_report_data(wb_headers, report_number)
     print(len(costs_data))
     for data in costs_data:
         try:
             # if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
-            article_obj = Articles.objects.filter(nomenclatura_wb=data["nmId"]).first()
+            article_obj = Articles.objects.filter(
+                nomenclatura_wb=data["nmId"]
+            ).first()
             ArticleStorageCost.objects.get_or_create(
                 article=article_obj,
                 date=data["date"],
@@ -259,15 +263,12 @@ def ozon_update_article_date() -> None:
                         article_obj = Articles.objects.filter(
                             barcode=product["barcodes"][0]
                         ).first()
-                elif Articles.objects.filter(common_article=product["offer_id"]):
+                elif Articles.objects.filter(
+                    common_article=product["offer_id"]
+                ):
                     article_obj = Articles.objects.filter(
                         common_article=product["offer_id"]
                     ).first()
-                else:
-                    if len(product["barcodes"]) > 1:
-                        article_obj = Articles.objects.filter(
-                            barcode=product["barcodes"][1]
-                        ).first()
 
                 if article_obj:
                     article_obj.ozon_product_id = product["id"]
@@ -275,6 +276,7 @@ def ozon_update_article_date() -> None:
                     article_obj.ozon_sku = product["sources"][0]["sku"]
                     article_obj.ozon_barcode = product["barcodes"][0]
                     article_obj.save()
+            product = None
 
 
 @app.task

@@ -9,9 +9,19 @@ from django.db.models.functions import ExtractWeek, ExtractYear, TruncWeek
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from action.periodic_tasks import (
+    add_new_actions_ozon_to_db,
+    products_in_action_ozon,
+)
 from kinmac.constants_file import BRAND_LIST
+from database.periodic_tasks import ozon_update_article_date
 
-from .forms import ArticlesForm, LoginUserForm, SelectDateForm, SelectDateStocksForm
+from .forms import (
+    ArticlesForm,
+    LoginUserForm,
+    SelectDateForm,
+    SelectDateStocksForm,
+)
 from .models import (
     Articles,
     Deliveries,
@@ -30,6 +40,8 @@ def database_home(request):
     context = {
         "data": data,
     }
+    ozon_update_article_date()
+    # products_in_action_ozon()
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)
@@ -61,8 +73,12 @@ def database_home(request):
         average_cost_list = load_excel_data_wb_stock["Сред СС"].to_list()
         dbframe = empexceldata
         for i in range(len(common_article_list)):
-            if Articles.objects.filter(Q(common_article=common_article_list[i])):
-                Articles.objects.filter(common_article=common_article_list[i]).update(
+            if Articles.objects.filter(
+                Q(common_article=common_article_list[i])
+            ):
+                Articles.objects.filter(
+                    common_article=common_article_list[i]
+                ).update(
                     barcode=barcode_list[i],
                     nomenclatura_wb=nomenclatura_wb_list[i],
                     brand=brand_list[i],
@@ -105,7 +121,9 @@ def database_stock_api(request):
         datefinish = form.cleaned_data.get("datefinish")
         article_filter = form.cleaned_data.get("article_filter")
         if article_filter == "":
-            data = StocksApi.objects.filter(Q(pub_date__range=[datestart, datefinish]))
+            data = StocksApi.objects.filter(
+                Q(pub_date__range=[datestart, datefinish])
+            )
         else:
             data = StocksApi.objects.filter(
                 Q(pub_date__range=[datestart, datefinish]),
@@ -138,7 +156,9 @@ def stock_site(request):
         article_filter = form.cleaned_data.get("article_filter")
         stock_filter = form.cleaned_data.get("stock_filter")
         if article_filter == "" and stock_filter == "":
-            data = StocksSite.objects.filter(Q(pub_date__range=[datestart, datefinish]))
+            data = StocksSite.objects.filter(
+                Q(pub_date__range=[datestart, datefinish])
+            )
         elif article_filter != "" and stock_filter == "":
             data = StocksSite.objects.filter(
                 Q(pub_date__range=[datestart, datefinish]),
@@ -146,7 +166,8 @@ def stock_site(request):
             )
         elif article_filter == "" and stock_filter != "":
             data = StocksSite.objects.filter(
-                Q(pub_date__range=[datestart, datefinish]), Q(stock_name=stock_filter)
+                Q(pub_date__range=[datestart, datefinish]),
+                Q(stock_name=stock_filter),
             )
         else:
             data = StocksSite.objects.filter(
@@ -179,7 +200,9 @@ def database_sales(request):
         datefinish = form.cleaned_data.get("datefinish")
         article_filter = form.cleaned_data.get("article_filter")
         if article_filter == "":
-            data = Sales.objects.filter(Q(pub_date__range=[datestart, datefinish]))
+            data = Sales.objects.filter(
+                Q(pub_date__range=[datestart, datefinish])
+            )
         else:
             data = Sales.objects.filter(
                 Q(pub_date__range=[datestart, datefinish]),
@@ -213,15 +236,17 @@ def database_deliveries(request):
         datefinish = form.cleaned_data.get("datefinish")
         article_filter = form.cleaned_data.get("article_filter")
         if datestart:
-            data = Deliveries.objects.filter(Q(delivery_date__gte=datestart)).order_by(
-                "delivery_date"
-            )
+            data = Deliveries.objects.filter(
+                Q(delivery_date__gte=datestart)
+            ).order_by("delivery_date")
         if datefinish:
-            data = Deliveries.objects.filter(Q(delivery_date__lte=datefinish)).order_by(
-                "delivery_date"
-            )
+            data = Deliveries.objects.filter(
+                Q(delivery_date__lte=datefinish)
+            ).order_by("delivery_date")
         if article_filter:
-            data = Deliveries.objects.filter(Q(supplier_article=article_filter))
+            data = Deliveries.objects.filter(
+                Q(supplier_article=article_filter)
+            )
         return redirect("deliveries")
     context = {
         "form": form,
@@ -235,9 +260,9 @@ def database_orders(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
     control_date_orders = date.today() - timedelta(days=30)
-    data = Orders.objects.filter(Q(order_date__gte=control_date_orders)).order_by(
-        "order_date"
-    )
+    data = Orders.objects.filter(
+        Q(order_date__gte=control_date_orders)
+    ).order_by("order_date")
 
     form = SelectDateForm(request.POST or None)
     datestart = control_date_orders
@@ -248,13 +273,13 @@ def database_orders(request):
         datefinish = form.cleaned_data.get("datefinish")
         article_filter = form.cleaned_data.get("article_filter")
         if datestart:
-            data = Orders.objects.filter(Q(order_date__gte=datestart)).order_by(
-                "order_date"
-            )
+            data = Orders.objects.filter(
+                Q(order_date__gte=datestart)
+            ).order_by("order_date")
         if datefinish:
-            data = Orders.objects.filter(Q(order_date__lte=datefinish)).order_by(
-                "order_date"
-            )
+            data = Orders.objects.filter(
+                Q(order_date__lte=datefinish)
+            ).order_by("order_date")
         if article_filter:
             data = Orders.objects.filter(Q(supplier_article=article_filter))
         return redirect("deliveries")
@@ -271,7 +296,9 @@ def sales_report(request):
         return redirect("login")
     control_date_orders = date.today() - timedelta(days=30)
     all_data = (
-        SalesReportOnSales.objects.all().values("realizationreport_id").distinct()
+        SalesReportOnSales.objects.all()
+        .values("realizationreport_id")
+        .distinct()
     )
     data = SalesReportOnSales.objects.filter(
         Q(date_from__range=[control_date_orders, date.today()])
@@ -288,7 +315,9 @@ def sales_report(request):
 
         report_number_filter = request.POST.get("report_number_filter")
         line_number_filter = request.POST.get("line_number_filter")
-        data = SalesReportOnSales.objects.filter().order_by("-realizationreport_id")
+        data = SalesReportOnSales.objects.filter().order_by(
+            "-realizationreport_id"
+        )
         if datestart:
             data = SalesReportOnSales.objects.filter(
                 Q(date_from__gt=datestart)
@@ -296,11 +325,13 @@ def sales_report(request):
         if datefinish:
             data = data.filter(Q(date_from__lt=datefinish)).order_by("rrd_id")
         if article_filter:
-            data = data.filter(Q(sa_name=article_filter.lower())).order_by("rrd_id")
-        if report_number_filter:
-            data = data.filter(Q(realizationreport_id=report_number_filter)).order_by(
+            data = data.filter(Q(sa_name=article_filter.lower())).order_by(
                 "rrd_id"
             )
+        if report_number_filter:
+            data = data.filter(
+                Q(realizationreport_id=report_number_filter)
+            ).order_by("rrd_id")
         if line_number_filter:
             data = data.filter(Q(rrd_id=line_number_filter)).order_by("rrd_id")
     paginator = Paginator(data, 100)
@@ -330,7 +361,10 @@ def weekly_sales_data(request):
         .values("supplier_article", "barcode", "week", "year")
         .annotate(
             count=Count(
-                Case(When(finished_price__gte=0, then=1), output_field=IntegerField())
+                Case(
+                    When(finished_price__gte=0, then=1),
+                    output_field=IntegerField(),
+                )
             )
         )
         .order_by("supplier_article", "barcode", "year", "week")
@@ -406,7 +440,9 @@ class DatabaseStockSiteDetailView(ListView):
     context_object_name = "articles"
 
     def get_queryset(self):
-        return StocksSite.objects.filter(seller_article=self.kwargs["nomenclatura_wb"])
+        return StocksSite.objects.filter(
+            seller_article=self.kwargs["nomenclatura_wb"]
+        )
 
 
 class DatabaseSalesDetailView(ListView):
@@ -415,12 +451,16 @@ class DatabaseSalesDetailView(ListView):
     context_object_name = "articles"
 
     def get_context_data(self, **kwargs):
-        context = super(DatabaseSalesDetailView, self).get_context_data(**kwargs)
+        context = super(DatabaseSalesDetailView, self).get_context_data(
+            **kwargs
+        )
         sales_amount = (
             Sales.objects.filter(barcode=self.kwargs["barcode"])
             .values("pub_date")
             .annotate(
-                count_true=Count("is_realization", filter=Q(is_realization="true"))
+                count_true=Count(
+                    "is_realization", filter=Q(is_realization="true")
+                )
             )
         )
         context.update(
@@ -443,18 +483,23 @@ class DatabaseWeeklySalesDetailView(ListView):
     context_object_name = "articles"
 
     def get_context_data(self, **kwargs):
-        context = super(DatabaseWeeklySalesDetailView, self).get_context_data(**kwargs)
+        context = super(DatabaseWeeklySalesDetailView, self).get_context_data(
+            **kwargs
+        )
 
         sales = (
             Sales.objects.filter(
                 Q(barcode=self.kwargs["barcode"]), Q(finished_price__gte=0)
             )
-            .annotate(week=ExtractWeek("pub_date"), year=ExtractYear("pub_date"))
+            .annotate(
+                week=ExtractWeek("pub_date"), year=ExtractYear("pub_date")
+            )
             .values("supplier_article", "barcode", "week", "year")
             .annotate(
                 count=Count(
                     Case(
-                        When(finished_price__gte=0, then=1), output_field=IntegerField()
+                        When(finished_price__gte=0, then=1),
+                        output_field=IntegerField(),
                     )
                 )
             )
@@ -463,7 +508,9 @@ class DatabaseWeeklySalesDetailView(ListView):
 
         sales_data = (
             Sales.objects.filter(Q(finished_price__gte=0))
-            .annotate(week=ExtractWeek("pub_date"), year=ExtractYear("pub_date"))
+            .annotate(
+                week=ExtractWeek("pub_date"), year=ExtractYear("pub_date")
+            )
             .values("week", "year")
             .order_by("year", "week")
         )
@@ -473,7 +520,9 @@ class DatabaseWeeklySalesDetailView(ListView):
             Sales.objects.filter(
                 Q(barcode=self.kwargs["barcode"]), Q(finished_price__gte=0)
             )
-            .annotate(week=ExtractWeek("pub_date"), year=ExtractYear("pub_date"))
+            .annotate(
+                week=ExtractWeek("pub_date"), year=ExtractYear("pub_date")
+            )
             .values("warehouse_name", "week", "year")
             .annotate(
                 week_sales=Count(
@@ -515,14 +564,17 @@ class DatabaseWeeklySalesDetailView(ListView):
             if key not in warehouses_data.keys():
                 warehouses_data[key] = {}
             # if key in warehouses_data.keys():
-            if f"{stock['week']}-{stock['year']}" in warehouses_data[key].keys():
-                warehouses_data[key][f"{stock['week']}-{stock['year']}"] += stock[
-                    "week_sales"
-                ]
+            if (
+                f"{stock['week']}-{stock['year']}"
+                in warehouses_data[key].keys()
+            ):
+                warehouses_data[key][
+                    f"{stock['week']}-{stock['year']}"
+                ] += stock["week_sales"]
             else:
-                warehouses_data[key][f"{stock['week']}-{stock['year']}"] = stock[
-                    "week_sales"
-                ]
+                warehouses_data[key][f"{stock['week']}-{stock['year']}"] = (
+                    stock["week_sales"]
+                )
 
         # Добавляем недостающие недели со значением 0
         for warehouse_name, amount in warehouses_data.items():

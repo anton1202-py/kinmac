@@ -49,7 +49,9 @@ def add_new_actions_wb_to_db():
             actions_details = wb_action_details_info(
                 company.wb_header, actions_not_exist_str
             )
-            action_front_info = action_data_from_front(company.wb_cookie_header)
+            action_front_info = action_data_from_front(
+                company.wb_cookie_header
+            )
             if actions_details and "data" in actions_details:
                 for detail in actions_details["data"]["promotions"]:
                     # Получаем инормацию по артикулам, которые могут участвовать в акции
@@ -62,7 +64,9 @@ def add_new_actions_wb_to_db():
                         articles_amount = len(article_action_data)
                     # Сохраняем новую акцию в базу
                     search_params = {
-                        "marketplace": Marketplace.objects.get(name="Wildberries"),
+                        "marketplace": Marketplace.objects.get(
+                            name="Wildberries"
+                        ),
                         "action_number": detail["id"],
                     }
                     values_for_update = {
@@ -118,7 +122,9 @@ def add_new_actions_ozon_to_db():
     for company in Company.objects.all():
         header = company.ozon_header
         actions_raw_data = action_req.actions_list(header)
-        action_handler.actions_save(company, actions_raw_data)
+        action_handler.actions_save(
+            company=company, actions_raw_data=actions_raw_data
+        )
 
         hot_sale_actions_raw_data = action_req.hotsale_actions_list(header)
         action_handler.hotsale_actions_save(company, hot_sale_actions_raw_data)
@@ -129,15 +135,16 @@ def products_in_action_ozon():
     """Сохраняет товары, которые могут участвовать в акциях Озон"""
     # Получаем информацию по новым акциям
     action_req = ActionRequest()
-    action_handler = OzonActionHandler
+    action_handler = OzonActionHandler()
     marketplace = Marketplace.objects.filter(name="Ozon").first()
 
     for company in Company.objects.all():
         actions = Action.objects.filter(
-            company=company, marketplace=marketplace, date_end__gte=datetime.now()
-        )
+            company=company,
+            marketplace=marketplace,
+            date_finish__gte=datetime.now(),
+        ).exclude(action_type="hotsale")
         header = company.ozon_header
-
         for action in actions:
             products_list = action_req.access_products_for_action(
                 header, int(action.action_number)
@@ -145,5 +152,21 @@ def products_in_action_ozon():
             if products_list:
                 for product_raw_data in products_list:
                     action_handler.products_for_action(
+                        company, product_raw_data, action
+                    )
+        hotsale_actions = Action.objects.filter(
+            company=company,
+            marketplace=marketplace,
+            date_finish__gte=datetime.now(),
+            action_type="hotsale",
+        )
+
+        for action in hotsale_actions:
+            products_list = action_req.products_in_hotsale(
+                header, int(action.action_number)
+            )
+            if products_list:
+                for product_raw_data in products_list:
+                    action_handler.products_for_hotsale_action(
                         company, product_raw_data, action
                     )

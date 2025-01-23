@@ -17,7 +17,9 @@ class OzonTemplatesRequest:
         else:
 
             message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
-            bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
+            bot.send_message(
+                chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
+            )
             return message
 
     def _post_recursion_template_last_id_req(
@@ -27,7 +29,11 @@ class OzonTemplatesRequest:
             data_list = []
         payload = json.dumps(
             {
-                "filter": {"offer_id": [], "product_id": [], "visibility": "ALL"},
+                "filter": {
+                    "offer_id": [],
+                    "product_id": [],
+                    "visibility": "ALL",
+                },
                 "last_id": last_id,
                 "limit": limit,
             }
@@ -64,7 +70,11 @@ class ArticleDataRequest:
             data_list = []
         payload = json.dumps(
             {
-                "filter": {"offer_id": [], "product_id": [], "visibility": "ALL"},
+                "filter": {
+                    "offer_id": [],
+                    "product_id": [],
+                    "visibility": "ALL",
+                },
                 "last_id": last_id,
                 "limit": limit,
             }
@@ -95,7 +105,9 @@ class ArticleDataRequest:
             products = []
         if sku is None:
             sku = []
-        payload = json.dumps({"offer_id": [], "product_id": products, "sku": sku})
+        payload = json.dumps(
+            {"offer_id": [], "product_id": products, "sku": sku}
+        )
         return self._post_template_req(url, header, payload)
 
 
@@ -116,7 +128,9 @@ class ActionRequest(OzonTemplatesRequest):
     ) -> list:
         if not data_list:
             data_list = []
-        payload = json.dumps({"limit": limit, "offset": offset, "action_id": action_id})
+        payload = json.dumps(
+            {"limit": limit, "offset": offset, "action_id": action_id}
+        )
         response = requests.request("POST", url, headers=header, data=payload)
         if response.status_code == 200:
             main_data = json.loads(response.text)
@@ -133,20 +147,20 @@ class ActionRequest(OzonTemplatesRequest):
                 return data_list
 
     def actions_list(self, header: dict) -> dict:
-        url = f"{self.MAIN_URL}/v1/actions"
+        url = f"{self.MAIN_URL}v1/actions"
         return self._get_template_req(url, header)
 
     def access_products_for_action(self, header: dict, action_id: int) -> list:
-        url = f"{self.MAIN_URL}/v1/actions/candidates"
+        url = f"{self.MAIN_URL}v1/actions/candidates"
         return self._post_recursion_template_req_action(url, header, action_id)
 
     def hotsale_actions_list(self, header: dict) -> dict:
-        url = f"{self.MAIN_URL}/v1/actions/hotsales/list"
+        url = f"{self.MAIN_URL}v1/actions/hotsales/list"
         payload = json.dumps({})
         return self._post_template_req(url, header, payload)
 
     def products_in_hotsale(self, header: dict, action_id: int) -> list:
-        url = f"{self.MAIN_URL}/v1/actions/hotsales/products"
+        url = f"{self.MAIN_URL}v1/actions/hotsales/products"
         return self._post_recursion_template_req_action(url, header, action_id)
 
 
@@ -171,7 +185,13 @@ class OzonWarehouseApiRequest:
             return json.loads(response.text)
 
     def _post_recursion_template_req(
-        self, url: str, header: dict, limit=1000, offset=0, attempt=1, data_list=None
+        self,
+        url: str,
+        header: dict,
+        limit=1000,
+        offset=0,
+        attempt=1,
+        data_list=None,
     ) -> list:
         if not data_list:
             data_list = []
@@ -207,13 +227,17 @@ class OzonAdvertismentApiRequest:
     def __init__(self):
         self.main_url = "https://api-performance.ozon.ru:443/"
 
-    def _post_template_req(self, url: str, header: dict, payload: str) -> dict | str:
+    def _post_template_req(
+        self, url: str, header: dict, payload: str
+    ) -> dict | str:
         response = requests.request("POST", url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
         else:
             message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
-            bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
+            bot.send_message(
+                chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
+            )
             return message
 
     def _get_template_req(self, url: str, header: dict) -> dict | str:
@@ -223,11 +247,19 @@ class OzonAdvertismentApiRequest:
         else:
 
             message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
-            bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
+            bot.send_message(
+                chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
+            )
             return message
 
     def _post_recursion_template_req(
-        self, url: str, header: dict, limit=1000, offset=0, attempt=1, data_list=None
+        self,
+        url: str,
+        header: dict,
+        limit=1000,
+        offset=0,
+        attempt=1,
+        data_list=None,
     ) -> list:
         if not data_list:
             data_list = []
@@ -249,7 +281,9 @@ class OzonAdvertismentApiRequest:
             else:
                 return data_list
 
-    def get_auth_header(self, header: dict, perfomance_header: dict) -> dict | str:
+    def get_auth_header(
+        self, header: dict, perfomance_header: dict
+    ) -> dict | str:
         url = f"{self.main_url}/api/client/token"
         payload = json.dumps(perfomance_header)
         data = self._post_template_req(url, header, payload)
@@ -262,7 +296,9 @@ class OzonAdvertismentApiRequest:
             return header
         else:
             message = f"Ошибка при получении токена авторизации к рекламному кабинету. Текст: {data}"
-            bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000])
+            bot.send_message(
+                chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
+            )
             return message
 
     def get_proxy_auth_post_request(
@@ -305,7 +341,9 @@ class OzonAdvertismentApiRequest:
                 "productAutopilotStrategy": product_auto_strategy,
             }
         )
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
     def activate_trafarets_top_campaign_req(
         self, header: dict, perfomance_header: dict, campaign_id: str
@@ -315,7 +353,9 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/campaign/{campaign_id}/activate"
         payload = json.dumps({})
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
     def stop_trafarets_top_campaign_req(
         self, header: dict, perfomance_header: dict, campaign_id: str
@@ -325,7 +365,9 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/campaign/{campaign_id}/deactivate"
         payload = json.dumps({})
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
     def add_products_to_trafarets_top_campaign_req(
         self,
@@ -339,7 +381,9 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/campaign/{campaign_id}/products"
         payload = json.dumps({"bids": [sku_bid_info]})
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
     def add_products_to_search_promo_req(
         self, header: dict, perfomance_header: dict, ozon_sku: str
@@ -349,9 +393,13 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/search_promo/product/enable"
         payload = json.dumps({"skus": [ozon_sku]})
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
-    def campaigns_list_req(self, header: dict, perfomance_header: dict) -> dict:
+    def campaigns_list_req(
+        self, header: dict, perfomance_header: dict
+    ) -> dict:
         """
         Список кампаний
         """
@@ -384,7 +432,9 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/campaign/search_promo/v2/products"
         payload = json.dumps({"page": 0, "pageSize": 1000})
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
     def add_product_to_search_promo_campaign_req(
         self, header: dict, perfomance_header: dict, sku: str
@@ -394,10 +444,16 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/search_promo/product/enable"
         payload = json.dumps({"skus": [sku]})
-        return self.get_proxy_auth_post_request(header, perfomance_header, url, payload)
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, url, payload
+        )
 
     def cost_statistic(
-        self, header: dict, perfomance_header: dict, date_from: str, date_to: str
+        self,
+        header: dict,
+        perfomance_header: dict,
+        date_from: str,
+        date_to: str,
     ):
         """
         Статистика расходов рекламных кампаний

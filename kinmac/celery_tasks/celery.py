@@ -128,6 +128,15 @@ app.conf.beat_schedule = {
         "task": "action.periodic_tasks.add_article_in_actions_info",
         "schedule": crontab(hour=13, minute=0),
     },
+    # --------- Акции Озон --------- #
+    "actions_add_new_actions_ozon_to_db": {
+        "task": "action.periodic_tasks.add_new_actions_ozon_to_db",
+        "schedule": crontab(hour=13, minute=0),
+    },
+    "actions_products_in_action_ozon": {
+        "task": "action.periodic_tasks.products_in_action_ozon",
+        "schedule": crontab(hour=13, minute=1),
+    },
     # ========== КОНЕЦ ACTIONS ========== #
     # ========== OZON РЕКЛАМА ========== #
     "reklama_add_ozon_adv_campaigns": {

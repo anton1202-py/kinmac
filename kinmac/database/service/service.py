@@ -15,25 +15,49 @@ class ModelObjectService:
         header = company.ozon_header
 
         article_common_data = self.article_info.ozon_product_info(
-            header=header, sku=sku
+            header=header, sku=sku, products=products
         )
-        article_info = article_common_data[0]
+        article_info = article_common_data["items"][0]
 
         ozon_product_id = article_info["id"]
         name = article_info["name"]
         ozon_sku = sku
-        ozon_barcode = article_info["barcodes"][0]
-        common_article = ozon_seller_article = article_info["offer_id"]
+        if "barcodes" in article_info and article_info["barcodes"]:
+            print(article_info["offer_id"], article_info["barcodes"])
+            ozon_barcode = article_info["barcodes"][0]
+            common_article = ozon_seller_article = article_info["offer_id"]
+            article_obj = Articles.objects.filter(
+                barcode=ozon_barcode,
+            ).first()
+            if article_obj:
+                article_obj.ozon_product_id = ozon_product_id
+                article_obj.ozon_seller_article = ozon_seller_article
+                article_obj.ozon_sku = ozon_sku
+                article_obj.ozon_barcode = ozon_barcode
+                article_obj.save()
+            elif Articles.objects.filter(
+                common_article=common_article,
+            ).first():
+                article_obj = Articles.objects.filter(
+                    common_article=common_article,
+                ).first()
+                article_obj.ozon_product_id = ozon_product_id
+                article_obj.ozon_seller_article = ozon_seller_article
+                article_obj.ozon_sku = ozon_sku
+                article_obj.ozon_barcode = ozon_barcode
+                article_obj.save()
 
-        article_obj = Articles.objects.get_or_create(
-            common_article=common_article,
-            ozon_product_id=ozon_product_id,
-            ozon_seller_article=ozon_seller_article,
-            ozon_sku=ozon_sku,
-            ozon_barcode=ozon_barcode,
-            name=name,
-        )
-        return article_obj
+            else:
+
+                article_obj = Articles.objects.get_or_create(
+                    common_article=common_article,
+                    ozon_product_id=ozon_product_id,
+                    ozon_seller_article=ozon_seller_article,
+                    ozon_sku=ozon_sku,
+                    ozon_barcode=ozon_barcode,
+                    name=name,
+                )
+            return article_obj
 
     def get_article_obj_from_ozon_data(
         self, company: Company, sku: int, ozon_seller_article: str = None
@@ -48,7 +72,9 @@ class ModelObjectService:
             ).first()
 
         if not article_obj:
-            article_obj = self.add_article_from_ozon(company=company, sku=[sku])
+            article_obj = self.add_article_from_ozon(
+                company=company, sku=[sku]
+            )
 
         return article_obj
 
@@ -57,7 +83,9 @@ class ModelObjectService:
     ) -> Articles:
         """."""
         product_id = int(product_id)
-        article_obj = Articles.objects.filter(ozon_product_id=product_id).first()
+        article_obj = Articles.objects.filter(
+            ozon_product_id=product_id
+        ).first()
 
         if not article_obj:
             article_obj = self.add_article_from_ozon(
