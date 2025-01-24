@@ -24,6 +24,7 @@ from .models import (
     ArticleStorageCost,
     Articles,
     Company,
+    Marketplace,
     MarketplaceCategory,
     MarketplaceChoices,
     Platform,
@@ -228,7 +229,9 @@ def wb_article_price_stock_app_data() -> None:
             "spp": spp,
         }
         ArticlePriceStock.objects.update_or_create(
-            article=article_obj, defaults=defaults
+            article=article_obj,
+            marketplace=Marketplace.objects.get(name="Wildberries"),
+            defaults=defaults,
         )
 
 

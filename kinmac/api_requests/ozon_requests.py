@@ -460,3 +460,53 @@ class OzonAdvertismentApiRequest:
         """
         url = f"{self.main_url}api/client/statistics/expense/json?dateFrom={date_from}&dateTo={date_to}"
         return self.get_proxy_auth_get_request(header, perfomance_header, url)
+
+
+class OzonPriceComissionApiRequest(OzonTemplatesRequest):
+
+    def __init__(self):
+        self.main_url = "https://api-performance.ozon.ru:443/"
+
+    def _post_recursion_template_req_action(
+        self,
+        url: str,
+        header: dict,
+        data_list: list = None,
+        limit: int = 1000,
+        cursor: str = "",
+    ) -> list:
+        if not data_list:
+            data_list = []
+        payload = json.dumps(
+            {
+                "cursor": cursor,
+                "filter": {
+                    "offer_id": [],
+                    "product_id": [],
+                    "visibility": "ALL",
+                },
+                "limit": limit,
+            }
+        )
+        response = requests.request("POST", url, headers=header, data=payload)
+        if response.status_code == 200:
+            main_data = json.loads(response.text)
+            response_data = main_data["items"]
+            for data in response_data:
+                data_list.append(data)
+            if main_data["total"] == limit:
+                cursor = main_data["cursor"]
+                return self._post_recursion_template_req_action(
+                    url=url,
+                    header=header,
+                    limit=limit,
+                    data_list=data_list,
+                    cursor=cursor,
+                )
+            else:
+                return data_list
+
+    def comission_price_req(self, header: dict) -> list:
+        """Запрос по комиссиям и актуальной цене"""
+        url = f"{self.main_url}v5/product/info/prices"
+        return self._post_recursion_template_req_action(url, header)

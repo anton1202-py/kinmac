@@ -5,6 +5,7 @@ from database.models import (
     ArticlePriceStock,
     ArticleStorageCost,
     Articles,
+    Marketplace,
     Orders,
     SalesReportOnSales,
     StocksSite,
@@ -45,9 +46,9 @@ class WbMarketplaceArticlesData:
                 "sales_amount": data["sales_amount"],
                 "sales_sum": data["sales_sum"],
             }
-        for article_obj in Articles.objects.filter(brand__in=BRAND_LIST).order_by(
-            "common_article"
-        ):
+        for article_obj in Articles.objects.filter(
+            brand__in=BRAND_LIST
+        ).order_by("common_article"):
             article_wb = int(article_obj.nomenclatura_wb)
             if article_wb in sales_dict:
                 response_dict[article_wb] = {
@@ -60,7 +61,8 @@ class WbMarketplaceArticlesData:
 
     def comission_data(self):
         comissions = MarketplaceCommission.objects.filter(
-            marketplace_product__brand__in=BRAND_LIST
+            marketplace=Marketplace.objects.get(name="Wildberries"),
+            marketplace_product__brand__in=BRAND_LIST,
         ).order_by("marketplace_product__common_article")
         response_dict = {}
         for data in comissions:
@@ -75,7 +77,8 @@ class WbMarketplaceArticlesData:
     def spp_stock_data(self):
         """Отдает данные по SPP, остаткам, цене"""
         stock_data = ArticlePriceStock.objects.filter(
-            article__brand__in=BRAND_LIST
+            marketplace=Marketplace.objects.get(name="Wildberries"),
+            article__brand__in=BRAND_LIST,
         ).order_by("article__common_article")
         response_dict = {}
         for data in stock_data:
@@ -112,7 +115,9 @@ class WbMarketplaceArticlesData:
         )
         for data in articles_data:
             response_dict[data.common_article] = {
-                "sales_amount": sales_dict[int(data.nomenclatura_wb)]["sales_amount"],
+                "sales_amount": sales_dict[int(data.nomenclatura_wb)][
+                    "sales_amount"
+                ],
                 "adv_cost_sum": (
                     round(adv_dict[data.nomenclatura_wb], 2)
                     if data.nomenclatura_wb in adv_dict
@@ -135,7 +140,9 @@ class WbMarketplaceArticlesData:
 
         storage_data = (
             ArticleStorageCost.objects.filter(
-                date__gte=start_date, date__lte=end_date, article__brand__in=BRAND_LIST
+                date__gte=start_date,
+                date__lte=end_date,
+                article__brand__in=BRAND_LIST,
             )
             .order_by("article__common_article")
             .values("article__nomenclatura_wb")
@@ -160,20 +167,24 @@ class WbMarketplaceArticlesData:
         for data in logistic_data:
             logistic_cost[data["nm_id"]] = round(data["logistic_cost"], 2)
 
-        for article_obj in Articles.objects.filter(brand__in=BRAND_LIST).order_by(
-            "common_article"
-        ):
+        for article_obj in Articles.objects.filter(
+            brand__in=BRAND_LIST
+        ).order_by("common_article"):
             article_wb = int(article_obj.nomenclatura_wb)
             sales_amount = sales_dict[article_wb]["sales_amount"]
             sales_sum = sales_dict[article_wb]["sales_sum"]
             main_returned_dict[article_obj.common_article] = {
                 "logistic_cost": (
-                    logistic_cost[article_wb] if article_wb in logistic_cost else 0
+                    logistic_cost[article_wb]
+                    if article_wb in logistic_cost
+                    else 0
                 ),
                 "sales_amount": sales_amount,
                 "sales_sum": sales_sum,
                 "storage_cost": (
-                    storage_cost[article_wb] if article_wb in storage_cost else 0
+                    storage_cost[article_wb]
+                    if article_wb in storage_cost
+                    else 0
                 ),
             }
         return main_returned_dict
@@ -215,7 +226,9 @@ class WbAnalyticalTableData:
                     }
                 }
             else:
-                response_dict[data["supplier_article"]][str(data["order_day"])] = {
+                response_dict[data["supplier_article"]][
+                    str(data["order_day"])
+                ] = {
                     "total_count": data["total_count"],
                     "total_sum": total_sum,
                     "average_price": average_price,
@@ -242,7 +255,10 @@ class WbAnalyticalTableData:
                 latest_pub_date=Max("pub_date")
             )
             .values(
-                "pub_date_truncated", "seller_article", "warehouse", "latest_pub_date"
+                "pub_date_truncated",
+                "seller_article",
+                "warehouse",
+                "latest_pub_date",
             )
         )
         # Теперь получаем остатки для каждой самой поздней записи

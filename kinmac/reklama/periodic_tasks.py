@@ -60,8 +60,12 @@ def campaign_list_to_db():
                 create_time = adv_data["createTime"]
                 reklama_obj = ReklamaCampaign.objects.create(
                     campaign=adv_data["advertId"],
-                    campaign_type=new_campigns_dict[adv_data["advertId"]]["type"],
-                    campaign_status=new_campigns_dict[adv_data["advertId"]]["status"],
+                    campaign_type=new_campigns_dict[adv_data["advertId"]][
+                        "type"
+                    ],
+                    campaign_status=new_campigns_dict[adv_data["advertId"]][
+                        "status"
+                    ],
                     create_time=create_time,
                 )
                 if new_campigns_dict[adv_data["advertId"]]["type"] == 8:
@@ -100,10 +104,16 @@ def update_daily_article_adv_cost():
     if statistic_data:
         for data in statistic_data:
             campaign_number = data["advertId"]
-            campaign_obj = ReklamaCampaign.objects.get(campaign=campaign_number)
+            campaign_obj = ReklamaCampaign.objects.get(
+                campaign=campaign_number
+            )
             for day_statistic in data["days"]:
                 articles_daily_statistic = defaultdict(int)
-                date = datetime.fromisoformat(day_statistic["date"]).date().isoformat()
+                date = (
+                    datetime.fromisoformat(day_statistic["date"])
+                    .date()
+                    .isoformat()
+                )
                 for statistic in day_statistic["apps"]:
                     if statistic["appType"] != 0:
                         for article_statistic in statistic["nm"]:
@@ -112,9 +122,14 @@ def update_daily_article_adv_cost():
                             )
                             cost = article_statistic["sum"]
                             articles_daily_statistic[article_obj] += cost
-                for article_obj, daily_cost in articles_daily_statistic.items():
+                for (
+                    article_obj,
+                    daily_cost,
+                ) in articles_daily_statistic.items():
                     if not ArticleDailyCostToAdv.objects.filter(
-                        article=article_obj, cost_date=date, campaign=campaign_obj
+                        article=article_obj,
+                        cost_date=date,
+                        campaign=campaign_obj,
                     ).exists():
                         ArticleDailyCostToAdv(
                             article=article_obj,
@@ -141,7 +156,9 @@ def write_daily_adv_statistic():
     try:
         for data in statistic_data:
             campaign_number = data["advertId"]
-            campaign_obj = ReklamaCampaign.objects.get(campaign=campaign_number)
+            campaign_obj = ReklamaCampaign.objects.get(
+                campaign=campaign_number
+            )
             for stat in data["days"]:
                 request_date = stat["date"]
                 date_obj = datetime.fromisoformat(request_date)
@@ -193,10 +210,14 @@ def add_ozon_adv_campaigns() -> None:
         if company.ozon_token:
             header = company.ozon_header
             perfomance_header = company.ozon_perfomance_header
-            advert_list = advert_req.campaigns_list_req(header, perfomance_header)
+            advert_list = advert_req.campaigns_list_req(
+                header, perfomance_header
+            )
             if advert_list.get("list"):
                 for campaign_info in advert_list.get("list"):
-                    adv_handler.save_campaigns_to_database(company, campaign_info)
+                    adv_handler.save_campaigns_to_database(
+                        company, campaign_info
+                    )
 
 
 @app.task
@@ -223,4 +244,6 @@ def ozon_cost_adv_articles() -> None:
             ).get("rows")
             if statistic_data:
                 for statistic in statistic_data:
-                    adv_handler.article_adv_cost(company=company, statistic=statistic)
+                    adv_handler.article_adv_cost(
+                        company=company, statistic=statistic
+                    )
