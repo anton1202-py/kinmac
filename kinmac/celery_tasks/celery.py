@@ -114,8 +114,12 @@ app.conf.beat_schedule = {
     },
     # ========== КОНЕЦ ПОЗИЦИЯ ТОВАРА В ВЫДАЧЕ ========== #
     # ========== UNIT_ECONOMICS ========== #
-    "tariffs_and_logistic": {
+    "unit_economic_tariffs_and_logistic": {
         "task": "unit_economic.periodic_tasks.update_tariffs_and_logistic",
+        "schedule": crontab(hour=6, minute=2),
+    },
+    "unit_update_ozon_tariffs_and_logistic": {
+        "task": "unit_economic.periodic_tasks.update_ozon_tariffs_and_logistic",
         "schedule": crontab(hour=6, minute=2),
     },
     # ========== КОНЕЦ UNIT_ECONOMICS ========== #

@@ -45,10 +45,15 @@ class OzonComissionsPriceHandler:
 
         if article:
             seller_disc = (
-                1
-                - article_info["price"]["marketing_seller_price"]
-                / article_info["price"]["old_price"]
-            ) * 100
+                (
+                    1
+                    - article_info["price"]["marketing_seller_price"]
+                    / article_info["price"]["old_price"]
+                )
+                * 100
+                if article_info["price"]["old_price"] != 0
+                else 0
+            )
             defaults = {
                 "date": datetime.now().date(),
                 "price_in_page": article_info["price"]["price"],
@@ -56,7 +61,7 @@ class OzonComissionsPriceHandler:
                     "marketing_seller_price"
                 ],
                 "price_before_seller_disc": article_info["price"]["old_price"],
-                "seller_disc": seller_disc,
+                "seller_disc": round(seller_disc),
             }
             ArticlePriceStock.objects.update_or_create(
                 article=article,

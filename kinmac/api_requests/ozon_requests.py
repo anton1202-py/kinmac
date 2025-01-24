@@ -465,7 +465,7 @@ class OzonAdvertismentApiRequest:
 class OzonPriceComissionApiRequest(OzonTemplatesRequest):
 
     def __init__(self):
-        self.main_url = "https://api-performance.ozon.ru:443/"
+        self.main_url = "https://api-seller.ozon.ru/"
 
     def _post_recursion_template_req_action(
         self,

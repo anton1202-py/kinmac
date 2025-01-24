@@ -1,7 +1,7 @@
 from unit_economic.models import MarketplaceCommission, MarketplaceLogistic
 
 
-def wadd_marketplace_comission_to_db(
+def add_marketplace_comission_to_db(
     product_obj,
     fbs_commission=None,
     fbo_commission=None,
