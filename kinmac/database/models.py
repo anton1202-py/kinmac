@@ -1207,7 +1207,7 @@ class ArticlePriceStock(models.Model):
 
     marketplace = models.ForeignKey(
         Marketplace,
-        related_name="article_comission",
+        related_name="article_price_stock",
         on_delete=models.CASCADE,
         verbose_name="Маркетплейс",
         default=1,
