@@ -60,6 +60,11 @@ app.conf.beat_schedule = {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=19, minute=1),
     },
+    # ========== Обновление Озон. ЗАКАЗЫ ФБО - ФБС ========== #
+    "database_get_ozon_fbo_fbs_orders": {
+        "task": "database.periodic_tasks.get_ozon_fbo_fbs_orders",
+        "schedule": crontab(hour=2, minute=0),
+    },
     # ========== Обновление Озон. КЛАСТЕРЫ. СКЛАДЫ. ОСТАТКИ ========== #
     "database_clusters_ozon_info_update": {
         "task": "database.periodic_tasks.clusters_ozon_info_update",
