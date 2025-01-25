@@ -1,9 +1,18 @@
+from collections import defaultdict
 from datetime import datetime
 
 from database.service.service import ModelObjectService
 
 from api_requests.ozon_requests import OzonWarehouseApiRequest
-from database.models import Cluster, Company, Marketplace, Warehouse, WarehouseBalance
+from database.models import (
+    Articles,
+    Cluster,
+    Company,
+    Marketplace,
+    MarketplaceOrders,
+    Warehouse,
+    WarehouseBalance,
+)
 
 
 class OzonWarehouseInfo:
@@ -41,7 +50,9 @@ class OzonWarehouseInfo:
 
     def save_ozon_clusters_warehouses_info(self) -> None:
         """Сохраняет данные по кластерам и складам в них"""
-        clusters_info = self.request.cluster_warehouse_req(self.company_obj.ozon_header)
+        clusters_info = self.request.cluster_warehouse_req(
+            self.company_obj.ozon_header
+        )
         for cluster in clusters_info.get("clusters"):
             cluster_obj = self.get_cluster_obj(
                 marketplace_obj=self.marketplace_obj, cluster_info=cluster
@@ -52,11 +63,13 @@ class OzonWarehouseInfo:
                         warehouse_number = warehouse.get("warehouse_id")
                         warehouse_name = warehouse.get("name")
 
-                        warehouse_obj, created = Warehouse.objects.get_or_create(
-                            marketplace=self.marketplace_obj,
-                            warehouse_number=warehouse_number,
-                            name=warehouse_name,
-                            defaults={"cluster": cluster_obj},
+                        warehouse_obj, created = (
+                            Warehouse.objects.get_or_create(
+                                marketplace=self.marketplace_obj,
+                                warehouse_number=warehouse_number,
+                                name=warehouse_name,
+                                defaults={"cluster": cluster_obj},
+                            )
                         )
 
     def save_ozon_fbo_warehouse_stock(self) -> None:
@@ -81,10 +94,71 @@ class OzonWarehouseInfo:
                     idc = stock_info.get("idc")
 
                     if warehouse_obj and article_obj:
-                        balance, created = WarehouseBalance.objects.update_or_create(
-                            company=company,
-                            warehouse=warehouse_obj,
-                            article=article_obj,
-                            date=datetime.now().date(),
-                            defaults={"quantity": quantity, "idc": idc},
+                        balance, created = (
+                            WarehouseBalance.objects.update_or_create(
+                                company=company,
+                                warehouse=warehouse_obj,
+                                article=article_obj,
+                                date=datetime.now().date(),
+                                defaults={"quantity": quantity, "idc": idc},
+                            )
                         )
+
+
+class OzonSalesOrdersHandler:
+    """Обрабатывает продажи и заказы Озон"""
+
+    def save_order_data(self, order_data: dict) -> None:
+
+        order, created = MarketplaceOrders.objects.get_or_create(
+            company=order_data.get("company"),
+            marketplace=order_data.get("marketplace"),
+            article=order_data.get("article"),
+            posting_number=order_data.get("posting_number"),
+            order_id=order_data.get("order_id"),
+            order_number=order_data.get("order_number"),
+            date=order_data.get("date"),
+            amount=order_data.get("amount"),
+            order_cluster=order_data.get("order_cluster"),
+            order_type=order_data.get("order_type"),
+            price=order_data.get("price"),
+        )
+
+    def order_data_handler(
+        self, company: Company, raw_order_data: dict, order_type: str
+    ) -> dict:
+
+        company = (company,)
+        marketplace = Marketplace.objects.filter(name="Ozon").first()
+        posting_number = raw_order_data["posting_number"]
+        order_id = raw_order_data["order_id"]
+        order_number = raw_order_data["order_number"]
+
+        date = datetime.fromisoformat(raw_order_data["created_at"][:-1]).date()
+        order_cluster = Cluster.objects.filter(
+            marketplace=marketplace,
+            name=raw_order_data["financial_data"]["cluster_to"],
+        ).first()
+        order_type = order_type
+
+        products = raw_order_data["products"]
+
+        for product in products:
+            article = Articles.objects.filter(ozon_sku=product["sku"]).first()
+            amount = product["quantity"]
+            price = product["price"]
+
+            order_data = {
+                "company": company,
+                "marketplace": marketplace,
+                "article": article,
+                "posting_number": posting_number,
+                "order_id": order_id,
+                "order_number": order_number,
+                "date": date,
+                "amount": amount,
+                "order_cluster": order_cluster,
+                "order_type": order_type,
+                "price": price,
+            }
+            self.save_order_data(order_data)

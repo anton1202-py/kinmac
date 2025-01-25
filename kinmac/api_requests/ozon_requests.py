@@ -169,6 +169,54 @@ class OzonSalesRequest(OzonTemplatesRequest):
     def __init__(self):
         self.main_url = "https://api-seller.ozon.ru/"
 
+    def _post_recursion_template_req_action(
+        self,
+        url: str,
+        header: dict,
+        date_from: str,
+        date_to: str,
+        limit=1000,
+        offset=0,
+        attempt=1,
+        data_list=None,
+    ) -> list:
+        if not data_list:
+            data_list = []
+        payload = json.dumps(
+            {
+                "dir": "ASC",
+                "filter": {
+                    "since": f"{date_from}T00:00:00.878Z",
+                    "to": f"{date_to}T23:59:59.878Z",
+                    "status": "delivered",
+                },
+                "limit": limit,
+                "offset": offset,
+                "with": {"financial_data": True},
+            }
+        )
+        response = requests.post(url, headers=header, data=payload)
+        if response.status_code == 200:
+            main_data = json.loads(response.text)
+            response_data = main_data["result"]
+            for data in response_data:
+                data_list.append(data)
+            if len(response_data) == limit:
+                offset = limit * attempt
+                attempt += 1
+                return self._post_recursion_template_req_action(
+                    url=url,
+                    header=header,
+                    date_from=date_from,
+                    date_to=date_to,
+                    limit=limit,
+                    offset=offset,
+                    attempt=attempt,
+                    data_list=data_list,
+                )
+            else:
+                return data_list
+
     def realization_report(self, header: dict, month: int, year: int) -> dict:
         url = f"{self.main_url}v2/finance/realization"
         payload = json.dumps({"month": month, "year": year})
@@ -187,6 +235,33 @@ class OzonSalesRequest(OzonTemplatesRequest):
             }
         )
         return self._post_template_req(url, header, payload)
+
+    def fbs_orders_req(self, header: dict, date_from: str, date_to: str):
+        """Заказы FBS"""
+        url = f"{self.main_url}v3/posting/fbs/list"
+        payload = json.dumps(
+            {
+                "dir": "ASC",
+                "filter": {
+                    "since": f"{date_from}T00:00:00.878Z",
+                    "to": f"{date_to}T23:59:59.878Z",
+                    "status": "delivered",
+                },
+                "limit": 1000,
+                "offset": 0,
+                "with": {"financial_data": True},
+            }
+        )
+        return self._post_template_req(url, header, payload)
+
+    def fbo_orders_req(
+        self, header: dict, date_from: str, date_to: str
+    ) -> list:
+        """Заказы FBO"""
+        url = f"{self.main_url}v2/posting/fbo/list"
+        return self._post_template_req(
+            url=url, header=header, date_from=date_from, date_to=date_to
+        )
 
 
 class OzonWarehouseApiRequest:

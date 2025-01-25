@@ -16,7 +16,10 @@ from database.supplyment import (
     get_article_commot_stock_from_front,
     get_price_info_from_ofissial_api,
 )
-from database.service.ozon_service import OzonWarehouseInfo
+from database.service.ozon_service import (
+    OzonSalesOrdersHandler,
+    OzonWarehouseInfo,
+)
 
 
 from .models import (
@@ -324,3 +327,36 @@ def clusters_ozon_info_update():
     """Обновляет информацию о кластерах ОЗОН"""
     clusters = OzonWarehouseInfo()
     clusters.save_ozon_clusters_warehouses_info()
+
+
+@app.task
+def get_ozon_fbo_fbs_orders():
+    """Загружает информацию о заказах Озон (ежедневно)"""
+
+    orders_req = OzonSalesRequest()
+    handler = OzonSalesOrdersHandler()
+    for company in Company.objects.all():
+        header = company.ozon_header
+
+        date_from = datetime.now() - timedelta(days=1)
+        date_to = datetime.now() - timedelta(days=7)
+
+        fbo_orders_data = orders_req.fbo_orders_req(
+            header=header, date_from=date_from, date_to=date_to
+        )
+        if fbo_orders_data:
+            handler.order_data_handler(
+                company=company,
+                raw_order_data=fbo_orders_data,
+                order_type="fbo",
+            )
+
+        fbs_orders_data = orders_req.fbs_orders_req(
+            header=header, date_from=date_from, date_to=date_to
+        )["result"].get("postings")
+        if fbs_orders_data:
+            handler.order_data_handler(
+                company=company,
+                raw_order_data=fbs_orders_data,
+                order_type="fbs",
+            )
