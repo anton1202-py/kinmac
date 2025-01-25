@@ -128,37 +128,42 @@ class OzonSalesOrdersHandler:
         self, company: Company, raw_order_data: dict, order_type: str
     ) -> dict:
 
-        company = (company,)
+        company = company
         marketplace = Marketplace.objects.filter(name="Ozon").first()
-        posting_number = raw_order_data["posting_number"]
-        order_id = raw_order_data["order_id"]
-        order_number = raw_order_data["order_number"]
+        for order_info in raw_order_data:
+            posting_number = order_info["posting_number"]
+            order_id = order_info["order_id"]
+            order_number = order_info["order_number"]
 
-        date = datetime.fromisoformat(raw_order_data["created_at"][:-1]).date()
-        order_cluster = Cluster.objects.filter(
-            marketplace=marketplace,
-            name=raw_order_data["financial_data"]["cluster_to"],
-        ).first()
-        order_type = order_type
+            date = datetime.fromisoformat(
+                order_info["in_process_at"][:-1]
+            ).date()
+            order_cluster = Cluster.objects.filter(
+                marketplace=marketplace,
+                name=order_info["financial_data"]["cluster_to"],
+            ).first()
+            order_type = order_type
 
-        products = raw_order_data["products"]
+            products = order_info["products"]
 
-        for product in products:
-            article = Articles.objects.filter(ozon_sku=product["sku"]).first()
-            amount = product["quantity"]
-            price = product["price"]
+            for product in products:
+                article = Articles.objects.filter(
+                    ozon_sku=product["sku"]
+                ).first()
+                amount = product["quantity"]
+                price = product["price"]
 
-            order_data = {
-                "company": company,
-                "marketplace": marketplace,
-                "article": article,
-                "posting_number": posting_number,
-                "order_id": order_id,
-                "order_number": order_number,
-                "date": date,
-                "amount": amount,
-                "order_cluster": order_cluster,
-                "order_type": order_type,
-                "price": price,
-            }
-            self.save_order_data(order_data)
+                order_data = {
+                    "company": company,
+                    "marketplace": marketplace,
+                    "article": article,
+                    "posting_number": posting_number,
+                    "order_id": order_id,
+                    "order_number": order_number,
+                    "date": date,
+                    "amount": amount,
+                    "order_cluster": order_cluster,
+                    "order_type": order_type,
+                    "price": price,
+                }
+                self.save_order_data(order_data)

@@ -338,8 +338,12 @@ def get_ozon_fbo_fbs_orders():
     for company in Company.objects.all():
         header = company.ozon_header
 
-        date_from = datetime.now() - timedelta(days=1)
-        date_to = datetime.now() - timedelta(days=7)
+        date_from = (
+            (datetime.now() - timedelta(days=7)).date().strftime("%Y-%m-%d")
+        )
+        date_to = (
+            (datetime.now() - timedelta(days=1)).date().strftime("%Y-%m-%d")
+        )
 
         fbo_orders_data = orders_req.fbo_orders_req(
             header=header, date_from=date_from, date_to=date_to

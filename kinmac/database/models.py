@@ -1642,6 +1642,7 @@ class MarketplaceOrders(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Кластер, из которого пришел заказ",
         related_name="marketplace_orders",
+        null=True,
     )
     order_type = models.CharField(
         verbose_name="Тип заказа ФБО/ФБС.",

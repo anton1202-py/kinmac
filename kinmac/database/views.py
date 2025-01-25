@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
+from database.periodic_tasks import get_ozon_fbo_fbs_orders
 
 from .forms import (
     ArticlesForm,
@@ -33,6 +34,7 @@ def database_home(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
     data = Articles.objects.filter(brand__in=BRAND_LIST)
+    get_ozon_fbo_fbs_orders()
     context = {
         "data": data,
     }

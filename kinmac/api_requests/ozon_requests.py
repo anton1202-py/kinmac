@@ -169,7 +169,7 @@ class OzonSalesRequest(OzonTemplatesRequest):
     def __init__(self):
         self.main_url = "https://api-seller.ozon.ru/"
 
-    def _post_recursion_template_req_action(
+    def _post_recursion_template_req(
         self,
         url: str,
         header: dict,
@@ -204,7 +204,7 @@ class OzonSalesRequest(OzonTemplatesRequest):
             if len(response_data) == limit:
                 offset = limit * attempt
                 attempt += 1
-                return self._post_recursion_template_req_action(
+                return self._post_recursion_template_req(
                     url=url,
                     header=header,
                     date_from=date_from,
@@ -259,7 +259,7 @@ class OzonSalesRequest(OzonTemplatesRequest):
     ) -> list:
         """Заказы FBO"""
         url = f"{self.main_url}v2/posting/fbo/list"
-        return self._post_template_req(
+        return self._post_recursion_template_req(
             url=url, header=header, date_from=date_from, date_to=date_to
         )
 
