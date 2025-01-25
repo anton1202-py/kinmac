@@ -167,11 +167,25 @@ class ActionRequest(OzonTemplatesRequest):
 class OzonSalesRequest(OzonTemplatesRequest):
 
     def __init__(self):
-        self.MAIN_URL = "https://api-seller.ozon.ru/"
+        self.main_url = "https://api-seller.ozon.ru/"
 
     def realization_report(self, header: dict, month: int, year: int) -> dict:
-        url = f"{self.MAIN_URL}v2/finance/realization"
+        url = f"{self.main_url}v2/finance/realization"
         payload = json.dumps({"month": month, "year": year})
+        return self._post_template_req(url, header, payload)
+
+    def daily_orders_req(self, header: dict, check_date: str) -> dict:
+        url = f"{self.main_url}v1/analytics/data"
+        payload = json.dumps(
+            {
+                "date_from": check_date,
+                "date_to": check_date,
+                "metrics": ["revenue", "ordered_units"],
+                "dimension": ["sku"],
+                "limit": 1000,
+                "offset": 0,
+            }
+        )
         return self._post_template_req(url, header, payload)
 
 

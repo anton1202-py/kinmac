@@ -1593,3 +1593,58 @@ class ReturnArticlesRealizationReportOzon(models.Model):
     class Meta:
         verbose_name = "Возвраты ежемесячного отчета Озон"
         verbose_name_plural = "Возвраты ежемесячного отчета Озон"
+
+
+class MarketplaceOrders(models.Model):
+    """Заказы с маркетплейсов"""
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        verbose_name="Компания",
+        related_name="marketplace_orders",
+    )
+    marketplace = models.ForeignKey(
+        Marketplace,
+        on_delete=models.CASCADE,
+        verbose_name="Маркетплейс",
+        related_name="marketplace_orders",
+    )
+    article = models.ForeignKey(
+        Articles,
+        on_delete=models.CASCADE,
+        verbose_name="Артикул",
+        related_name="marketplace_orders",
+    )
+    posting_number = models.CharField(
+        verbose_name="Номер отправления.",
+        max_length=255,
+        null=True,
+    )
+    order_id = models.CharField(
+        verbose_name="ID ордера.",
+        max_length=255,
+        null=True,
+    )
+    order_number = models.CharField(
+        verbose_name="Номер ордера.",
+        max_length=255,
+        null=True,
+    )
+    date = models.DateField(
+        verbose_name="Дата заказа",
+    )
+    amount = models.IntegerField(
+        verbose_name="Количество",
+    )
+    order_cluster = models.ForeignKey(
+        Cluster,
+        on_delete=models.CASCADE,
+        verbose_name="Кластер, из которого пришел заказ",
+        related_name="marketplace_orders",
+    )
+    order_type = models.CharField(
+        verbose_name="Тип заказа ФБО/ФБС.",
+        max_length=10,
+        null=True,
+    )
