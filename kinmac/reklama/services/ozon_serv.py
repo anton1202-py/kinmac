@@ -1,4 +1,4 @@
-from database.models import Articles, Company
+from database.models import Articles, Company, OzonProduct
 from database.service.service import ModelObjectService
 from reklama.models import OzonArticleDailyCostToAdv, OzonReklamaCampaign
 from api_requests.ozon_requests import OzonAdvertismentApiRequest
@@ -16,7 +16,7 @@ class OzonAdvCampaignAndProducts:
         company: Company,
         campaign_info: dict,
         campaign_type: str = None,
-        article_obj: Articles = None,
+        article_obj: OzonProduct = None,
     ):
         """Сохраняет рекламную кампанию озон в базу данных"""
         campaigns_status = [

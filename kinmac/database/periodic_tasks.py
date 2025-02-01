@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import datetime, timedelta
 import time
 from api_requests.wb_requests import (
@@ -7,6 +6,7 @@ from api_requests.wb_requests import (
     get_storage_cost_report_data,
     wb_article_data_from_api,
 )
+from django.db import transaction
 from celery_tasks.celery import app
 
 from api_requests.ozon_requests import ArticleDataRequest, OzonSalesRequest
@@ -307,17 +307,25 @@ def ozon_update_article_date() -> None:
                         volume_weight=product["volume_weight"],
                     ).save()
         attributes_info = ozon_req.ozon_product_attributes(header)
+        ozon_products_to_update = []
         for attribute in attributes_info:
-            if OzonProduct.objects.filter(
+            product = OzonProduct.objects.filter(
                 company=company, product_id=attribute["id"]
-            ):
-                OzonProduct.objects.filter(
-                    company=company, product_id=attribute["id"]
-                ).update(
-                    heigh=attribute["heigh"],
-                    depth=attribute["depth"],
-                    width=attribute["width"],
-                    weight=attribute["weight"],
+            ).first()
+            if product:
+                # Обновляем атрибуты
+                product.heigh = attribute.get("height", 0) / 10
+                product.depth = attribute.get("depth", 0) / 10
+                product.width = attribute.get("width", 0) / 10
+                product.weight = attribute.get("weight", 0) / 1000
+                ozon_products_to_update.append(product)
+
+        # Выполняем одно обращение к базе данных для обновления всех записей
+        if ozon_products_to_update:
+            with transaction.atomic():
+                OzonProduct.objects.bulk_update(
+                    ozon_products_to_update,
+                    ["heigh", "depth", "width", "weight"],
                 )
 
 

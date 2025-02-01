@@ -10,6 +10,7 @@ from database.models import (
     Company,
     Marketplace,
     MarketplaceOrders,
+    OzonProduct,
     Warehouse,
     WarehouseBalance,
 )
@@ -110,7 +111,7 @@ class OzonSalesOrdersHandler:
 
     def save_order_data(self, order_data: dict) -> None:
 
-        order, created = MarketplaceOrders.objects.get_or_create(
+        MarketplaceOrders.objects.get_or_create(
             company=order_data.get("company"),
             marketplace=order_data.get("marketplace"),
             article=order_data.get("article"),
@@ -147,8 +148,8 @@ class OzonSalesOrdersHandler:
             products = order_info["products"]
 
             for product in products:
-                article = Articles.objects.filter(
-                    ozon_sku=product["sku"]
+                article = OzonProduct.objects.filter(
+                    sku=product["sku"]
                 ).first()
                 amount = product["quantity"]
                 price = product["price"]
@@ -156,7 +157,7 @@ class OzonSalesOrdersHandler:
                 order_data = {
                     "company": company,
                     "marketplace": marketplace,
-                    "article": article,
+                    "ozon_article": article,
                     "posting_number": posting_number,
                     "order_id": order_id,
                     "order_number": order_number,

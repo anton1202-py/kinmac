@@ -310,10 +310,10 @@ class OzonProduct(models.Model):
     volume_weight = models.FloatField(
         verbose_name="Объёмный вес товара.", null=True
     )
-    heigh = models.FloatField(verbose_name="Высота упаковки, см", null=True)
+    height = models.FloatField(verbose_name="Высота упаковки, см", null=True)
     depth = models.FloatField(verbose_name="Глубина упаковки, см", null=True)
     width = models.FloatField(verbose_name="Ширина упаковки, см", null=True)
-    weight = models.FloatField(verbose_name="Вес уваковки, г", null=True)
+    weight = models.FloatField(verbose_name="Вес уваковки, кг", null=True)
 
 
 class Marketplace(models.Model):
