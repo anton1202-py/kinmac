@@ -20,8 +20,8 @@ class OzonAdvCampaignAndProducts:
     ):
         """Сохраняет рекламную кампанию озон в базу данных"""
         campaigns_status = [
-            "PLACEMENT_TOP_PROMOTION",
-            "PLACEMENT_SEARCH_AND_CATEGORY",
+            ["PLACEMENT_TOP_PROMOTION"],
+            ["PLACEMENT_SEARCH_AND_CATEGORY"],
         ]
         if campaign_info.get("placement") in campaigns_status:
             article_obj = self.support_req.product_in_trafaret_top_campaign(

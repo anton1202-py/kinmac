@@ -7,7 +7,10 @@ from database.models import (
     Marketplace,
     MarketplaceOrders,
     OzonProduct,
+    WarehouseBalance,
 )
+from reklama.models import OzonArticleDailyCostToAdv
+from unit_economic.models import MarketplaceCommission
 
 
 class OzonMarketplaceArticlesData:
@@ -25,7 +28,7 @@ class OzonMarketplaceArticlesData:
         sale_data = (
             MarketplaceOrders.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
-                marketplace=Marketplace.objects.filter(name="Ozon"),
+                marketplace=Marketplace.objects.filter(name="Ozon").first(),
                 date__gte=start_date,
                 date__lte=end_date,
             )
@@ -42,47 +45,74 @@ class OzonMarketplaceArticlesData:
                 "sales_sum": data["sales_sum"],
             }
         for article_obj in OzonProduct.objects.filter(
-            brand__in=BRAND_LIST
-        ).order_by("common_article"):
-            article_wb = int(article_obj.nomenclatura_wb)
-            if article_wb in sales_dict:
-                response_dict[article_wb] = {
-                    "sales_amount": sales_dict[article_wb]["sales_amount"],
-                    "sales_sum": sales_dict[article_wb]["sales_sum"],
+            company=Company.objects.filter(name="KINMAC").first()
+        ).order_by("seller_article"):
+            if article_obj.product_id in sales_dict:
+                response_dict[article_obj.product_id] = {
+                    "sales_amount": sales_dict[article_obj.product_id][
+                        "sales_amount"
+                    ],
+                    "sales_sum": sales_dict[article_obj.product_id][
+                        "sales_sum"
+                    ],
                 }
             else:
-                response_dict[article_wb] = {"sales_amount": 0, "sales_sum": 0}
+                response_dict[article_obj.product_id] = {
+                    "sales_amount": 0,
+                    "sales_sum": 0,
+                }
         return response_dict
 
-    def comission_data(self):
-        comissions = MarketplaceCommission.objects.filter(
-            marketplace=Marketplace.objects.get(name="Wildberries"),
-            marketplace_product__brand__in=BRAND_LIST,
-        ).order_by("marketplace_product__common_article")
+    def common_article_data(self):
+        """Общая информация артикула"""
+        comissions = OzonProduct.objects.filter(
+            company=Company.objects.filter(name="KINMAC").first()
+        ).order_by("seller_article")
         response_dict = {}
         for data in comissions:
-            response_dict[data.marketplace_product.common_article] = {
-                "fbo_commission": data.fbo_commission,
-                "width": data.marketplace_product.width,
-                "height": data.marketplace_product.height,
-                "length": data.marketplace_product.length,
+            response_dict[data.seller_article] = {
+                "fbo_commission": data.fbo_comission,
+                "width": data.width,
+                "height": data.height,
+                "length": data.depth,
+                "weight": data.weight,
+                "price_after_seller_disc": data.price,
             }
         return response_dict
 
-    def spp_stock_data(self):
+    def stock_data(self):
         """Отдает данные по SPP, остаткам, цене"""
-        stock_data = ArticlePriceStock.objects.filter(
-            marketplace=Marketplace.objects.get(name="Wildberries"),
-            article__brand__in=BRAND_LIST,
-        ).order_by("article__common_article")
-        response_dict = {}
+        stock_data = (
+            WarehouseBalance.objects.values("ozon_article__seller_article")
+            .annotate(
+                latest_date=Max("date"),
+                common_stock=Sum("quantity"),
+            )
+            .order_by("ozon_article__seller_article")
+        )
+
+        stock_dict = {}
         for data in stock_data:
-            response_dict[data.article.common_article] = {
-                "date": data.date,
-                "common_stock": data.common_stock,
-                "price_after_seller_disc": data.price_after_seller_disc,
-                "spp": data.spp,
+            stock_dict[data["ozon_article__seller_article"]] = {
+                "date": data["latest_date"],
+                "common_stock": data["common_stock"],
             }
+        response_dict = {}
+        for article_obj in OzonProduct.objects.filter(
+            company=Company.objects.filter(name="KINMAC").first()
+        ).order_by("seller_article"):
+            if article_obj.seller_article in stock_dict:
+                response_dict[article_obj.seller_article] = {
+                    "date": stock_dict[article_obj.seller_article]["date"],
+                    "common_stock": stock_dict[article_obj.seller_article][
+                        "common_stock"
+                    ],
+                }
+            else:
+                response_dict[article_obj.seller_article] = {
+                    "date": 0,
+                    "common_stock": 0,
+                }
         return response_dict
 
     def advert_data(self):
@@ -92,30 +122,26 @@ class OzonMarketplaceArticlesData:
         sales_dict = self.only_sales_data()
         adv_dict = {}
         adv_data = (
-            ArticleDailyCostToAdv.objects.filter(
+            OzonArticleDailyCostToAdv.objects.filter(
                 cost_date__gte=start_date,
                 cost_date__lte=end_date,
-                article__brand__in=BRAND_LIST,
             )
-            .order_by("article__common_article")
-            .values("article__nomenclatura_wb")
+            .order_by("article__seller_article")
+            .values("article__product_id")
             .annotate(sum_cost=Sum("cost"))
         )
         for data in adv_data:
-            adv_dict[data["article__nomenclatura_wb"]] = data["sum_cost"]
+            adv_dict[data["article__product_id"]] = data["sum_cost"]
 
         response_dict = {}
-        articles_data = Articles.objects.filter(brand__in=BRAND_LIST).order_by(
-            "common_article"
-        )
+        articles_data = OzonProduct.objects.filter(
+            company=Company.objects.filter(name="KINMAC").first()
+        ).order_by("seller_article")
         for data in articles_data:
-            response_dict[data.common_article] = {
-                "sales_amount": sales_dict[int(data.nomenclatura_wb)][
-                    "sales_amount"
-                ],
+            response_dict[data.seller_article] = {
                 "adv_cost_sum": (
-                    round(adv_dict[data.nomenclatura_wb], 2)
-                    if data.nomenclatura_wb in adv_dict
+                    round(adv_dict[data.product_id], 2)
+                    if data.product_id in adv_dict
                     else 0
                 ),
             }

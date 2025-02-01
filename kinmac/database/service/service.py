@@ -1,4 +1,4 @@
-from database.models import Articles, Company
+from database.models import Articles, Company, OzonProduct
 from api_requests.ozon_requests import ArticleDataRequest
 
 
@@ -61,20 +61,22 @@ class ModelObjectService:
 
     def get_article_obj_from_ozon_data(
         self, company: Company, sku: int, ozon_seller_article: str = None
-    ) -> Articles:
+    ) -> OzonProduct:
         """."""
         sku = int(sku)
-        article_obj = Articles.objects.filter(ozon_sku=sku).first()
+        article_obj = OzonProduct.objects.filter(
+            company=company, sku=sku
+        ).first()
 
         if not article_obj:
-            article_obj = Articles.objects.filter(
-                ozon_seller_article=ozon_seller_article
+            article_obj = OzonProduct.objects.filter(
+                company=company, seller_article=ozon_seller_article
             ).first()
 
-        if not article_obj:
-            article_obj = self.add_article_from_ozon(
-                company=company, sku=[sku]
-            )
+        # if not article_obj:
+        #     article_obj = self.add_article_from_ozon(
+        #         company=company, sku=[sku]
+        #     )
 
         return article_obj
 

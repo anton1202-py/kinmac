@@ -14,6 +14,12 @@ from kinmac.constants_file import BRAND_LIST
 from database.periodic_tasks import (
     get_ozon_fbo_fbs_orders,
     ozon_update_article_date,
+    save_ozon_fbo_warehouses_balance,
+)
+from google_table.service.ozon_serv import OzonMarketplaceArticlesData
+from reklama.periodic_tasks import (
+    add_ozon_adv_campaigns,
+    ozon_cost_adv_articles,
 )
 
 from .forms import (
@@ -40,7 +46,13 @@ def database_home(request):
     context = {
         "data": data,
     }
-    get_ozon_fbo_fbs_orders()
+    # add_ozon_adv_campaigns()
+    # ozon_cost_adv_articles()
+    # x = OzonMarketplaceArticlesData(weeks_amount=10)
+    # save_ozon_fbo_warehouses_balance()
+    # x.advert_data()
+    # ozon_update_article_date()
+    # get_ozon_fbo_fbs_orders()
 
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]

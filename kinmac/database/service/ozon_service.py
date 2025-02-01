@@ -99,7 +99,7 @@ class OzonWarehouseInfo:
                             WarehouseBalance.objects.update_or_create(
                                 company=company,
                                 warehouse=warehouse_obj,
-                                article=article_obj,
+                                ozon_article=article_obj,
                                 date=datetime.now().date(),
                                 defaults={"quantity": quantity, "idc": idc},
                             )
