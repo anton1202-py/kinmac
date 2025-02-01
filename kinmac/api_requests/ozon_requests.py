@@ -599,3 +599,6 @@ class OzonPriceComissionApiRequest(OzonTemplatesRequest):
         """Запрос по комиссиям и актуальной цене"""
         url = f"{self.main_url}v5/product/info/prices"
         return self._post_recursion_template_req_action(url, header)
+
+
+"""Загружать /v1/finance/cash-flow-statement/list"""

@@ -279,9 +279,6 @@ def ozon_update_article_date() -> None:
                         article.ozon_sku = product["sources"][0]["sku"]
                         article.ozon_barcode = product["barcodes"][0]
                         article.save()
-        
-        for product in products_info:
-            if not Articles.objects.filter():
 
 
 @app.task
