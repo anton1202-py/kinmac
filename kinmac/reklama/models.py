@@ -1,6 +1,6 @@
 from django.db import models
 
-from database.models import Articles, Company
+from database.models import Articles, Company, OzonProduct
 
 
 class ReklamaCampaign(models.Model):
@@ -73,8 +73,12 @@ class CampaignDailyAdvStatistic(models.Model):
     #     blank=True,
     #     null=True,
     # )
-    statistic_date = models.DateField(verbose_name="Дата", blank=True, null=True)
-    views = models.IntegerField(verbose_name="Просмотры", blank=True, null=True)
+    statistic_date = models.DateField(
+        verbose_name="Дата", blank=True, null=True
+    )
+    views = models.IntegerField(
+        verbose_name="Просмотры", blank=True, null=True
+    )
     clicks = models.IntegerField(verbose_name="Клики", blank=True, null=True)
     ctr = models.FloatField(
         verbose_name="CTR. Показатель кликабельности, отношение числа кликов к количеству показов, %",
@@ -97,7 +101,9 @@ class CampaignDailyAdvStatistic(models.Model):
         null=True,
     )
     shks = models.IntegerField(
-        verbose_name="Количество заказанных товаров, шт.", blank=True, null=True
+        verbose_name="Количество заказанных товаров, шт.",
+        blank=True,
+        null=True,
     )
     sum_price = models.FloatField(
         verbose_name="Заказов на сумму, ₽", blank=True, null=True
@@ -118,17 +124,21 @@ class OzonReklamaCampaign(models.Model):
         related_name="ozon_adv_campaigns",
     )
     number = models.IntegerField(verbose_name="ID кампании", null=True)
-    name = models.CharField(verbose_name="Название кампании", max_length=255, null=True)
+    name = models.CharField(
+        verbose_name="Название кампании", max_length=255, null=True
+    )
     type = models.CharField(verbose_name="Тип кампании", null=True)
     status = models.CharField(verbose_name="Статус кампании", null=True)
-    date_start = models.DateTimeField(verbose_name="Дата создания кампании", null=True)
+    date_start = models.DateTimeField(
+        verbose_name="Дата создания кампании", null=True
+    )
     end_time = models.DateField(
         verbose_name="Дата завершения кампании",
         blank=True,
         null=True,
     )
     article = models.ForeignKey(
-        Articles,
+        OzonProduct,
         on_delete=models.CASCADE,
         verbose_name="Артикулы",
         related_name="ozon_adv_campaigns",
@@ -144,7 +154,7 @@ class OzonArticleDailyCostToAdv(models.Model):
     """Затраты на рекламу одного артикула в день"""
 
     article = models.ForeignKey(
-        Articles,
+        OzonProduct,
         verbose_name="Артикул",
         on_delete=models.SET_NULL,
         related_name="ozon_adv_daily_cost_article",

@@ -30,6 +30,7 @@ from .models import (
     Marketplace,
     MarketplaceCategory,
     MarketplaceChoices,
+    OzonProduct,
     Platform,
     StorageCost,
 )
@@ -262,23 +263,62 @@ def ozon_update_article_date() -> None:
         for chunk in split_list(product_id_list, chunk_size):
             products = ozon_req.ozon_product_info(header, chunk)["items"]
             products_info.extend(products)
-        articles = Articles.objects.all()
-        for article in articles:
-            for product in products_info:
-                if product["barcodes"]:
-                    if article.barcode in product["barcodes"]:
 
-                        article.ozon_product_id = product["id"]
-                        article.ozon_seller_article = product["offer_id"]
-                        article.ozon_sku = product["sources"][0]["sku"]
-                        article.ozon_barcode = article.barcode
-                        article.save()
-                    elif article.common_article == product["offer_id"]:
-                        article.ozon_product_id = product["id"]
-                        article.ozon_seller_article = product["offer_id"]
-                        article.ozon_sku = product["sources"][0]["sku"]
-                        article.ozon_barcode = product["barcodes"][0]
-                        article.save()
+        for product in products_info:
+            if product["sources"]:
+                if OzonProduct.objects.filter(
+                    company=company, product_id=product["id"]
+                ):
+                    OzonProduct.objects.filter(
+                        company=company, product_id=product["id"]
+                    ).update(
+                        seller_article=product["offer_id"],
+                        barcode=product["barcodes"],
+                        sku=product["sources"][0]["sku"],
+                        name=product["name"],
+                        description_category_id=product[
+                            "description_category_id"
+                        ],
+                        type_id=product["type_id"],
+                        images=product["images"],
+                        marketing_price=product["marketing_price"],
+                        min_price=product["min_price"],
+                        old_price=product["old_price"],
+                        price=product["price"],
+                        volume_weight=product["volume_weight"],
+                    )
+                else:
+                    OzonProduct(
+                        company=company,
+                        product_id=product["id"],
+                        seller_article=product["offer_id"],
+                        barcode=product["barcodes"],
+                        sku=product["sources"][0]["sku"],
+                        name=product["name"],
+                        description_category_id=product[
+                            "description_category_id"
+                        ],
+                        type_id=product["type_id"],
+                        images=product["images"],
+                        marketing_price=product["marketing_price"],
+                        min_price=product["min_price"],
+                        old_price=product["old_price"],
+                        price=product["price"],
+                        volume_weight=product["volume_weight"],
+                    ).save()
+        attributes_info = ozon_req.ozon_product_attributes(header)
+        for attribute in attributes_info:
+            if OzonProduct.objects.filter(
+                company=company, product_id=attribute["id"]
+            ):
+                OzonProduct.objects.filter(
+                    company=company, product_id=attribute["id"]
+                ).update(
+                    heigh=attribute["heigh"],
+                    depth=attribute["depth"],
+                    width=attribute["width"],
+                    weight=attribute["weight"],
+                )
 
 
 @app.task

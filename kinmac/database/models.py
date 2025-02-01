@@ -310,6 +310,10 @@ class OzonProduct(models.Model):
     volume_weight = models.FloatField(
         verbose_name="Объёмный вес товара.", null=True
     )
+    heigh = models.FloatField(verbose_name="Высота упаковки, см", null=True)
+    depth = models.FloatField(verbose_name="Глубина упаковки, см", null=True)
+    width = models.FloatField(verbose_name="Ширина упаковки, см", null=True)
+    weight = models.FloatField(verbose_name="Вес уваковки, г", null=True)
 
 
 class Marketplace(models.Model):
@@ -1448,6 +1452,14 @@ class WarehouseBalance(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Артикул",
         related_name="balance",
+        null=True,
+    )
+    ozon_article = models.ForeignKey(
+        OzonProduct,
+        on_delete=models.CASCADE,
+        verbose_name="Артикул",
+        related_name="balance",
+        null=True,
     )
     date = models.DateField(
         verbose_name="Дата проверки",
@@ -1570,7 +1582,7 @@ class ArticlesRealizationReportOzon(models.Model):
     """Ежемесячный отчет о реализации Озон (деализация)"""
 
     article = models.ForeignKey(
-        Articles,
+        OzonProduct,
         verbose_name="Артикул",
         on_delete=models.SET_NULL,
         related_name="article_ozon_realization_report",
@@ -1718,6 +1730,14 @@ class MarketplaceOrders(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Артикул",
         related_name="marketplace_orders",
+        null=True,
+    )
+    ozon_article = models.ForeignKey(
+        OzonProduct,
+        on_delete=models.CASCADE,
+        verbose_name="Товар с Озон",
+        related_name="marketplace_orders",
+        null=True,
     )
     posting_number = models.CharField(
         verbose_name="Номер отправления.",

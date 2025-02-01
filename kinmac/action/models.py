@@ -1,5 +1,5 @@
 from django.db import models
-from database.models import Company, Marketplace
+from database.models import Company, Marketplace, OzonProduct
 from database.models import Articles
 
 
@@ -23,8 +23,14 @@ class Action(models.Model):
         blank=True,
         null=True,
     )
-    action_number = models.CharField(verbose_name="Номер акции", max_length=100)
-    name = models.CharField(verbose_name="Название акции", max_length=255, null=True,)
+    action_number = models.CharField(
+        verbose_name="Номер акции", max_length=100
+    )
+    name = models.CharField(
+        verbose_name="Название акции",
+        max_length=255,
+        null=True,
+    )
     description = models.TextField(verbose_name="Описание акции")
     date_start = models.DateTimeField(verbose_name="Дата начала акции")
     date_finish = models.DateTimeField(
@@ -67,17 +73,31 @@ class ArticleForAction(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Артикул",
         related_name="article_in_action",
+        null=True,
+    )
+    ozon_article = models.ForeignKey(
+        OzonProduct,
+        on_delete=models.CASCADE,
+        verbose_name="Артикул на Озоне",
+        related_name="article_in_action",
+        null=True,
     )
     in_action = models.BooleanField(
         verbose_name="Участвует в акции", null=True, blank=True
     )
-    action_price = models.FloatField(verbose_name="Цена в акции", null=True, blank=True)
+    action_price = models.FloatField(
+        verbose_name="Цена в акции", null=True, blank=True
+    )
     current_price = models.FloatField(
         verbose_name="Текущая цена", null=True, blank=True
     )
-    discount = models.IntegerField(verbose_name="Текущая скидка", null=True, blank=True)
+    discount = models.IntegerField(
+        verbose_name="Текущая скидка", null=True, blank=True
+    )
     plan_discount = models.IntegerField(
-        verbose_name="Рекомендуемая скидка для участия в акции", null=True, blank=True
+        verbose_name="Рекомендуемая скидка для участия в акции",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):

@@ -110,6 +110,10 @@ class ArticleDataRequest:
         )
         return self._post_template_req(url, header, payload)
 
+    def ozon_product_attributes(self, header: dict) -> list:
+        url = f"{self.MAIN_URL}v4/product/info/attributes"
+        return self._post_recursion_template_req(url, header)
+
 
 class ActionRequest(OzonTemplatesRequest):
 
