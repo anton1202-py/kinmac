@@ -266,6 +266,13 @@ def ozon_update_article_date() -> None:
 
         for product in products_info:
             if product["sources"]:
+                fbo_comission = None
+                fbs_comission = None
+                for data in product["commissions"]:
+                    if data["sale_schema"] == "FBO":
+                        fbo_comission = data["percent"]
+                    if data["sale_schema"] == "FBS":
+                        fbs_comission = data["percent"]
                 if OzonProduct.objects.filter(
                     company=company, product_id=product["id"]
                 ):
@@ -286,6 +293,8 @@ def ozon_update_article_date() -> None:
                         old_price=product["old_price"],
                         price=product["price"],
                         volume_weight=product["volume_weight"],
+                        fbo_comission=fbo_comission,
+                        fbs_comission=fbs_comission,
                     )
                 else:
                     OzonProduct(
@@ -305,6 +314,8 @@ def ozon_update_article_date() -> None:
                         old_price=product["old_price"],
                         price=product["price"],
                         volume_weight=product["volume_weight"],
+                        fbo_comission=fbo_comission,
+                        fbs_comission=fbs_comission,
                     ).save()
         attributes_info = ozon_req.ozon_product_attributes(header)
         ozon_products_to_update = []

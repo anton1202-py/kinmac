@@ -37,7 +37,7 @@ class OzonMarketplaceArticlesData:
             )
         )
         for data in sale_data:
-            sales_dict[data["nm_id"]] = {
+            sales_dict[data["ozon_article__product_id"]] = {
                 "sales_amount": data["sales_amount"],
                 "sales_sum": data["sales_sum"],
             }

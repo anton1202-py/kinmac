@@ -114,7 +114,7 @@ class OzonSalesOrdersHandler:
         MarketplaceOrders.objects.get_or_create(
             company=order_data.get("company"),
             marketplace=order_data.get("marketplace"),
-            article=order_data.get("article"),
+            ozon_article=order_data.get("ozon_article"),
             posting_number=order_data.get("posting_number"),
             order_id=order_data.get("order_id"),
             order_number=order_data.get("order_number"),

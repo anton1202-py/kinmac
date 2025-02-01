@@ -315,6 +315,9 @@ class OzonProduct(models.Model):
     width = models.FloatField(verbose_name="Ширина упаковки, см", null=True)
     weight = models.FloatField(verbose_name="Вес уваковки, кг", null=True)
 
+    fbo_comission = models.FloatField(verbose_name="Комиссия ФБО", null=True)
+    fbs_comission = models.FloatField(verbose_name="Комиссия ФБС", null=True)
+
 
 class Marketplace(models.Model):
     name = models.CharField(
