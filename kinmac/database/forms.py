@@ -24,26 +24,38 @@ class ArticlesForm(ModelForm):
             "common_article": TextInput(
                 attrs={"class": "form-control", "placeholder": "Артикул"}
             ),
-            "brand": TextInput(attrs={"class": "form-control", "placeholder": "Бренд"}),
+            "brand": TextInput(
+                attrs={"class": "form-control", "placeholder": "Бренд"}
+            ),
             "barcode": TextInput(
                 attrs={"class": "form-control", "placeholder": "Баркод"}
             ),
             "nomenclatura_wb": TextInput(
-                attrs={"class": "form-control", "placeholder": "Номенклатура WB"}
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Номенклатура WB",
+                }
             ),
             "predmet": TextInput(
                 attrs={"class": "form-control", "placeholder": "Предмет"}
             ),
-            "size": TextInput(attrs={"class": "form-control", "placeholder": "Размер"}),
+            "size": TextInput(
+                attrs={"class": "form-control", "placeholder": "Размер"}
+            ),
             "model": TextInput(
                 attrs={"class": "form-control", "placeholder": "Модель"}
             ),
-            "color": TextInput(attrs={"class": "form-control", "placeholder": "Цвет"}),
+            "color": TextInput(
+                attrs={"class": "form-control", "placeholder": "Цвет"}
+            ),
             "prime_cost": TextInput(
                 attrs={"class": "form-control", "placeholder": "Себестоимость"}
             ),
             "average_cost": TextInput(
-                attrs={"class": "form-control", "placeholder": "Средняя себестоимость"}
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Средняя себестоимость",
+                }
             ),
         }
 

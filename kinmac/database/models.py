@@ -41,12 +41,18 @@ class Company(models.Model):
 
     @property
     def wb_cookie_header(self):
+        USER_AGENT = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/128.0.0.0 YaBrowser/24.10.0.0 "
+            "Safari/537.36"
+        )
         return {
             "authorizev3": "",
             "baggage": "",
             "cookie": self.wb_cookie_token,
             "sentry-trace": "",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 YaBrowser/24.10.0.0 Safari/537.36",
+            "user-agent": USER_AGENT,
             "Content-Type": "application/json",
         }
 
@@ -224,6 +230,86 @@ class Articles(models.Model):
     class Meta:
         verbose_name = "Артикул"
         verbose_name_plural = "Артикулы"
+
+
+class OzonProduct(models.Model):
+    """Описывает товары на Озоне (без привязки к ВБ)"""
+
+    company = models.ForeignKey(
+        Company,
+        verbose_name="Компания",
+        related_name="ozon_product",
+        on_delete=models.CASCADE,
+    )
+    product_id = models.BigIntegerField(
+        verbose_name="Product ID OZON",
+    )
+    seller_article = models.CharField(
+        verbose_name="Product ID OZON",
+        max_length=255,
+        null=True,
+    )
+    barcode = models.JSONField(
+        verbose_name="Баркод",
+        null=True,
+    )
+    sku = models.BigIntegerField(
+        verbose_name="OZON SKU",
+        null=True,
+    )
+    name = models.CharField(
+        verbose_name="Название",
+        max_length=300,
+        null=True,
+    )
+    description_category_id: int = models.BigIntegerField(
+        verbose_name="ID категории",
+        null=True,
+    )
+    type_id = models.IntegerField(
+        verbose_name="Идентификатор типа товара.",
+        null=True,
+    )
+    created_at = models.DateTimeField(
+        verbose_name="Дата и время создания товара.",
+        null=True,
+    )
+    images = models.JSONField(
+        verbose_name="Массив ссылок на изображения.",
+        null=True,
+    )
+    marketing_price = models.CharField(
+        verbose_name=(
+            "Цена на товар с учётом всех акций. "
+            "Это значение будет указано на витрине Ozon."
+        ),
+        max_length=20,
+        null=True,
+    )
+    min_price = models.CharField(
+        verbose_name="Минимальная цена товара после применения акций.",
+        max_length=50,
+        null=True,
+    )
+    old_price = models.CharField(
+        verbose_name=(
+            "Цена до учёта скидок. "
+            "На карточке товара отображается зачёркнутой."
+        ),
+        max_length=50,
+        null=True,
+    )
+    price = models.CharField(
+        verbose_name=(
+            "Цена товара с учётом скидок."
+            "Это значение показывается на карточке товара."
+        ),
+        max_length=50,
+        null=True,
+    )
+    volume_weight = models.FloatField(
+        verbose_name="Объёмный вес товара.", null=True
+    )
 
 
 class Marketplace(models.Model):
@@ -888,7 +974,9 @@ class SalesReportOnSales(models.Model):
         blank=True,
     )
     ppvz_sales_commission = models.FloatField(
-        verbose_name="Вознаграждение с продаж до вычета услуг поверенного, без НДС",
+        verbose_name=(
+            "Вознаграждение с продаж до вычета услуг поверенного, без НДС"
+        ),
         null=True,
         blank=True,
     )
@@ -1167,7 +1255,10 @@ class ArticleStorageCost(models.Model):
         verbose_name="Сумма хранения",
     )
     barcodes_count = models.IntegerField(
-        verbose_name="Количество единиц товара (штук), подлежащих тарифицированию за расчётные сутки",
+        verbose_name=(
+            "Количество единиц товара (штук), "
+            "подлежащих тарифицированию за расчётные сутки"
+        ),
     )
     pallet_place_code = models.IntegerField(
         verbose_name="Код паллетоместа",
@@ -1176,7 +1267,10 @@ class ArticleStorageCost(models.Model):
         verbose_name="Количество паллет",
     )
     original_date = models.CharField(
-        verbose_name="Если был перерасчёт, это дата первоначального расчёта. Если перерасчёта не было, совпадает с date",
+        verbose_name=(
+            "Если был перерасчёт, это дата первоначального расчёта. "
+            "Если перерасчёта не было, совпадает с date"
+        ),
         max_length=300,
         null=True,
         blank=True,
@@ -1203,7 +1297,9 @@ class ArticleStorageCost(models.Model):
 
 
 class ArticlePriceStock(models.Model):
-    """Содержит данные об общих остатках каждого артикула, цене продавца и СПП"""
+    """
+    Содержит данные об общих остатках каждого артикула, цене продавца и СПП
+    """
 
     marketplace = models.ForeignKey(
         Marketplace,
@@ -1362,7 +1458,10 @@ class WarehouseBalance(models.Model):
         default=0,
     )
     idc = models.FloatField(
-        verbose_name="На сколько дней хватит остатка товара с учётом среднесуточных продаж.",
+        verbose_name=(
+            "На сколько дней хватит остатка товара "
+            "с учётом среднесуточных продаж."
+        ),
         null=True,
         blank=True,
     )
@@ -1525,7 +1624,9 @@ class ArticlesRealizationReportOzon(models.Model):
         null=True,
     )
     bank_coinvestment = models.FloatField(
-        verbose_name="Выплаты по механикам лояльности партнёров: зелёные цены.",
+        verbose_name=(
+            "Выплаты по механикам лояльности партнёров: зелёные цены."
+        ),
         null=True,
     )
     pick_up_point_coinvestment = models.FloatField(
@@ -1582,7 +1683,9 @@ class ReturnArticlesRealizationReportOzon(models.Model):
         null=True,
     )
     bank_coinvestment = models.FloatField(
-        verbose_name="Выплаты по механикам лояльности партнёров: зелёные цены.",
+        verbose_name=(
+            "Выплаты по механикам лояльности партнёров: зелёные цены."
+        ),
         null=True,
     )
     pick_up_point_coinvestment = models.FloatField(

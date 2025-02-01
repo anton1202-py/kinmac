@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
+from database.periodic_tasks import ozon_update_article_date
 
 from .forms import (
     ArticlesForm,
@@ -36,6 +37,17 @@ def database_home(request):
     context = {
         "data": data,
     }
+    ozon_update_article_date()
+    for article in Articles.objects.all():
+        if (
+            article.barcode != article.ozon_barcode
+            and article.ozon_seller_article is not None
+        ):
+            print(
+                article.brand,
+                article.barcode,
+                article.ozon_barcode,
+            )
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)

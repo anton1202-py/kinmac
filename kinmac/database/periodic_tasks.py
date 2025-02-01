@@ -262,27 +262,26 @@ def ozon_update_article_date() -> None:
         for chunk in split_list(product_id_list, chunk_size):
             products = ozon_req.ozon_product_info(header, chunk)["items"]
             products_info.extend(products)
-        for product in products_info:
-            if product["barcodes"]:
-                if Articles.objects.filter(barcode=product["barcodes"][0]):
-                    if product["sources"][0]["sku"]:
-                        article_obj = Articles.objects.filter(
-                            barcode=product["barcodes"][0]
-                        ).first()
-                elif Articles.objects.filter(
-                    common_article=product["offer_id"]
-                ):
-                    article_obj = Articles.objects.filter(
-                        common_article=product["offer_id"]
-                    ).first()
+        articles = Articles.objects.all()
+        for article in articles:
+            for product in products_info:
+                if product["barcodes"]:
+                    if article.barcode in product["barcodes"]:
 
-                if article_obj:
-                    article_obj.ozon_product_id = product["id"]
-                    article_obj.ozon_seller_article = product["offer_id"]
-                    article_obj.ozon_sku = product["sources"][0]["sku"]
-                    article_obj.ozon_barcode = product["barcodes"][0]
-                    article_obj.save()
-            product = None
+                        article.ozon_product_id = product["id"]
+                        article.ozon_seller_article = product["offer_id"]
+                        article.ozon_sku = product["sources"][0]["sku"]
+                        article.ozon_barcode = article.barcode
+                        article.save()
+                    elif article.common_article == product["offer_id"]:
+                        article.ozon_product_id = product["id"]
+                        article.ozon_seller_article = product["offer_id"]
+                        article.ozon_sku = product["sources"][0]["sku"]
+                        article.ozon_barcode = product["barcodes"][0]
+                        article.save()
+        
+        for product in products_info:
+            if not Articles.objects.filter():
 
 
 @app.task
