@@ -12,6 +12,8 @@ from database.models import (
 from reklama.models import OzonArticleDailyCostToAdv
 from unit_economic.models import MarketplaceCommission
 
+OZON_CATEGORY_LIST = [17028939, 17027904]
+
 
 class OzonMarketplaceArticlesData:
     """Данные артикулов по Озон"""
@@ -29,35 +31,37 @@ class OzonMarketplaceArticlesData:
             MarketplaceOrders.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 marketplace=Marketplace.objects.filter(name="Ozon").first(),
+                ozon_article__description_category_id__in=OZON_CATEGORY_LIST,
                 date__gte=start_date,
                 date__lte=end_date,
             )
             .order_by("ozon_article__seller_article")
-            .values("ozon_article__product_id")
+            .values("ozon_article__seller_article")
             .annotate(
                 sales_amount=Count("amount"),
                 sales_sum=Sum("price"),
             )
         )
         for data in sale_data:
-            sales_dict[data["ozon_article__product_id"]] = {
+            sales_dict[data["ozon_article__seller_article"]] = {
                 "sales_amount": data["sales_amount"],
                 "sales_sum": data["sales_sum"],
             }
         for article_obj in OzonProduct.objects.filter(
-            company=Company.objects.filter(name="KINMAC").first()
+            company=Company.objects.filter(name="KINMAC").first(),
+            description_category_id__in=OZON_CATEGORY_LIST,
         ).order_by("seller_article"):
             if article_obj.product_id in sales_dict:
-                response_dict[article_obj.product_id] = {
-                    "sales_amount": sales_dict[article_obj.product_id][
+                response_dict[article_obj.seller_article] = {
+                    "sales_amount": sales_dict[article_obj.seller_article][
                         "sales_amount"
                     ],
-                    "sales_sum": sales_dict[article_obj.product_id][
+                    "sales_sum": sales_dict[article_obj.seller_article][
                         "sales_sum"
                     ],
                 }
             else:
-                response_dict[article_obj.product_id] = {
+                response_dict[article_obj.seller_article] = {
                     "sales_amount": 0,
                     "sales_sum": 0,
                 }
@@ -66,7 +70,8 @@ class OzonMarketplaceArticlesData:
     def common_article_data(self):
         """Общая информация артикула"""
         comissions = OzonProduct.objects.filter(
-            company=Company.objects.filter(name="KINMAC").first()
+            company=Company.objects.filter(name="KINMAC").first(),
+            description_category_id__in=OZON_CATEGORY_LIST,
         ).order_by("seller_article")
         response_dict = {}
         for data in comissions:
@@ -83,7 +88,10 @@ class OzonMarketplaceArticlesData:
     def stock_data(self):
         """Отдает данные по SPP, остаткам, цене"""
         stock_data = (
-            WarehouseBalance.objects.values("ozon_article__seller_article")
+            WarehouseBalance.objects.filter(
+                ozon_article__description_category_id__in=OZON_CATEGORY_LIST
+            )
+            .values("ozon_article__seller_article")
             .annotate(
                 latest_date=Max("date"),
                 common_stock=Sum("quantity"),
@@ -99,7 +107,8 @@ class OzonMarketplaceArticlesData:
             }
         response_dict = {}
         for article_obj in OzonProduct.objects.filter(
-            company=Company.objects.filter(name="KINMAC").first()
+            company=Company.objects.filter(name="KINMAC").first(),
+            description_category_id__in=OZON_CATEGORY_LIST,
         ).order_by("seller_article"):
             if article_obj.seller_article in stock_dict:
                 response_dict[article_obj.seller_article] = {
@@ -119,29 +128,30 @@ class OzonMarketplaceArticlesData:
         """Получение данных а цене артикула в акции"""
         end_date = datetime.now()
         start_date = end_date - timedelta(weeks=self.weeks_amount)
-        sales_dict = self.only_sales_data()
         adv_dict = {}
         adv_data = (
             OzonArticleDailyCostToAdv.objects.filter(
+                article__description_category_id__in=OZON_CATEGORY_LIST,
                 cost_date__gte=start_date,
                 cost_date__lte=end_date,
             )
             .order_by("article__seller_article")
-            .values("article__product_id")
+            .values("article__seller_article")
             .annotate(sum_cost=Sum("cost"))
         )
         for data in adv_data:
-            adv_dict[data["article__product_id"]] = data["sum_cost"]
+            adv_dict[data["article__seller_article"]] = data["sum_cost"]
 
         response_dict = {}
         articles_data = OzonProduct.objects.filter(
-            company=Company.objects.filter(name="KINMAC").first()
+            company=Company.objects.filter(name="KINMAC").first(),
+            description_category_id__in=OZON_CATEGORY_LIST,
         ).order_by("seller_article")
         for data in articles_data:
             response_dict[data.seller_article] = {
                 "adv_cost_sum": (
-                    round(adv_dict[data.product_id], 2)
-                    if data.product_id in adv_dict
+                    round(adv_dict[data.seller_article], 2)
+                    if data.seller_article in adv_dict
                     else 0
                 ),
             }

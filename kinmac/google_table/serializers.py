@@ -26,6 +26,14 @@ class ActionArticlesSerializer(serializers.ModelSerializer):
         fields = ["article", "action_price"]
 
 
+class OzonActionArticlesSerializer(serializers.ModelSerializer):
+    article = serializers.CharField(source="ozon_article.seller_article")
+
+    class Meta:
+        model = ArticleForAction
+        fields = ["article", "action_price"]
+
+
 class MarketplaceCommissionSerializer(serializers.ModelSerializer):
     marketplace_product = serializers.CharField(
         source="marketplace_product.common_article"

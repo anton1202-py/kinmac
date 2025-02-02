@@ -74,7 +74,7 @@ class OzonActionHandler:
             try:
                 ArticleForAction.objects.update_or_create(
                     action=action,
-                    article=article,
+                    ozon_article=article,
                     defaults={
                         "action_price": product_raw_data["action_price"],
                         "current_price": product_raw_data["price"],
@@ -88,32 +88,25 @@ class OzonActionHandler:
         self, company: Company, product_raw_data: dict, action: Action
     ):
         """
-        Сохраняет товары, которые могут участвовать в акции Озон
-            "action_price": 0,
-            "date_day_promo": "string",
-            "id": 0,
-            "is_active": true,
-            "max_action_price": 0,
-            "min_stock": 0,
-            "stock": 0
+        Сохраняет товары, которые могут участвовать в акции Hot Sale Озон
         """
         article = self.art_obj.get_article_obj_ozon_with_product_id(
             company=company, product_id=product_raw_data["id"]
         )
         if article:
             action_price = product_raw_data["action_price"]
-            # current_price = product_raw_data["price"]
-            # discount = (
-            #     (1 - action_price / current_price) * 100
-            #     if current_price != 0
-            #     else 0
-            # )
+            current_price = article.price
+            discount = (
+                (1 - action_price / current_price) * 100
+                if current_price != 0
+                else 0
+            )
             ArticleForAction.objects.update_or_create(
                 action=action,
-                article=article,
+                ozon_article=article,
                 defaults={
                     "action_price": product_raw_data["action_price"],
-                    # "current_price": product_raw_data["price"],
-                    # "discount": discount,
+                    "current_price": article.price,
+                    "discount": discount,
                 },
             )

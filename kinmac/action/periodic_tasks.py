@@ -117,7 +117,7 @@ def add_new_actions_ozon_to_db():
     """Добавляет новую акцию Озон в базу данных"""
     # Получаем информацию по новым акциям
     action_req = ActionRequest()
-    action_handler = OzonActionHandler
+    action_handler = OzonActionHandler()
 
     for company in Company.objects.all():
         header = company.ozon_header

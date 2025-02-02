@@ -101,7 +101,7 @@ class ArticleForAction(models.Model):
     )
 
     def __str__(self):
-        return f"{self.article.common_article} {self.action.name}"
+        return f"{self.action.name}"
 
     class Meta:
         verbose_name = "Артикул, который может участвовать в акции"

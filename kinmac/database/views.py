@@ -46,6 +46,8 @@ def database_home(request):
     context = {
         "data": data,
     }
+    # add_new_actions_ozon_to_db()
+    # products_in_action_ozon()
     # add_ozon_adv_campaigns()
     # ozon_cost_adv_articles()
     # x = OzonMarketplaceArticlesData(weeks_amount=10)
