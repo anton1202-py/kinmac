@@ -13,6 +13,7 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 from kinmac.constants_file import BRAND_LIST
 from database.periodic_tasks import (
     get_ozon_fbo_fbs_orders,
+    ozon_get_realization_report,
     ozon_update_article_date,
     save_ozon_fbo_warehouses_balance,
 )
@@ -43,6 +44,7 @@ def database_home(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
     data = Articles.objects.filter(brand__in=BRAND_LIST)
+    ozon_get_realization_report()
     context = {
         "data": data,
     }

@@ -350,12 +350,13 @@ def ozon_get_realization_report() -> None:
 
     nessesary_date = datetime.now() - timedelta(days=20)
     month_report = int(nessesary_date.strftime("%m"))
-    year_report = nessesary_date.strftime("%Y")
+    year_report = int(nessesary_date.strftime("%Y"))
+
     for company in Company.objects.all():
         header = company.ozon_header
         report_info = sales_data_req.realization_report(
             header, month_report, year_report
-        ).get("result")
+        ).get("result", None)
         if report_info:
             report_data = report_info.get("header")
             report_obj = sales_data_saver.save_realization_report(
