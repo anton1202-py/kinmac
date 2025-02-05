@@ -44,20 +44,9 @@ def database_home(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
     data = Articles.objects.filter(brand__in=BRAND_LIST)
-    ozon_get_realization_report()
     context = {
         "data": data,
     }
-    # add_new_actions_ozon_to_db()
-    # products_in_action_ozon()
-    # add_ozon_adv_campaigns()
-    # ozon_cost_adv_articles()
-    # x = OzonMarketplaceArticlesData(weeks_amount=10)
-    # save_ozon_fbo_warehouses_balance()
-    # x.advert_data()
-    # ozon_update_article_date()
-    # get_ozon_fbo_fbs_orders()
-
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)
