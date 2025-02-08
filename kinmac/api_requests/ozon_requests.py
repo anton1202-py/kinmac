@@ -636,4 +636,72 @@ class OzonPriceComissionApiRequest(OzonTemplatesRequest):
         return self._post_recursion_template_req_action(url, header)
 
 
+class OzonReportsApiRequest(OzonTemplatesRequest):
+
+    def __init__(self):
+        self.url = "https://api-seller.ozon.ru"
+
+    def _post_recursion_template_req_transaction(
+        self,
+        url: str,
+        header: dict,
+        date_from: str,
+        date_to: str,
+        data_list: list = None,
+        limit: int = 1000,
+        page: int = 1,
+    ) -> list:
+        if not data_list:
+            data_list = []
+        payload = json.dumps(
+            {
+                "filter": {
+                    "date": {
+                        "from": f"{date_from}T00:00:00.000Z",
+                        "to": f"{date_to}T00:00:00.000Z",
+                    },
+                    "operation_type": [],
+                    "transaction_type": "all",
+                },
+                "page": page,
+                "page_size": limit,
+            }
+        )
+        response = requests.post(url, headers=header, data=payload)
+        if response.status_code == 200:
+            main_data: dict = json.loads(response.text).get("result")
+            response_data: list = main_data.get("operations")
+            for data in response_data:
+                data_list.append(data)
+            if len(response_data) == limit:
+                page == 1
+                return self._post_recursion_template_req_transaction(
+                    url=url,
+                    header=header,
+                    date_from=date_from,
+                    date_to=date_to,
+                    data_list=data_list,
+                    limit=limit,
+                    page=page,
+                )
+            else:
+                return data_list
+
+    def finance_transaction_list(
+        self, header: dict, date_from: str, date_to: str
+    ) -> list:
+        """
+        Возвращает подробную информацию по всем начислениям.
+        Максимальный период, за который можно получить информацию
+        в одном запросе — 1 месяц.
+        """
+        method = "/v3/finance/transaction/list"
+        return self._post_recursion_template_req_transaction(
+            url=self.url + method,
+            header=header,
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+
 """Загружать /v1/finance/cash-flow-statement/list"""

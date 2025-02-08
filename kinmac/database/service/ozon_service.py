@@ -1,16 +1,16 @@
-from collections import defaultdict
 from datetime import datetime
 
 from database.service.service import ModelObjectService
 
 from api_requests.ozon_requests import OzonWarehouseApiRequest
 from database.models import (
-    Articles,
     Cluster,
     Company,
     Marketplace,
     MarketplaceOrders,
     OzonProduct,
+    OzonTransaction,
+    TransactionService,
     Warehouse,
     WarehouseBalance,
 )
@@ -168,3 +168,71 @@ class OzonSalesOrdersHandler:
                     "price": price,
                 }
                 self.save_order_data(order_data)
+
+
+class OzonReportsHandler:
+    """Обрабатывает и сохраняет данные из отчетов Озон"""
+
+    def _get_service_object(
+        self, service_name: str, service_price: float
+    ) -> TransactionService:
+
+        service_obj, create = TransactionService.objects.get_or_create(
+            name=service_name, price=service_price
+        )
+        return service_obj
+
+    def _save_transaction_to_db(
+        self, company: Company, transaction: dict
+    ) -> OzonTransaction:
+        OzonTransaction.objects.get_or_create(
+            company=company,
+            operation_id=transaction.get("operation_id"),
+            operation_date=transaction.get("operation_date"),
+            operation_type=transaction.get("operation_type"),
+            defaults={
+                "accruals_for_sale": transaction.get("accruals_for_sale"),
+                "amount": transaction.get("amount"),
+                "delivery_charge": transaction.get("delivery_charge"),
+                "article": transaction.get("article"),
+                "operation_type_name": transaction.get("operation_type_name"),
+                "delivery_schema": transaction.get("delivery_schema"),
+                "order_date": transaction.get("order_date"),
+                "posting_number": transaction.get("posting_number"),
+                "warehouse_id": transaction.get("warehouse_id"),
+                "return_delivery_charge": transaction.get(
+                    "return_delivery_charge"
+                ),
+                "sale_commission": transaction.get("sale_commission"),
+                "services": transaction.get("services"),
+                "type": transaction.get("type"),
+            },
+        )
+
+    def transaction_handler(
+        self, company: Company, transactions_info: list[dict]
+    ) -> None:
+        """Обрабатывает данные по отчету транзакций"""
+        for transaction in transactions_info:
+            skus: list[dict] = transaction.get("items")
+            article = None
+            if skus:
+                sku = skus[0].get("sku")
+                article = OzonProduct.objects.filter(
+                    company=company, sku=sku
+                ).firs()
+            services = []
+            services_raw = transaction.get("services")
+            if services_raw:
+                for service in services_raw:
+                    service_obj = self._get_service_object(
+                        service_name=service["name"],
+                        service_price=service["price"],
+                    )
+                    services.append(service_obj)
+            transaction["article"] = article
+            transaction["services"] = services
+
+            self._save_transaction_to_db(
+                company=company, transaction=transaction
+            )

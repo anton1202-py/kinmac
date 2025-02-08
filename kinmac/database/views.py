@@ -11,17 +11,6 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
-from database.periodic_tasks import (
-    get_ozon_fbo_fbs_orders,
-    ozon_get_realization_report,
-    ozon_update_article_date,
-    save_ozon_fbo_warehouses_balance,
-)
-from google_table.service.ozon_serv import OzonMarketplaceArticlesData
-from reklama.periodic_tasks import (
-    add_ozon_adv_campaigns,
-    ozon_cost_adv_articles,
-)
 
 from .forms import (
     ArticlesForm,
@@ -76,7 +65,7 @@ def database_home(request):
         color_list = load_excel_data_wb_stock["COLOR"].to_list()
         prime_cost_list = load_excel_data_wb_stock["CC"].to_list()
         average_cost_list = load_excel_data_wb_stock["Сред СС"].to_list()
-        dbframe = empexceldata
+
         for i in range(len(common_article_list)):
             if Articles.objects.filter(
                 Q(common_article=common_article_list[i])
@@ -300,11 +289,7 @@ def sales_report(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
     control_date_orders = date.today() - timedelta(days=30)
-    all_data = (
-        SalesReportOnSales.objects.all()
-        .values("realizationreport_id")
-        .distinct()
-    )
+
     data = SalesReportOnSales.objects.filter(
         Q(date_from__range=[control_date_orders, date.today()])
     ).order_by("-realizationreport_id")
@@ -520,7 +505,15 @@ class DatabaseWeeklySalesDetailView(ListView):
             .order_by("year", "week")
         )
 
-        # Получаем queryset вида [{'warehouse_name': 'Тула', 'week': 43, 'year': 2023, 'week_sales': 2}]
+        # Получаем queryset вида
+        # [
+        #   {
+        #       'warehouse_name': 'Тула',
+        #       'week': 43,
+        #       'year': 2023,
+        #       'week_sales': 2
+        #   }
+        # ]
         warehouses = (
             Sales.objects.filter(
                 Q(barcode=self.kwargs["barcode"]), Q(finished_price__gte=0)
@@ -584,7 +577,6 @@ class DatabaseWeeklySalesDetailView(ListView):
         # Добавляем недостающие недели со значением 0
         for warehouse_name, amount in warehouses_data.items():
             for week in unique_week:
-                inner_dict = {}
                 if week not in amount.keys():
                     amount[week] = ""
         for article_data in data.values():

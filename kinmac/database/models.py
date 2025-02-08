@@ -1779,3 +1779,101 @@ class MarketplaceOrders(models.Model):
         verbose_name="Цена заказа.",
         null=True,
     )
+
+
+class TransactionService(models.Model):
+    """Название услуги."""
+
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.name
+
+
+class OzonTransaction(models.Model):
+    """Транзакции Озон (заказы, возвраты)"""
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        verbose_name="Компания",
+        related_name="transaction",
+    )
+
+    accruals_for_sale = models.FloatField(
+        verbose_name="Стоимость товаров с учётом скидок продавца.",
+        null=True,
+    )
+    amount = models.FloatField(
+        verbose_name="Итоговая сумма операции.",
+        null=True,
+    )
+    delivery_charge = models.FloatField(
+        verbose_name="Стоимость доставки по тарифам до 1 февраля 2021 года",
+        null=True,
+    )
+    article = models.ForeignKey(
+        OzonProduct,
+        on_delete=models.CASCADE,
+        verbose_name="Товар с Озон",
+        related_name="transaction",
+        null=True,
+    )
+    operation_date = models.DateTimeField(
+        verbose_name="Дата операции.",
+        null=True,
+    )
+    operation_id = models.BigIntegerField(
+        verbose_name="Идентификатор операции.",
+        null=True,
+    )
+    operation_type = models.CharField(
+        verbose_name="Тип операции.",
+        max_length=150,
+        null=True,
+    )
+    operation_type_name = models.CharField(
+        verbose_name="Название типа операции.",
+        max_length=150,
+        null=True,
+    )
+    delivery_schema = models.CharField(
+        verbose_name="Схема доставки.",
+        max_length=150,
+        null=True,
+    )
+    order_date = models.DateTimeField(
+        verbose_name="Дата принятия отправления в обработку.",
+        null=True,
+    )
+    posting_number = models.CharField(
+        verbose_name="Номер отправления.",
+        max_length=150,
+        null=True,
+    )
+    warehouse_id = models.BigIntegerField(
+        verbose_name="Идентификатор склада.",
+        null=True,
+    )
+    return_delivery_charge = models.FloatField(
+        verbose_name="Плата за возвраты и отмены по тарифам до 1 февраля 2021",
+        null=True,
+    )
+    sale_commission = models.FloatField(
+        verbose_name="Комиссия за продажу или возврат комиссии за продажу.",
+        null=True,
+    )
+    services = models.ManyToManyField(
+        TransactionService,
+        verbose_name="Название услуги.",
+        related_name="operations",
+    )
+    type = models.CharField(
+        verbose_name="Тип начисления.",
+        max_length=50,
+        null=True,
+    )
+
+    def __str__(self):
+        return f"Transaction {self.operation_id} - {self.operation_type_name}"

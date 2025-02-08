@@ -9,7 +9,11 @@ from api_requests.wb_requests import (
 from django.db import transaction
 from celery_tasks.celery import app
 
-from api_requests.ozon_requests import ArticleDataRequest, OzonSalesRequest
+from api_requests.ozon_requests import (
+    ArticleDataRequest,
+    OzonReportsApiRequest,
+    OzonSalesRequest,
+)
 from kinmac.constants_file import wb_headers
 from database.supplyment import (
     OzonSalesDataSave,
@@ -17,6 +21,7 @@ from database.supplyment import (
     get_price_info_from_ofissial_api,
 )
 from database.service.ozon_service import (
+    OzonReportsHandler,
     OzonSalesOrdersHandler,
     OzonWarehouseInfo,
 )
@@ -420,3 +425,23 @@ def get_ozon_fbo_fbs_orders():
                 raw_order_data=fbs_orders_data,
                 order_type="fbs",
             )
+
+
+@app.task
+def get_ozon_transactions_info():
+    """Загружает информацию о транзакциях Озон"""
+
+    req = OzonReportsApiRequest()
+    handler = OzonReportsHandler()
+
+    companies = Company.objects.filter(ozon_token__isnull=False)
+    date_today = datetime.now()
+    date_from = (date_today - timedelta(days=7)).date()
+    date_to = date_today.date()
+    for company in companies:
+        transactions_info = req.finance_transaction_list(
+            header=company.ozon_header, date_from=date_from, date_to=date_to
+        )
+        handler.transaction_handler(
+            company=company, transactions_info=transactions_info
+        )
