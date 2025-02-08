@@ -674,7 +674,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
             for data in response_data:
                 data_list.append(data)
             if len(response_data) == limit:
-                page == 1
+                page += 1
                 return self._post_recursion_template_req_transaction(
                     url=url,
                     header=header,

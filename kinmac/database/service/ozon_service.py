@@ -185,7 +185,10 @@ class OzonReportsHandler:
     def _save_transaction_to_db(
         self, company: Company, transaction: dict
     ) -> OzonTransaction:
-        OzonTransaction.objects.get_or_create(
+        order_date = transaction.get("posting").get("order_date")
+        if order_date == "":
+            order_date = None
+        ozon_transaction, created = OzonTransaction.objects.update_or_create(
             company=company,
             operation_id=transaction.get("operation_id"),
             operation_date=transaction.get("operation_date"),
@@ -196,18 +199,22 @@ class OzonReportsHandler:
                 "delivery_charge": transaction.get("delivery_charge"),
                 "article": transaction.get("article"),
                 "operation_type_name": transaction.get("operation_type_name"),
-                "delivery_schema": transaction.get("delivery_schema"),
-                "order_date": transaction.get("order_date"),
-                "posting_number": transaction.get("posting_number"),
-                "warehouse_id": transaction.get("warehouse_id"),
+                "delivery_schema": transaction.get("posting").get(
+                    "delivery_schema"
+                ),
+                "order_date": order_date,
+                "posting_number": transaction.get("posting").get(
+                    "posting_number"
+                ),
+                "warehouse_id": transaction.get("posting").get("warehouse_id"),
                 "return_delivery_charge": transaction.get(
                     "return_delivery_charge"
                 ),
                 "sale_commission": transaction.get("sale_commission"),
-                "services": transaction.get("services"),
                 "type": transaction.get("type"),
             },
         )
+        ozon_transaction.services.set(transaction.get("services"))
 
     def transaction_handler(
         self, company: Company, transactions_info: list[dict]
@@ -220,7 +227,7 @@ class OzonReportsHandler:
                 sku = skus[0].get("sku")
                 article = OzonProduct.objects.filter(
                     company=company, sku=sku
-                ).firs()
+                ).first()
             services = []
             services_raw = transaction.get("services")
             if services_raw:

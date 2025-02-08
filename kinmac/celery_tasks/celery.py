@@ -83,10 +83,15 @@ app.conf.beat_schedule = {
         "task": "database.periodic_tasks.article_storage_cost",
         "schedule": crontab(hour=15, minute=5),
     },
-    # ========= ЕЖЕМЕСЯЧНЫЙ ОТЧЕТ ПО ППРОДАЖАМ ОЗОН =========#
+    # ========= ЕЖЕМЕСЯЧНЫЙ ОТЧЕТ ПО ПРОДАЖАМ ОЗОН =========#
     "database_ozon_realization_report": {
         "task": "database.periodic_tasks.ozon_get_realization_report",
         "schedule": crontab(0, 0, day_of_month="7"),
+    },
+    # ========= СПИСОК ТРАНЗАКЦИЙ ОЗОН =========#
+    "database_ozon_get_transactions_info": {
+        "task": "database.periodic_tasks.ozon_get_transactions_info",
+        "schedule": crontab(hour=4, minute=1),
     },
     "database_update_spp_stock_price": {
         "task": "database.periodic_tasks.wb_article_price_stock_app_data",

@@ -428,7 +428,7 @@ def get_ozon_fbo_fbs_orders():
 
 
 @app.task
-def get_ozon_transactions_info():
+def ozon_get_transactions_info():
     """Загружает информацию о транзакциях Озон"""
 
     req = OzonReportsApiRequest()
@@ -436,7 +436,7 @@ def get_ozon_transactions_info():
 
     companies = Company.objects.filter(ozon_token__isnull=False)
     date_today = datetime.now()
-    date_from = (date_today - timedelta(days=7)).date()
+    date_from = (date_today - timedelta(days=10)).date()
     date_to = date_today.date()
     for company in companies:
         transactions_info = req.finance_transaction_list(
