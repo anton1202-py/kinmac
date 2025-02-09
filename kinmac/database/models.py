@@ -8,6 +8,7 @@ class Company(models.Model):
     wb_cookie_token = models.TextField(
         verbose_name="Куки токен ВБ", blank=True, null=True
     )
+
     ozon_token = models.TextField(
         verbose_name="Токен ОЗОН", blank=True, null=True
     )
@@ -30,6 +31,12 @@ class Company(models.Model):
         verbose_name="client_secret для работы с рекламой ОЗОН",
         null=True,
         blank=True,
+    )
+    ozon_cookie_token = models.TextField(
+        verbose_name="Куки токен Озон", blank=True, null=True
+    )
+    ozon_front_company_id = models.IntegerField(
+        verbose_name="ID компании с фронта Озон", blank=True, null=True
     )
 
     @property
@@ -76,6 +83,20 @@ class Company(models.Model):
     def yandex_header(self):
         return {
             "Authorization": self.yandex_token,
+        }
+
+    @property
+    def ozon_cookie_header(self):
+        USER_AGENT = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/128.0.0.0 YaBrowser/24.10.0.0 "
+            "Safari/537.36"
+        )
+        return {
+            "Cookie": self.ozon_cookie_token,
+            "user-agent": USER_AGENT,
+            "x-o3-company-id": self.ozon_front_company_id,
         }
 
     def __str__(self):
