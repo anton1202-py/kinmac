@@ -11,6 +11,7 @@ from celery_tasks.celery import app
 
 from api_requests.ozon_requests import (
     ArticleDataRequest,
+    OzonFrontApiRequests,
     OzonReportsApiRequest,
     OzonSalesRequest,
 )
@@ -21,6 +22,7 @@ from database.supplyment import (
     get_price_info_from_ofissial_api,
 )
 from database.service.ozon_service import (
+    OzonFrontDataHandler,
     OzonReportsHandler,
     OzonSalesOrdersHandler,
     OzonWarehouseInfo,
@@ -482,4 +484,24 @@ def ozon_get_transactions_info():
             )
             handler.transaction_handler(
                 company=company, transactions_info=transactions_info
+            )
+
+
+@app.task
+def ozon_storage_cost():
+    """Сохраняет затраты на хранение товаров Озон (ежедневно)"""
+
+    req = OzonFrontApiRequests()
+    handler = OzonFrontDataHandler()
+    companies = Company.objects.filter(ozon_cookie_token__isnull=False)
+
+    for company in companies:
+        check_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+        cost_info: dict = req.daily_storage_cost(
+            front_header=company.ozon_cookie_header, check_date=check_date
+        ).get("items")
+        if cost_info:
+            handler.storage_cost_to_db(
+                company=company, cost_info=cost_info, cost_date=check_date
             )

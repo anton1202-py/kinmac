@@ -16,7 +16,10 @@ class OzonTemplatesRequest:
             return json.loads(response.text)
         else:
 
-            message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
+            message: str = (
+                f"Статус код: {response.status_code} "
+                f"на запрос {url}. Ошибка: {response.text}"
+            )
             bot.send_message(
                 chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
             )
@@ -701,6 +704,32 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
             header=header,
             date_from=date_from,
             date_to=date_to,
+        )
+
+
+class OzonFrontApiRequests(OzonTemplatesRequest):
+
+    def __init__(self):
+        self.url: str = "https://seller.ozon.ru"
+
+    def daily_storage_cost(self, front_header: dict, check_date: str) -> dict:
+        """."""
+        method = (
+            "/api/site/self-placement-gateway/placement/periods/date/items"
+        )
+        payload = json.dumps(
+            {
+                "pagination": {"page": 1, "page_size": 1000},
+                "sorting": {
+                    "sort_by": "ByAccountingPlacement",
+                    "sort_direction": "Desc",
+                },
+                "billed_type": "Paid",
+                "date": check_date,
+            }
+        )
+        return self._post_template_req(
+            url=self.url + method, header=front_header, payload=payload
         )
 
 

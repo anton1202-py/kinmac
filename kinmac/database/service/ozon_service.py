@@ -8,6 +8,7 @@ from database.models import (
     Company,
     Marketplace,
     MarketplaceOrders,
+    OzonArticleStorageCost,
     OzonProduct,
     OzonTransaction,
     TransactionService,
@@ -243,3 +244,48 @@ class OzonReportsHandler:
             self._save_transaction_to_db(
                 company=company, transaction=transaction
             )
+
+
+class OzonFrontDataHandler:
+    """Обрабатывает данные с АПи фронта Озон"""
+
+    def storage_cost_to_db(
+        self, company: Company, cost_info: list[dict], cost_date: str
+    ) -> None:
+        """Сохраняет данные о затратах на хранение артикулов"""
+
+        save_objs: list = []
+        update_objs: list = []
+        commo_db_cost_info = OzonArticleStorageCost.objects.filter(
+            company=company, date=cost_date
+        ).values_list("article__sku", flat=True)
+        for cost in cost_info:
+
+            article: OzonProduct = OzonProduct.objects.filter(
+                company=company, sku=cost.get("item").get("id").get("value")
+            ).first()
+
+            quantity: int = cost.get("total_stock").get("quantity")
+            warehouse_price: float = cost.get("paid").get("amount")
+
+            if article.sku not in commo_db_cost_info:
+                cost_obj = OzonArticleStorageCost(
+                    company=company,
+                    article=article,
+                    date=cost_date,
+                    warehouse_price=warehouse_price,
+                    article_count=quantity,
+                )
+                save_objs.append(cost_obj)
+            else:
+                upd_cost_obj = OzonArticleStorageCost.objects.filter(
+                    company=company, article=article, date=cost_date
+                ).first()
+                upd_cost_obj.warehouse_price = (warehouse_price,)
+                upd_cost_obj.article_count = quantity
+                update_objs.append(upd_cost_obj)
+
+        OzonArticleStorageCost.objects.bulk_update(
+            update_objs, ["warehouse_price", "article_count"]
+        )
+        OzonArticleStorageCost.objects.bulk_create(save_objs)

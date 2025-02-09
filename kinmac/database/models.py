@@ -1821,7 +1821,6 @@ class OzonTransaction(models.Model):
         verbose_name="Компания",
         related_name="transaction",
     )
-
     accruals_for_sale = models.FloatField(
         verbose_name="Стоимость товаров с учётом скидок продавца.",
         null=True,
@@ -1898,3 +1897,38 @@ class OzonTransaction(models.Model):
 
     def __str__(self):
         return f"Transaction {self.operation_id} - {self.operation_type_name}"
+
+
+class OzonArticleStorageCost(models.Model):
+    """Стоимость хранения товаров на Озон по датам"""
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        verbose_name="Компания",
+        related_name="ozon_article_storage_cost",
+    )
+    article = models.ForeignKey(
+        OzonProduct,
+        verbose_name="Артикул",
+        on_delete=models.SET_NULL,
+        related_name="ozon_article_storage_cost",
+        blank=True,
+        null=True,
+    )
+    date = models.DateField(
+        verbose_name="Дата, за которую был расчёт",
+        null=True,
+        blank=True,
+    )
+
+    warehouse_price = models.FloatField(
+        verbose_name="Сумма хранения",
+    )
+    article_count = models.IntegerField(
+        verbose_name=("Количество единиц товара (штук)"),
+    )
+
+    class Meta:
+        verbose_name = "Стоимость хранения товаров на Озон по датам"
+        verbose_name_plural = "Стоимость хранения товаров на Озон по датам"
