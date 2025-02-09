@@ -10,8 +10,19 @@
             "request": "launch",
             "module": "manage",
             "args": ["runserver"],
-            "cwd": "D:/Projects/kinmac/kinmac/", // Укажите путь к вашей папке
+            "cwd": "D:/Projects/kinmac/kinmac/",
             "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "module": "manage",
+            "args": ["runserver"],
+            "cwd": "D:/Projects/kinmac/kinmac/",
+            "django": true,
             "justMyCode": true
         }
     ]

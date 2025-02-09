@@ -427,6 +427,40 @@ def get_ozon_fbo_fbs_orders():
             )
 
 
+def generate_date_segments():
+    # Текущая дата
+    end_date = datetime.now()
+    # Дата 365 дней назад
+    start_date = end_date - timedelta(days=365)
+
+    # Список для хранения отрезков
+    date_segments = []
+
+    # Переменная для отслеживания текущей даты в цикле
+    current_date = end_date
+
+    while current_date > start_date:
+        # Определяем дату начала отрезка
+        date_from = current_date - timedelta(days=20)
+
+        # Если date_from меньше start_date, устанавливаем его на start_date
+        if date_from < start_date:
+            date_from = start_date
+
+        # Добавляем отрезок в список
+        date_segments.append(
+            {
+                "date_from": date_from.strftime("%Y-%m-%d"),
+                "date_to": current_date.strftime("%Y-%m-%d"),
+            }
+        )
+
+        # Обновляем текущую дату для следующего отрезка
+        current_date = date_from
+
+    return date_segments
+
+
 @app.task
 def ozon_get_transactions_info():
     """Загружает информацию о транзакциях Озон"""
@@ -435,13 +469,17 @@ def ozon_get_transactions_info():
     handler = OzonReportsHandler()
 
     companies = Company.objects.filter(ozon_token__isnull=False)
-    date_today = datetime.now()
-    date_from = (date_today - timedelta(days=10)).date()
-    date_to = date_today.date()
+    # date_today = datetime.now()
+    # date_from = (date_today - timedelta(days=10)).date()
+    # date_to = date_today.date()
+    date_list = generate_date_segments()
     for company in companies:
-        transactions_info = req.finance_transaction_list(
-            header=company.ozon_header, date_from=date_from, date_to=date_to
-        )
-        handler.transaction_handler(
-            company=company, transactions_info=transactions_info
-        )
+        for date in date_list:
+            transactions_info = req.finance_transaction_list(
+                header=company.ozon_header,
+                date_from=date["date_from"],
+                date_to=date["date_to"],
+            )
+            handler.transaction_handler(
+                company=company, transactions_info=transactions_info
+            )
