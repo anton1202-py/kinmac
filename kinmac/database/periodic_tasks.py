@@ -151,7 +151,6 @@ def article_storage_cost():
     print(len(costs_data))
     for data in costs_data:
         try:
-            # if Articles.objects.filter(nomenclatura_wb=data['nmId']).exists():
             article_obj = Articles.objects.filter(
                 nomenclatura_wb=data["nmId"]
             ).first()
@@ -181,7 +180,7 @@ def article_storage_cost():
                 tariffFix_date=data["tariffFixDate"],
                 tariff_lower_date=data["tariffLowerDate"],
             )
-        except:
+        except Exception:
             print(f"{data} в бд")
     print("загрузил", date_end)
 
@@ -505,3 +504,31 @@ def ozon_storage_cost():
             handler.storage_cost_to_db(
                 company=company, cost_info=cost_info, cost_date=check_date
             )
+
+
+@app.task
+def ozon_price_with_ozon_card():
+    """Сохраняет цены товара с озон картой"""
+    req = OzonFrontApiRequests()
+    handler = OzonFrontDataHandler()
+    companies = Company.objects.filter(ozon_cookie_token__isnull=False)
+    for company in companies:
+        common_price_info = []
+        article_objs = OzonProduct.objects.filter(company=company)
+        product_ids = article_objs.values_list("product_id", flat=True)
+        request_list = [
+            product_ids[str(i) : i + 100]
+            for i in range(0, len(product_ids), 100)
+        ]
+        for req_product_ids in request_list:
+            price_info: list = req.page_prices_info(
+                front_header=company.ozon_cookie_header,
+                front_company_id=company.ozon_front_company_id,
+                prodict_ids=req_product_ids,
+            ).get("items")
+            if price_info:
+                common_price_info += price_info
+
+    handler.article_price_info_to_db(
+        company=company, price_info=common_price_info
+    )

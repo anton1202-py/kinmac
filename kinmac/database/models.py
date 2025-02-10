@@ -307,6 +307,11 @@ class OzonProduct(models.Model):
         max_length=20,
         null=True,
     )
+    with_card_price = models.CharField(
+        verbose_name="Цена товара с картой Озон.",
+        max_length=50,
+        null=True,
+    )
     min_price = models.CharField(
         verbose_name="Минимальная цена товара после применения акций.",
         max_length=50,

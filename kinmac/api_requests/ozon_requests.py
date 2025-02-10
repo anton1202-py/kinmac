@@ -1,4 +1,5 @@
 import json
+import time
 import requests
 from kinmac.constants_file import TELEGRAM_ADMIN_CHAT_ID, bot
 
@@ -41,7 +42,7 @@ class OzonTemplatesRequest:
                 "limit": limit,
             }
         )
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             main_data = json.loads(response.text)
             response_data = main_data["result"]["items"]
@@ -62,7 +63,7 @@ class ArticleDataRequest:
         self.MAIN_URL = "https://api-seller.ozon.ru/"
 
     def _post_template_req(self, url: str, header: dict, payload: str) -> dict:
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
 
@@ -82,7 +83,7 @@ class ArticleDataRequest:
                 "limit": limit,
             }
         )
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             main_data = json.loads(response.text)
             response_data = main_data["result"]["items"]
@@ -113,7 +114,7 @@ class ArticleDataRequest:
                 "limit": limit,
             }
         )
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             main_data = json.loads(response.text)
             response_data = main_data["result"]
@@ -169,7 +170,7 @@ class ActionRequest(OzonTemplatesRequest):
         payload = json.dumps(
             {"limit": limit, "offset": offset, "action_id": action_id}
         )
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             main_data = json.loads(response.text)
             response_data = main_data["result"]["products"]
@@ -357,11 +358,14 @@ class OzonAdvertismentApiRequest:
     def _post_template_req(
         self, url: str, header: dict, payload: str
     ) -> dict | str:
-        response = requests.request("POST", url, headers=header, data=payload)
+        response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
         else:
-            message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
+            message = (
+                f"Статус код: {response.status_code} "
+                f"на запрос {url}. Ошибка: {response.text}"
+            )
             bot.send_message(
                 chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
             )
@@ -373,7 +377,10 @@ class OzonAdvertismentApiRequest:
             return json.loads(response.text)
         else:
 
-            message = f"Статус код: {response.status_code} на запрос {url}. Ошибка: {response.text}"
+            message = (
+                f"Статус код: {response.status_code} "
+                f"на запрос {url}. Ошибка: {response.text}"
+            )
             bot.send_message(
                 chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
             )
@@ -422,7 +429,10 @@ class OzonAdvertismentApiRequest:
             }
             return header
         else:
-            message = f"Ошибка при получении токена авторизации к рекламному кабинету. Текст: {data}"
+            message = (
+                f"Ошибка при получении токена авторизации "
+                f"к рекламному кабинету. Текст: {data}"
+            )
             bot.send_message(
                 chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message[:4000]
             )
@@ -585,7 +595,10 @@ class OzonAdvertismentApiRequest:
         """
         Статистика расходов рекламных кампаний
         """
-        url = f"{self.main_url}api/client/statistics/expense/json?dateFrom={date_from}&dateTo={date_to}"
+        url = (
+            f"{self.main_url}api/client/statistics/expense/"
+            f"json?dateFrom={date_from}&dateTo={date_to}"
+        )
         return self.get_proxy_auth_get_request(header, perfomance_header, url)
 
 
@@ -727,6 +740,22 @@ class OzonFrontApiRequests(OzonTemplatesRequest):
                 "billed_type": "Paid",
                 "date": check_date,
             }
+        )
+        return self._post_template_req(
+            url=self.url + method, header=front_header, payload=payload
+        )
+
+    def page_prices_info(
+        self, front_header: dict, front_company_id: str, prodict_ids: list[str]
+    ) -> dict:
+        """
+        Получает инфо со страницы с ценами товара.
+        Цена продавца, цена для покупателя, цена с картой Озон.
+        """
+        time.sleep(3)
+        method = "/api/pricing-bff-service/v3/get-common-prices"
+        payload = json.dumps(
+            {"company_id": front_company_id, "item_ids": prodict_ids}
         )
         return self._post_template_req(
             url=self.url + method, header=front_header, payload=payload

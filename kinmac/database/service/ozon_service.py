@@ -289,3 +289,17 @@ class OzonFrontDataHandler:
             update_objs, ["warehouse_price", "article_count"]
         )
         OzonArticleStorageCost.objects.bulk_create(save_objs)
+
+    def article_price_info_to_db(
+        self, company: Company, price_info: list[dict]
+    ):
+        """Сохраняет цены артикула в базу данных"""
+        update_data = []
+        for price in price_info:
+            article: OzonProduct = OzonProduct.objects.get(
+                company=company, product_id=int(price["item_id"])
+            )
+            article.with_card_price = price.get("marketing_oa_price")
+            update_data.append(article)
+
+        OzonProduct.objects.bulk_update(update_data, ["with_card_price"])
