@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "manage",
             "args": ["runserver"],
-            "cwd": "D:/Projects/kinmac/kinmac/",
+            "cwd": "/home/anton/Projects/kinmac/kinmac/",
             "console": "integratedTerminal",
             "justMyCode": true
         },

@@ -35,8 +35,11 @@ class Company(models.Model):
     ozon_cookie_token = models.TextField(
         verbose_name="Куки токен Озон", blank=True, null=True
     )
-    ozon_front_company_id = models.IntegerField(
-        verbose_name="ID компании с фронта Озон", blank=True, null=True
+    ozon_front_company_id = models.CharField(
+        verbose_name="ID компании с фронта Озон",
+        max_length=50,
+        blank=True,
+        null=True,
     )
 
     @property

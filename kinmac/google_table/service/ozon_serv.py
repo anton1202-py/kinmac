@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
-from datetime import datetime, timedelta
-from django.db.models import Count, F, Sum, Max
-from django.db.models.functions import TruncDate
+from django.db.models import Count, Sum, Max
 from database.models import (
     Company,
     Marketplace,
@@ -10,7 +8,6 @@ from database.models import (
     WarehouseBalance,
 )
 from reklama.models import OzonArticleDailyCostToAdv
-from unit_economic.models import MarketplaceCommission
 
 OZON_CATEGORY_LIST = [17028939, 17027904]
 
@@ -81,7 +78,8 @@ class OzonMarketplaceArticlesData:
                 "height": data.height,
                 "length": data.depth,
                 "weight": data.weight,
-                "price_after_seller_disc": data.price,
+                "marketing_price": data.marketing_price,
+                "with_ozon_card_price": data.marketing_price,
             }
         return response_dict
 
@@ -158,7 +156,9 @@ class OzonMarketplaceArticlesData:
         return response_dict
 
     def logistic_storage_cost(self):
-        """Входящие данные - количество недель за которые нужно отдать данные"""
+        """
+        Входящие данные - количество недель за которые нужно отдать данные
+        """
         end_date = datetime.now()
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
