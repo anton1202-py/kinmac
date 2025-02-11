@@ -100,6 +100,7 @@ class Company(models.Model):
             "Cookie": self.ozon_cookie_token,
             "user-agent": USER_AGENT,
             "x-o3-company-id": self.ozon_front_company_id,
+            "content-type": "application/json",
         }
 
     def __str__(self):
