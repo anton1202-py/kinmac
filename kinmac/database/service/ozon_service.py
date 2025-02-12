@@ -267,23 +267,23 @@ class OzonFrontDataHandler:
 
             quantity: int = cost.get("total_stock").get("quantity")
             warehouse_price: float = cost.get("paid").get("amount")
-
-            if article.sku not in commo_db_cost_info:
-                cost_obj = OzonArticleStorageCost(
-                    company=company,
-                    article=article,
-                    date=cost_date,
-                    warehouse_price=warehouse_price,
-                    article_count=quantity,
-                )
-                save_objs.append(cost_obj)
-            else:
-                upd_cost_obj = OzonArticleStorageCost.objects.filter(
-                    company=company, article=article, date=cost_date
-                ).first()
-                upd_cost_obj.warehouse_price = (warehouse_price,)
-                upd_cost_obj.article_count = quantity
-                update_objs.append(upd_cost_obj)
+            if article:
+                if article.sku not in commo_db_cost_info:
+                    cost_obj = OzonArticleStorageCost(
+                        company=company,
+                        article=article,
+                        date=cost_date,
+                        warehouse_price=warehouse_price,
+                        article_count=quantity,
+                    )
+                    save_objs.append(cost_obj)
+                else:
+                    upd_cost_obj = OzonArticleStorageCost.objects.filter(
+                        company=company, article=article, date=cost_date
+                    ).first()
+                    upd_cost_obj.warehouse_price = warehouse_price
+                    upd_cost_obj.article_count = quantity
+                    update_objs.append(upd_cost_obj)
 
         OzonArticleStorageCost.objects.bulk_update(
             update_objs, ["warehouse_price", "article_count"]

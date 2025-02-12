@@ -97,6 +97,15 @@ app.conf.beat_schedule = {
         "task": "database.periodic_tasks.wb_article_price_stock_app_data",
         "schedule": crontab(hour=22, minute=5),
     },
+    # ========= ЗАПРОСЫ С ФРОНТА ОЗОН =========#
+    "database_ozon_price_with_ozon_card": {
+        "task": "database.periodic_tasks.ozon_price_with_ozon_card",
+        "schedule": crontab(hour=7, minute=5),
+    },
+    "database_ozon_storage_cost": {
+        "task": "database.periodic_tasks.ozon_storage_cost",
+        "schedule": crontab(hour=7, minute=30),
+    },
     # "sales_analytics_article_analytic_update": {
     #     "task": "sales_analytics.periodic_tasks.articles_analytics_data",
     #     "schedule": crontab(hour=22, minute=1)

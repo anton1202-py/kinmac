@@ -10,6 +10,12 @@ class OzonTemplatesRequest:
         response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
+        elif response.status_code == 403:
+            message = (
+                "Статус код 403 при запросе кз фронт "
+                "у загрузки стоимости хранения"
+            )
+            bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message)
 
     def _get_template_req(self, url: str, header: dict) -> dict | str:
         response = requests.get(url, headers=header)
@@ -727,6 +733,7 @@ class OzonFrontApiRequests(OzonTemplatesRequest):
 
     def daily_storage_cost(self, front_header: dict, check_date: str) -> dict:
         """."""
+        time.sleep(15)
         method = (
             "/api/site/self-placement-gateway/placement/periods/date/items"
         )
@@ -752,7 +759,7 @@ class OzonFrontApiRequests(OzonTemplatesRequest):
         Получает инфо со страницы с ценами товара.
         Цена продавца, цена для покупателя, цена с картой Озон.
         """
-        time.sleep(3)
+        time.sleep(15)
         method = "/api/pricing-bff-service/v3/get-common-prices"
         payload = json.dumps(
             {"company_id": front_company_id, "item_ids": prodict_ids}

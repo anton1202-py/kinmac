@@ -11,7 +11,6 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
-from database.periodic_tasks import ozon_storage_cost
 
 from .forms import (
     ArticlesForm,
@@ -37,7 +36,6 @@ def database_home(request):
     context = {
         "data": data,
     }
-    # ozon_storage_cost()
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)

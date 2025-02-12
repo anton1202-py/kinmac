@@ -470,20 +470,19 @@ def ozon_get_transactions_info():
     handler = OzonReportsHandler()
 
     companies = Company.objects.filter(ozon_token__isnull=False)
-    # date_today = datetime.now()
-    # date_from = (date_today - timedelta(days=10)).date()
-    # date_to = date_today.date()
-    date_list = generate_date_segments()
+    date_today = datetime.now()
+    date_from = (date_today - timedelta(days=10)).date()
+    date_to = date_today.date()
+
     for company in companies:
-        for date in date_list:
-            transactions_info = req.finance_transaction_list(
-                header=company.ozon_header,
-                date_from=date["date_from"],
-                date_to=date["date_to"],
-            )
-            handler.transaction_handler(
-                company=company, transactions_info=transactions_info
-            )
+        transactions_info = req.finance_transaction_list(
+            header=company.ozon_header,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        handler.transaction_handler(
+            company=company, transactions_info=transactions_info
+        )
 
 
 @app.task
@@ -497,10 +496,12 @@ def ozon_storage_cost():
     for company in companies:
         check_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
-        cost_info: dict = req.daily_storage_cost(
+        common_cost_info: dict = req.daily_storage_cost(
             front_header=company.ozon_cookie_header, check_date=check_date
-        ).get("items")
-        if cost_info:
+        )
+
+        if common_cost_info:
+            cost_info = common_cost_info.get("items")
             handler.storage_cost_to_db(
                 company=company, cost_info=cost_info, cost_date=check_date
             )
@@ -515,20 +516,23 @@ def ozon_price_with_ozon_card():
     for company in companies:
         common_price_info = []
         article_objs = OzonProduct.objects.filter(company=company)
-        product_ids = article_objs.values_list("product_id", flat=True)
+        product_ids_raw = article_objs.values_list("product_id", flat=True)
+        product_ids = []
+        for j in product_ids_raw:
+            product_ids.append(str(j))
         request_list = [
-            product_ids[str(i) : i + 100]
-            for i in range(0, len(product_ids), 100)
+            product_ids[i : i + 100] for i in range(0, len(product_ids), 100)
         ]
         for req_product_ids in request_list:
-            price_info: list = req.page_prices_info(
+            raw_price_info: list = req.page_prices_info(
                 front_header=company.ozon_cookie_header,
                 front_company_id=company.ozon_front_company_id,
                 prodict_ids=req_product_ids,
-            ).get("items")
-            if price_info:
+            )
+            if raw_price_info:
+                price_info = raw_price_info.get("items")
                 common_price_info += price_info
 
-    handler.article_price_info_to_db(
-        company=company, price_info=common_price_info
-    )
+                handler.article_price_info_to_db(
+                    company=company, price_info=price_info
+                )

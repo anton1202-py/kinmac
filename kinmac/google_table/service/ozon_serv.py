@@ -4,7 +4,9 @@ from database.models import (
     Company,
     Marketplace,
     MarketplaceOrders,
+    OzonArticleStorageCost,
     OzonProduct,
+    OzonTransaction,
     WarehouseBalance,
 )
 from reklama.models import OzonArticleDailyCostToAdv
@@ -79,7 +81,7 @@ class OzonMarketplaceArticlesData:
                 "length": data.depth,
                 "weight": data.weight,
                 "marketing_price": data.marketing_price,
-                "with_ozon_card_price": data.marketing_price,
+                "with_ozon_card_price": data.with_card_price,
             }
         return response_dict
 
@@ -170,37 +172,61 @@ class OzonMarketplaceArticlesData:
         main_returned_dict = {}
 
         storage_data = (
-            ArticleStorageCost.objects.filter(
+            OzonArticleStorageCost.objects.filter(
+                company=Company.objects.filter(name="KINMAC").first(),
                 date__gte=start_date,
                 date__lte=end_date,
-                article__brand__in=BRAND_LIST,
+                article__description_category_id__in=OZON_CATEGORY_LIST,
             )
-            .order_by("article__common_article")
-            .values("article__nomenclatura_wb")
+            .order_by("article__seller_article")
+            .values("article__seller_article")
             .annotate(storage_cost=Sum("warehouse_price"))
         )
 
         for data in storage_data:
-            storage_cost[int(data["article__nomenclatura_wb"])] = round(
+            storage_cost[int(data["article__seller_article"])] = round(
                 data["storage_cost"], 2
             )
 
         logistic_data = (
-            SalesReportOnSales.objects.filter(
-                date_from__gte=start_date,
-                date_to__lte=end_date,
-                brand_name__in=BRAND_LIST,
+            OzonTransaction.objects.filter(
+                order_date__gte=start_date,
+                order_date__lte=end_date,
+                article__description_category_id__in=OZON_CATEGORY_LIST,
             )
-            .order_by("sa_name")
-            .values("nm_id")
+            .order_by("article__seller_article")
+            .values("article__seller_article")
             .annotate(logistic_cost=Sum("delivery_rub"))
         )
         for data in logistic_data:
             logistic_cost[data["nm_id"]] = round(data["logistic_cost"], 2)
+        """
+        MarketplaceNotDeliveredCostItem — возврат невостребованного товара от покупателя на склад
+        MarketplaceReturnAfterDeliveryCostItem — возврат от покупателя на склад после доставки.
+        MarketplaceDeliveryCostItem — доставка товара до покупателя.
+        ItemAdvertisementForSupplierLogistic — доставка товаров на склад Ozon — кросс-докинг.
+        ItemAdvertisementForSupplierLogisticSeller — транспортно-экспедиционные услуги.
+        MarketplaceServiceItemDelivToCustomer — последняя миля.
+        MarketplaceServiceItemDirectFlowTrans — магистраль.
+        MarketplaceServiceItemDropoffFF — обработка отправления.
+        MarketplaceServiceItemDropoffPVZ — обработка отправления.
+        MarketplaceServiceItemDropoffSC — обработка отправления.
+        MarketplaceServiceItemFulfillment — сборка заказа.
+        MarketplaceServiceItemPickup — выезд транспортного средства по адресу продавца для забора отправлений — Pick-up.
+        MarketplaceServiceItemReturnAfterDelivToCustomer — обработка возврата.
+        MarketplaceServiceItemReturnFlowTrans — обратная магистраль.
+        MarketplaceServiceItemDeliveryKGT — доставка крупногабаритного товара (КГТ).
+        MarketplaceServiceItemDirectFlowLogistic — логистика.
+        MarketplaceServiceItemReturnFlowLogistic — обратная логистика.
+        MarketplaceServiceItemRedistributionReturnsPVZ — перевыставление возвратов на ПВЗ.
+        MarketplaceServiceItemDirectFlowLogisticVDC — логистика вРЦ.
+        
+        """
+        for article_obj in OzonProduct.objects.filter(
+            company=Company.objects.filter(name="KINMAC").first(),
+            description_category_id__in=OZON_CATEGORY_LIST,
+        ).order_by("seller_article"):
 
-        for article_obj in Articles.objects.filter(
-            brand__in=BRAND_LIST
-        ).order_by("common_article"):
             article_wb = int(article_obj.nomenclatura_wb)
             sales_amount = sales_dict[article_wb]["sales_amount"]
             sales_sum = sales_dict[article_wb]["sales_sum"]
