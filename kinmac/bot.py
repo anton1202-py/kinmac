@@ -845,7 +845,7 @@ def command_start(update, context):
         ),
         reply_markup=buttons,
     )
-    url = f"http://212.193.30.90/payment/login?chat_id={chat_id}"
+    url = f"https://analitic.dc319.ru//payment/login?chat_id={chat_id}"
     button_url = InlineKeyboardButton(text="Создать заявку", url=url)
     keyboard = [[button_url]]
     reply_markup = InlineKeyboardMarkup(keyboard)
