@@ -16,6 +16,15 @@
         },
 
         {
+            "name": "debug_bot",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/anton/Projects/kinmac/kinmac/bot.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
             "name": "Python: Django",
             "type": "python",
             "request": "launch",

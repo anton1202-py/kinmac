@@ -1,9 +1,7 @@
 import json
 import logging
 import os
-import re
 from datetime import datetime
-from urllib.parse import urlencode
 
 import django
 from django.core.files.base import ContentFile
@@ -15,7 +13,6 @@ django.setup()
 import psycopg2
 import requests
 import telegram
-from django.contrib.auth.models import User
 from django.db.models import Q
 from dotenv import load_dotenv
 from payment.models import (
@@ -27,7 +24,6 @@ from payment.models import (
     TelegramMessageActions,
 )
 from psycopg2 import Error
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -809,13 +805,13 @@ def command_start(update, context):
 
     approved_user = ApprovedFunction.objects.get(chat_id_tg=chat_id)
 
-    button_user = TelegramApproveButtonMessage.objects.get(
+    button_user = TelegramApproveButtonMessage.objects.filter(
         approve=approved_user
     )
 
     if approved_user.rating_for_approval > 0:
         buttons = ReplyKeyboardMarkup(
-            [["/start"], [KeyboardButton(button_user.button_name)]],
+            [["/start"], [KeyboardButton(button_user[0].button_name)]],
             resize_keyboard=True,
         )
     else:
