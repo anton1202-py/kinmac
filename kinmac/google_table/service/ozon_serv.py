@@ -188,7 +188,6 @@ class OzonMarketplaceArticlesData:
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
         logistic_cost = {}
-        sales_dict = self.only_sales_data()
         storage_cost = {}
 
         main_returned_dict = {}
@@ -206,7 +205,7 @@ class OzonMarketplaceArticlesData:
         )
 
         for data in storage_data:
-            storage_cost[int(data["article__seller_article"])] = round(
+            storage_cost[data["article__seller_article"]] = round(
                 data["storage_cost"], 2
             )
 
@@ -231,20 +230,15 @@ class OzonMarketplaceArticlesData:
             description_category_id__in=OZON_CATEGORY_LIST,
         ).order_by("seller_article"):
 
-            article_wb = int(article_obj.nomenclatura_wb)
-            sales_amount = sales_dict[article_wb]["sales_amount"]
-            sales_sum = sales_dict[article_wb]["sales_sum"]
-            main_returned_dict[article_obj.common_article] = {
+            main_returned_dict[article_obj.seller_article] = {
                 "logistic_cost": (
-                    logistic_cost[article_wb]
-                    if article_wb in logistic_cost
+                    logistic_cost[article_obj.seller_article]
+                    if article_obj.seller_article in logistic_cost
                     else 0
                 ),
-                "sales_amount": sales_amount,
-                "sales_sum": sales_sum,
                 "storage_cost": (
-                    storage_cost[article_wb]
-                    if article_wb in storage_cost
+                    storage_cost[article_obj.seller_article]
+                    if article_obj.seller_article in storage_cost
                     else 0
                 ),
             }

@@ -131,12 +131,13 @@ class OzonCommonDataViewSet(viewsets.ViewSet):
         article_data = common_data.common_article_data()
         stock_data = common_data.stock_data()
         advert_info = common_data.advert_data()
-        # log_stor_data = common_data.logistic_storage_cost()
+        log_stor_data = common_data.logistic_storage_cost()
 
         for article, data in article_data.items():
             data.update(sales_data[article])
             data.update(advert_info[article])
             data.update(stock_data[article])
+            data.update(log_stor_data[article])
         return Response(article_data)
 
 
