@@ -1,3 +1,4 @@
+from datetime import datetime
 from database.models import (
     ArticlePriceStock,
     Articles,
@@ -23,18 +24,22 @@ class OzonArticlesInfoSerializer(serializers.ModelSerializer):
         return ozon_sku
 
     def get_stock(self, obj):
+        stock = 0
+        date = datetime.now().date()
         stock_data = (
             WarehouseBalance.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 ozon_article=obj,
+                date=date,
             )
             .values("ozon_article__sku")
             .annotate(
-                latest_date=Max("date"),
                 common_stock=Sum("quantity"),
             )
         )
-        stock = stock_data[0]["common_stock"]
+        if stock_data:
+            stock = stock_data[0]["common_stock"]
+
         return stock
 
     def get_price(self, obj):
@@ -56,12 +61,13 @@ class WildberriesArticlesInfoSerializer(serializers.ModelSerializer):
         return wb_nm_id
 
     def get_stock(self, obj):
-        stock = (
-            ArticlePriceStock.objects.filter(article=obj)
-            .order_by("-date")
-            .first()
-            .common_stock
-        )
+        stock = 0
+        date = datetime.now().date()
+        stock_data = ArticlePriceStock.objects.filter(
+            article=obj, date=date
+        ).first()
+        if stock_data:
+            stock = stock_data.common_stock
         return stock
 
     def get_price(self, obj):
