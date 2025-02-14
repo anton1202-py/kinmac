@@ -61,7 +61,7 @@ def message_constructor(
 
     if payment_method == 1:
         file_path = (
-            f"https://analitic.dc319.ru//media/{pay_with_method.file_of_bill}"
+            f"https://analitic.dc319.ru/media/{pay_with_method.file_of_bill}"
         )
     elif payment_method == 2:
         message = (

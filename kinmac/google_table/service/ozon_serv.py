@@ -13,6 +13,28 @@ from reklama.models import OzonArticleDailyCostToAdv
 
 OZON_CATEGORY_LIST = [17028939, 17027904]
 
+LOGISTIC_OPERATION_TYPES: list = [
+    "MarketplaceNotDeliveredCostItem",
+    "MarketplaceReturnAfterDeliveryCostItem",
+    "MarketplaceDeliveryCostItem",
+    "ItemAdvertisementForSupplierLogistic",
+    "ItemAdvertisementForSupplierLogisticSeller",
+    "MarketplaceServiceItemDelivToCustomer",
+    "MarketplaceServiceItemDirectFlowTrans",
+    "MarketplaceServiceItemDropoffFF",
+    "MarketplaceServiceItemDropoffPVZ",
+    "MarketplaceServiceItemDropoffSC",
+    "MarketplaceServiceItemFulfillment",
+    "MarketplaceServiceItemPickup",
+    "MarketplaceServiceItemReturnAfterDelivToCustomer",
+    "MarketplaceServiceItemReturnFlowTrans",
+    "MarketplaceServiceItemDeliveryKGT",
+    "MarketplaceServiceItemDirectFlowLogistic",
+    "MarketplaceServiceItemReturnFlowLogistic",
+    "MarketplaceServiceItemRedistributionReturnsPVZ",
+    "MarketplaceServiceItemDirectFlowLogisticVDC",
+]
+
 
 class OzonMarketplaceArticlesData:
     """Данные артикулов по Озон"""
@@ -192,36 +214,18 @@ class OzonMarketplaceArticlesData:
             OzonTransaction.objects.filter(
                 order_date__gte=start_date,
                 order_date__lte=end_date,
+                operation_type__in=LOGISTIC_OPERATION_TYPES,
                 article__description_category_id__in=OZON_CATEGORY_LIST,
             )
             .order_by("article__seller_article")
             .values("article__seller_article")
-            .annotate(logistic_cost=Sum("delivery_rub"))
+            .annotate(logistic_cost=Sum("amount"))
         )
         for data in logistic_data:
-            logistic_cost[data["nm_id"]] = round(data["logistic_cost"], 2)
-        """
-        MarketplaceNotDeliveredCostItem — возврат невостребованного товара от покупателя на склад
-        MarketplaceReturnAfterDeliveryCostItem — возврат от покупателя на склад после доставки.
-        MarketplaceDeliveryCostItem — доставка товара до покупателя.
-        ItemAdvertisementForSupplierLogistic — доставка товаров на склад Ozon — кросс-докинг.
-        ItemAdvertisementForSupplierLogisticSeller — транспортно-экспедиционные услуги.
-        MarketplaceServiceItemDelivToCustomer — последняя миля.
-        MarketplaceServiceItemDirectFlowTrans — магистраль.
-        MarketplaceServiceItemDropoffFF — обработка отправления.
-        MarketplaceServiceItemDropoffPVZ — обработка отправления.
-        MarketplaceServiceItemDropoffSC — обработка отправления.
-        MarketplaceServiceItemFulfillment — сборка заказа.
-        MarketplaceServiceItemPickup — выезд транспортного средства по адресу продавца для забора отправлений — Pick-up.
-        MarketplaceServiceItemReturnAfterDelivToCustomer — обработка возврата.
-        MarketplaceServiceItemReturnFlowTrans — обратная магистраль.
-        MarketplaceServiceItemDeliveryKGT — доставка крупногабаритного товара (КГТ).
-        MarketplaceServiceItemDirectFlowLogistic — логистика.
-        MarketplaceServiceItemReturnFlowLogistic — обратная логистика.
-        MarketplaceServiceItemRedistributionReturnsPVZ — перевыставление возвратов на ПВЗ.
-        MarketplaceServiceItemDirectFlowLogisticVDC — логистика вРЦ.
-        
-        """
+            logistic_cost[data["article__seller_article"]] = round(
+                data["logistic_cost"], 2
+            )
+
         for article_obj in OzonProduct.objects.filter(
             company=Company.objects.filter(name="KINMAC").first(),
             description_category_id__in=OZON_CATEGORY_LIST,
