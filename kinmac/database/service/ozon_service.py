@@ -96,14 +96,12 @@ class OzonWarehouseInfo:
                     idc = stock_info.get("idc")
 
                     if warehouse_obj and article_obj:
-                        balance, created = (
-                            WarehouseBalance.objects.update_or_create(
-                                company=company,
-                                warehouse=warehouse_obj,
-                                ozon_article=article_obj,
-                                date=datetime.now().date(),
-                                defaults={"quantity": quantity, "idc": idc},
-                            )
+                        WarehouseBalance.objects.update_or_create(
+                            company=company,
+                            warehouse=warehouse_obj,
+                            ozon_article=article_obj,
+                            date=datetime.now().date(),
+                            defaults={"quantity": quantity, "idc": idc},
                         )
 
 

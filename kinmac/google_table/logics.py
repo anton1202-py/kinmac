@@ -91,7 +91,7 @@ class WbMarketplaceArticlesData:
         return response_dict
 
     def advert_data(self):
-        """Получение данных а цене артикула в акции"""
+        """Получение данных о цене артикула в акции"""
         end_date = datetime.now()
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         sales_dict = self.only_sales_data()

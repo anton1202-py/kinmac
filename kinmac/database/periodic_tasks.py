@@ -230,7 +230,6 @@ def wb_article_price_stock_app_data() -> None:
                 * 100
             )
         defaults = {
-            "date": datetime.now().date(),
             "common_stock": total_quantity,
             "price_in_page": price_on_page,
             "price_after_seller_disc": price_with_seller_discount,
@@ -241,6 +240,7 @@ def wb_article_price_stock_app_data() -> None:
         ArticlePriceStock.objects.update_or_create(
             article=article_obj,
             marketplace=Marketplace.objects.get(name="Wildberries"),
+            date=datetime.now().date(),
             defaults=defaults,
         )
 

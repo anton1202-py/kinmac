@@ -60,7 +60,11 @@ app.conf.beat_schedule = {
         "task": "celery_tasks.tasks.add_stock_data_site",
         "schedule": crontab(hour=19, minute=1),
     },
-    # ========== Обновление Озон. ЗАКАЗЫ ФБО - ФБС ========== #
+    # ========== Обновление Озон. ЦЕНЫ. ЗАКАЗЫ ФБО - ФБС ========== #
+    "database_ozon_update_article_date": {
+        "task": "database.periodic_tasks.ozon_update_article_date",
+        "schedule": crontab(hour="6,18", minute=3),
+    },
     "database_get_ozon_fbo_fbs_orders": {
         "task": "database.periodic_tasks.get_ozon_fbo_fbs_orders",
         "schedule": crontab(hour=2, minute=0),
@@ -72,7 +76,7 @@ app.conf.beat_schedule = {
     },
     "database_save_ozon_fbo_warehouses_balance": {
         "task": "database.periodic_tasks.save_ozon_fbo_warehouses_balance",
-        "schedule": crontab(hour=2, minute=0),
+        "schedule": crontab(minute="*/60"),
     },
     # ========== КОНЕЦ Обновления Озон. КЛАСТЕРЫ. СКЛАДЫ. ОСТАТКИ ========== #
     "database_update_articles": {
@@ -95,7 +99,7 @@ app.conf.beat_schedule = {
     },
     "database_update_spp_stock_price": {
         "task": "database.periodic_tasks.wb_article_price_stock_app_data",
-        "schedule": crontab(hour=22, minute=5),
+        "schedule": crontab(minute="*/60"),
     },
     # ========= ЗАПРОСЫ С ФРОНТА ОЗОН =========#
     "database_ozon_price_with_ozon_card": {
