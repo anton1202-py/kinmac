@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from django.db.models import Count, Sum, Max
+from django.db.models import Count, Sum, Max, F
 from database.models import (
     Company,
     Marketplace,
@@ -7,6 +7,7 @@ from database.models import (
     OzonArticleStorageCost,
     OzonProduct,
     OzonTransaction,
+    TransactionService,
     WarehouseBalance,
 )
 from reklama.models import OzonArticleDailyCostToAdv
@@ -211,20 +212,35 @@ class OzonMarketplaceArticlesData:
                 data["storage_cost"], 2
             )
 
-        logistic_data = (
+        # logistic_data
+        filtered_transactions = (
             OzonTransaction.objects.filter(
                 order_date__gte=start_date,
                 order_date__lte=end_date,
-                operation_type__in=LOGISTIC_OPERATION_TYPES,
+                article__isnull=False,
+                # operation_type__in=LOGISTIC_OPERATION_TYPES,
                 article__description_category_id__in=OZON_CATEGORY_LIST,
+            ).order_by("article__seller_article")
+        ).prefetch_related("services")
+
+        logistic_data = (
+            TransactionService.objects.filter(
+                operations__in=filtered_transactions,
+                name__in=LOGISTIC_OPERATION_TYPES,
             )
-            .order_by("article__seller_article")
-            .values("article__seller_article")
-            .annotate(logistic_cost=Sum("amount"))
+            .values("operations__article__seller_article")
+            .annotate(  # Фильтруем услуги, связанные с отфильтрованными транзакциями
+                total_price=Sum("price"),  # Суммируем цены услуг
+                article_name=F(
+                    "operations__article__seller_article"
+                ),  # Добавляем название артикула (если нужно)
+            )
+            .order_by("operations__article__seller_article")
         )
+
         for data in logistic_data:
-            logistic_cost[data["article__seller_article"]] = round(
-                data["logistic_cost"], 2
+            logistic_cost[data["operations__article__seller_article"]] = round(
+                data["total_price"], 2
             )
 
         for article_obj in OzonProduct.objects.filter(
