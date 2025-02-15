@@ -63,6 +63,7 @@ class OzonMarketplaceArticlesData:
                 sales_sum=Sum("price"),
             )
         )
+
         for data in sale_data:
             sales_dict[data["ozon_article__seller_article"]] = {
                 "sales_amount": data["sales_amount"],
@@ -72,7 +73,7 @@ class OzonMarketplaceArticlesData:
             company=Company.objects.filter(name="KINMAC").first(),
             description_category_id__in=OZON_CATEGORY_LIST,
         ).order_by("seller_article"):
-            if article_obj.product_id in sales_dict:
+            if article_obj.seller_article in sales_dict:
                 response_dict[article_obj.seller_article] = {
                     "sales_amount": sales_dict[article_obj.seller_article][
                         "sales_amount"
@@ -109,13 +110,14 @@ class OzonMarketplaceArticlesData:
 
     def stock_data(self):
         """Отдает данные по SPP, остаткам, цене"""
+        check_date = datetime.now().date()
         stock_data = (
             WarehouseBalance.objects.filter(
-                ozon_article__description_category_id__in=OZON_CATEGORY_LIST
+                ozon_article__description_category_id__in=OZON_CATEGORY_LIST,
+                date=check_date,
             )
-            .values("ozon_article__seller_article")
+            .values("ozon_article__seller_article", "date")
             .annotate(
-                latest_date=Max("date"),
                 common_stock=Sum("quantity"),
             )
             .order_by("ozon_article__seller_article")
@@ -124,8 +126,8 @@ class OzonMarketplaceArticlesData:
         stock_dict = {}
         for data in stock_data:
             stock_dict[data["ozon_article__seller_article"]] = {
-                "date": data["latest_date"],
                 "common_stock": data["common_stock"],
+                "date": data["date"],
             }
         response_dict = {}
         for article_obj in OzonProduct.objects.filter(
