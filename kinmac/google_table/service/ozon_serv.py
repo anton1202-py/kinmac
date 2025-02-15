@@ -1,5 +1,6 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
-from django.db.models import Count, Sum, Max, F
+from django.db.models import Count, Sum, Q
 from database.models import (
     Company,
     Marketplace,
@@ -50,23 +51,23 @@ class OzonMarketplaceArticlesData:
         sales_dict = {}
 
         sale_data = (
-            MarketplaceOrders.objects.filter(
+            OzonTransaction.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
-                marketplace=Marketplace.objects.filter(name="Ozon").first(),
-                ozon_article__description_category_id__in=OZON_CATEGORY_LIST,
-                date__gte=start_date,
-                date__lte=end_date,
+                article__description_category_id__in=OZON_CATEGORY_LIST,
+                order_date__gte=start_date,
+                order_date__lte=end_date,
+                type="orders",
             )
-            .order_by("ozon_article__seller_article")
-            .values("ozon_article__seller_article")
+            .order_by("article__seller_article")
+            .values("article__seller_article")
             .annotate(
                 sales_amount=Count("amount"),
-                sales_sum=Sum("price"),
+                sales_sum=Sum("amount"),
             )
         )
 
         for data in sale_data:
-            sales_dict[data["ozon_article__seller_article"]] = {
+            sales_dict[data["article__seller_article"]] = {
                 "sales_amount": data["sales_amount"],
                 "sales_sum": data["sales_sum"],
             }
@@ -214,34 +215,32 @@ class OzonMarketplaceArticlesData:
 
         # logistic_data
         filtered_transactions = (
-            OzonTransaction.objects.filter(
-                order_date__gte=start_date,
-                order_date__lte=end_date,
-                article__isnull=False,
-                # operation_type__in=LOGISTIC_OPERATION_TYPES,
-                article__description_category_id__in=OZON_CATEGORY_LIST,
-            ).order_by("article__seller_article")
-        ).prefetch_related("services")
-
-        logistic_data = (
-            TransactionService.objects.filter(
-                operations__in=filtered_transactions,
-                name__in=LOGISTIC_OPERATION_TYPES,
+            (
+                (
+                    OzonTransaction.objects.filter(
+                        order_date__gte=start_date,
+                        order_date__lte=end_date,
+                        article__isnull=False,
+                        # operation_type__in=LOGISTIC_OPERATION_TYPES,
+                        article__description_category_id__in=OZON_CATEGORY_LIST,
+                    ).order_by("article__seller_article")
+                )
+                .prefetch_related("services")
+                .select_related("article")
             )
-            .values("operations__article__seller_article")
-            .annotate(  # Фильтруем услуги, связанные с отфильтрованными транзакциями
-                total_price=Sum("price"),  # Суммируем цены услуг
-                article_name=F(
-                    "operations__article__seller_article"
-                ),  # Добавляем название артикула (если нужно)
+            .annotate(
+                total_price=Sum(
+                    "services__price",
+                    filter=Q(services__name__in=LOGISTIC_OPERATION_TYPES),
+                )
             )
-            .order_by("operations__article__seller_article")
+            .values("article__seller_article", "total_price")
         )
+        logistic_data = defaultdict(int)
 
-        for data in logistic_data:
-            logistic_cost[data["operations__article__seller_article"]] = round(
-                data["total_price"], 2
-            )
+        for i in filtered_transactions:
+            if i["total_price"]:
+                logistic_data[i["article__seller_article"]] += i["total_price"]
 
         for article_obj in OzonProduct.objects.filter(
             company=Company.objects.filter(name="KINMAC").first(),
@@ -250,8 +249,8 @@ class OzonMarketplaceArticlesData:
 
             main_returned_dict[article_obj.seller_article] = {
                 "logistic_cost": (
-                    logistic_cost[article_obj.seller_article]
-                    if article_obj.seller_article in logistic_cost
+                    logistic_data[article_obj.seller_article]
+                    if article_obj.seller_article in logistic_data
                     else 0
                 ),
                 "storage_cost": (
