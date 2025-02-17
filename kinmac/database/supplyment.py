@@ -420,12 +420,12 @@ def get_article_commot_stock_from_front() -> dict:
                 article_obj = Articles.objects.filter(
                     nomenclatura_wb=j["id"]
                 ).first()
-
-                returned_dict[article_obj] = {
-                    "price_u": price_u,
-                    "sale_price_u": sale_price_u,
-                    "total_quantity": total_quantity,
-                }
+                if price_u and sale_price_u and total_quantity:
+                    returned_dict[article_obj] = {
+                        "price_u": price_u,
+                        "sale_price_u": sale_price_u,
+                        "total_quantity": total_quantity,
+                    }
     return returned_dict
 
 

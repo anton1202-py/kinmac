@@ -135,7 +135,7 @@ class ArticleDataRequest:
                 return data_list
 
     def ozon_products_list(self, header: dict) -> list:
-        url = f"{self.MAIN_URL}v2/product/list"
+        url = f"{self.MAIN_URL}v3/product/list"
         return self._post_recursion_template_req(url, header)
 
     def ozon_product_info(

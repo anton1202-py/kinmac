@@ -1,7 +1,7 @@
 import json
 import random
 import time
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import requests
 from api_requests.common_func import api_retry_decorator
@@ -26,7 +26,9 @@ def wb_article_data_from_api(
     else:
         cursor = {"limit": 100, "nmID": mn_id}
     url = "https://content-api.wildberries.ru/content/v2/get/cards/list"
-    payload = json.dumps({"settings": {"cursor": cursor, "filter": {"withPhoto": -1}}})
+    payload = json.dumps(
+        {"settings": {"cursor": cursor, "filter": {"withPhoto": -1}}}
+    )
     response = requests.request("POST", url, headers=header, data=payload)
     counter += 1
     if response.status_code == 200:
@@ -63,7 +65,7 @@ def wb_price_discount_info(
     if not article_adv_data:
         article_adv_data = []
     url = f"https://discounts-prices-api.wildberries.ru/api/v2/list/goods/filter?limit={limit}&offset={offset}"
-    response = requests.request("GET", url, headers=header)
+    response = requests.get(url, headers=header)
     counter += 1
     if response.status_code == 200:
         articles_list = json.loads(response.text)["data"]["listGoods"]
@@ -90,7 +92,6 @@ def get_statistic_stock_api(header, control_date_stock):
     поэтому получить данные о них можно только в режиме "на текущий момент".
     Максимум 1 запрос в минуту
     """
-    # time.sleep(61)
     url = f"https://statistics-api.wildberries.ru/api/v1/supplier/stocks?dateFrom={control_date_stock}"
     response = requests.request("GET", url, headers=header)
     return response
@@ -101,10 +102,10 @@ def get_stock_from_webpage_api(nom_id):
     """
     Остатки товаров на складах WB. Из неофициального АПИ
     """
-    # time.sleep(61)
-    url = f"https://card.wb.ru/cards/detail?appType=0&dest=-2133464&nm={nom_id}"
-    response = requests.request("GET", url)
-    print(response.status_code)
+    url = (
+        f"https://card.wb.ru/cards/detail?appType=0&dest=-2133464&nm={nom_id}"
+    )
+    response = requests.get(url)
     return json.loads(response.text)
 
 
@@ -180,7 +181,6 @@ def get_create_storage_cost_report(header, date_from, date_to):
     Можно получить отчёт максимум за 8 дней.
     Максимум 1 запрос в минуту
     """
-    print("зашел в get_create_storage_cost_report. Ждем 40 сек", datetime.now().time())
     time.sleep(40)
     print("Закончили ждать 40 сек")
     url = f"https://seller-analytics-api.wildberries.ru/api/v1/paid_storage?dateFrom={date_from}&dateTo={date_to}"
@@ -351,7 +351,12 @@ def wb_action_details_info(header, action_ids_list):
 
 # @api_retry_decorator
 def wb_articles_in_action(
-    header, action_number, limit=1000, offset=0, counter=0, article_adv_data=None
+    header,
+    action_number,
+    limit=1000,
+    offset=0,
+    counter=0,
+    article_adv_data=None,
 ):
     """
     Возвращает список товаров, подходящих для участия в акции.
@@ -421,12 +426,16 @@ def create_excel_file_with_article_in_auto_actions(wb_cookie_header, period):
     time.sleep(time_sleep_for_wb_request())
     url = f"https://discounts-prices.wildberries.ru/ns/calendar-api/dp-calendar/suppliers/api/v1/excel/create"
     payload = json.dumps({"periodID": period})
-    response = requests.request("POST", url, headers=wb_cookie_header, data=payload)
+    response = requests.request(
+        "POST", url, headers=wb_cookie_header, data=payload
+    )
     time.sleep(time_sleep_for_wb_request())
     return response
 
 
-def take_excel_file_data_in_auto_actions(wb_cookie_header, action_number, period):
+def take_excel_file_data_in_auto_actions(
+    wb_cookie_header, action_number, period
+):
     """
     Запускает формировани Excel файла с артикулами из авто акций
     """
