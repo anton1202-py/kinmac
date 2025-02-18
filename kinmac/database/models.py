@@ -8,7 +8,9 @@ class Company(models.Model):
     wb_cookie_token = models.TextField(
         verbose_name="Куки токен ВБ", blank=True, null=True
     )
-
+    wb_authorizev_3 = models.TextField(
+        verbose_name="Токен ВБ для авторизации", blank=True, null=True
+    )
     ozon_token = models.TextField(
         verbose_name="Токен ОЗОН", blank=True, null=True
     )
@@ -58,7 +60,7 @@ class Company(models.Model):
             "Safari/537.36"
         )
         return {
-            "authorizev3": "",
+            "authorizev3": self.wb_authorizev_3,
             "baggage": "",
             "cookie": self.wb_cookie_token,
             "sentry-trace": "",
