@@ -141,10 +141,6 @@ app.conf.beat_schedule = {
         "task": "unit_economic.periodic_tasks.update_tariffs_and_logistic",
         "schedule": crontab(hour=6, minute=2),
     },
-    "unit_update_ozon_tariffs_and_logistic": {
-        "task": "unit_economic.periodic_tasks.update_ozon_tariffs_and_logistic",
-        "schedule": crontab(hour=6, minute=2),
-    },
     # ========== КОНЕЦ UNIT_ECONOMICS ========== #
     # ========== ACTIONS ========== #
     "actions_new_actions": {
