@@ -271,11 +271,22 @@ def ozon_update_article_date() -> None:
 
         for product in products_info:
             if product["sources"]:
-
-                marketing_price = float(product["marketing_price"])
-                min_price = float(product["min_price"])
-                old_price = float(product["old_price"])
-                price = float(product["price"])
+                try:
+                    marketing_price = float(product["marketing_price"])
+                except Exception:
+                    marketing_price = 0
+                try:
+                    min_price = float(product["min_price"])
+                except Exception:
+                    min_price = 0
+                try:
+                    old_price = float(product["old_price"])
+                except Exception:
+                    old_price = 0
+                try:
+                    price = float(product["price"])
+                except Exception:
+                    price = 0
 
                 fbo_comission = None
                 fbs_comission = None
