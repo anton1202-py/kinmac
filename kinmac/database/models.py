@@ -591,12 +591,12 @@ class Deliveries(models.Model):
 
     income_id = models.CharField(
         verbose_name="ID поставки",
-        max_length=15,
+        max_length=100,
         null=True,
     )
     number = models.CharField(
         verbose_name="Номер УПД",
-        max_length=15,
+        max_length=100,
         null=True,
         blank=True,
     )
@@ -614,7 +614,7 @@ class Deliveries(models.Model):
     )
     tech_size = models.CharField(
         verbose_name="Размер товара",
-        max_length=10,
+        max_length=100,
         null=True,
     )
     barcode = models.PositiveBigIntegerField(

@@ -23,7 +23,11 @@ from check_report.supplyment import (
     report_reconciliation,
     write_sales_report_data_to_database,
 )
-from database.models import Articles, SalesReportOnSales, WeeklyReportInDatabase
+from database.models import (
+    Articles,
+    SalesReportOnSales,
+    WeeklyReportInDatabase,
+)
 from database.supplyment import (
     add_data_delivery_to_db,
     add_data_orders_from_site_to_db,
@@ -77,7 +81,9 @@ def check_wb_toket_expire():
     delta_time = dt_object - datetime.now()
     delta_days = delta_time.days
     if delta_days < 5:
-        message = f"Токен ВБ истекает через {delta_days} дней. Срочно обновите его"
+        message = (
+            f"Токен ВБ истекает через {delta_days} дней. Срочно обновите его"
+        )
         bot.send_message(chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message)
 
 
@@ -90,9 +96,13 @@ def add_data_stock_api():
             add_data_stock_from_api(data)
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
-        message_text = error_message("add_data_stock_api", add_data_stock_api, e)
+        message_text = error_message(
+            "add_data_stock_api", add_data_stock_api, e
+        )
         bot.send_message(
-            chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message_text, parse_mode="HTML"
+            chat_id=TELEGRAM_ADMIN_CHAT_ID,
+            text=message_text,
+            parse_mode="HTML",
         )
 
 
@@ -107,7 +117,9 @@ def add_data_sales():
         # обработка ошибки и отправка сообщения через бота
         message_text = error_message("add_data_sales", add_data_sales, e)
         bot.send_message(
-            chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message_text, parse_mode="HTML"
+            chat_id=TELEGRAM_ADMIN_CHAT_ID,
+            text=message_text,
+            parse_mode="HTML",
         )
 
 
@@ -289,7 +301,9 @@ def add_stock_data_site():
         article_data = Articles.objects.filter(nomenclatura_wb__isnull=False)
         article_dict = {}
         for article_obj in article_data:
-            article_dict[int(article_obj.nomenclatura_wb)] = article_obj.common_article
+            article_dict[int(article_obj.nomenclatura_wb)] = (
+                article_obj.common_article
+            )
         iter_amount = math.ceil(len(article_dict.keys()) / 70)
         for k in range(iter_amount):
             start_point = k * 70
@@ -331,7 +345,9 @@ def add_stock_data_site():
 
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
-        message_text = error_message("add_stock_data_site", add_stock_data_site, e)
+        message_text = error_message(
+            "add_stock_data_site", add_stock_data_site, e
+        )
         bot.send_message(
             chat_id=TELEGRAM_ADMIN_CHAT_ID,
             text=str(message_text)[:4000],
@@ -343,17 +359,23 @@ def add_stock_data_site():
 def delivery_statistic():
     """Добавляет данные по поставкам в базу данных"""
     try:
-        control_date_delivery = date.today() - timedelta(days=2)
-        data_deliveries = get_statistic_delivery_api(wb_headers, control_date_delivery)
+        control_date_delivery = date.today() - timedelta(days=2000)
+        data_deliveries = get_statistic_delivery_api(
+            wb_headers, control_date_delivery
+        )
 
         if data_deliveries:
             for data in data_deliveries:
                 add_data_delivery_to_db(data)
     except Exception as e:
         # обработка ошибки и отправка сообщения через бота
-        message_text = error_message("delivery_statistic", delivery_statistic, e)
+        message_text = error_message(
+            "delivery_statistic", delivery_statistic, e
+        )
         bot.send_message(
-            chat_id=TELEGRAM_ADMIN_CHAT_ID, text=message_text, parse_mode="HTML"
+            chat_id=TELEGRAM_ADMIN_CHAT_ID,
+            text=message_text,
+            parse_mode="HTML",
         )
 
 
@@ -376,7 +398,9 @@ def sales_report_statistic():
     """Добавляет данные по отчету продаж"""
     start_date = date.today() - timedelta(days=90)
     finish_date = date.today() - timedelta(days=1)
-    common_data = get_report_detail_by_period(wb_headers, start_date, finish_date)
+    common_data = get_report_detail_by_period(
+        wb_headers, start_date, finish_date
+    )
     if common_data:
         reports_data = {}
         for data in common_data:
