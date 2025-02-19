@@ -271,6 +271,12 @@ def ozon_update_article_date() -> None:
 
         for product in products_info:
             if product["sources"]:
+
+                marketing_price = float(product["marketing_price"])
+                min_price = float(product["min_price"])
+                old_price = float(product["old_price"])
+                price = float(product["price"])
+
                 fbo_comission = None
                 fbs_comission = None
                 for data in product["commissions"]:
@@ -293,10 +299,10 @@ def ozon_update_article_date() -> None:
                         ],
                         type_id=product["type_id"],
                         images=product["images"],
-                        marketing_price=product["marketing_price"],
-                        min_price=product["min_price"],
-                        old_price=product["old_price"],
-                        price=product["price"],
+                        marketing_price=marketing_price,
+                        min_price=min_price,
+                        old_price=old_price,
+                        price=price,
                         volume_weight=product["volume_weight"],
                         fbo_comission=fbo_comission,
                         fbs_comission=fbs_comission,
@@ -314,10 +320,10 @@ def ozon_update_article_date() -> None:
                         ],
                         type_id=product["type_id"],
                         images=product["images"],
-                        marketing_price=product["marketing_price"],
-                        min_price=product["min_price"],
-                        old_price=product["old_price"],
-                        price=product["price"],
+                        marketing_price=marketing_price,
+                        min_price=min_price,
+                        old_price=old_price,
+                        price=price,
                         volume_weight=product["volume_weight"],
                         fbo_comission=fbo_comission,
                         fbs_comission=fbs_comission,
@@ -330,7 +336,7 @@ def ozon_update_article_date() -> None:
             ).first()
             if product:
                 # Обновляем атрибуты
-                product.heigh = attribute.get("height", 0) / 10
+                product.height = attribute.get("height", 0) / 10
                 product.depth = attribute.get("depth", 0) / 10
                 product.width = attribute.get("width", 0) / 10
                 product.weight = attribute.get("weight", 0) / 1000

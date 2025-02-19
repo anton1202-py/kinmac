@@ -3,12 +3,9 @@ from datetime import datetime, timedelta
 from django.db.models import Count, Sum, Q
 from database.models import (
     Company,
-    Marketplace,
-    MarketplaceOrders,
     OzonArticleStorageCost,
     OzonProduct,
     OzonTransaction,
-    TransactionService,
     WarehouseBalance,
 )
 from reklama.models import OzonArticleDailyCostToAdv
@@ -105,6 +102,7 @@ class OzonMarketplaceArticlesData:
                 "height": data.height,
                 "length": data.depth,
                 "weight": data.weight,
+                "price": data.price,
                 "marketing_price": data.marketing_price,
                 "with_ozon_card_price": data.with_card_price,
             }

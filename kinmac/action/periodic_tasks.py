@@ -1,5 +1,4 @@
 from datetime import datetime
-from django.utils import timezone
 from api_requests.wb_requests import (
     wb_action_details_info,
     wb_actions_first_list,
@@ -7,7 +6,7 @@ from api_requests.wb_requests import (
 )
 from celery_tasks.celery import app
 
-from action.models import Action, ArticleForAction
+from action.models import Action
 from action.supplyment import (
     action_data_from_front,
     add_article_may_be_in_action,
@@ -15,15 +14,8 @@ from action.supplyment import (
 )
 from api_requests.ozon_requests import ActionRequest
 from action.service.ozon_serv import OzonActionHandler
-from kinmac.constants_file import (
-    TELEGRAM_ADMIN_CHAT_ID,
-    bot,
-    wb_headers,
-    wb_header_with_lk_cookie,
-    actions_info_users_list,
-)
+
 from database.models import Company, Marketplace
-from database.models import Articles
 
 
 @app.task
@@ -36,13 +28,6 @@ def add_new_actions_wb_to_db():
         if actions_data:
             actions_info = actions_data["data"]["promotions"]
             for action in actions_info:
-                # if not Action.objects.filter(action_number=action['id']).exists():
-                # message = (f"{action['id']}: {action['name']}.\n"
-                #             f"Дата начала: {datetime.strptime(action['startDateTime'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d')}.\n"
-                #             f"Дата завершения {datetime.strptime(action['endDateTime'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d')}.")
-                # for chat_id in actions_info_users_list:
-                #     bot.send_message(chat_id=chat_id,
-                #          text=message)
                 actions_not_exist_str += f"promotionIDs={action['id']}&"
         if actions_not_exist_str:
             # Получаем детальную информацию по новым акциям
@@ -54,13 +39,15 @@ def add_new_actions_wb_to_db():
             )
             if actions_details and "data" in actions_details:
                 for detail in actions_details["data"]["promotions"]:
-                    # Получаем инормацию по артикулам, которые могут участвовать в акции
+                    # Получаем инормацию по артикулам,
+                    # которые могут участвовать в акции
                     article_action_data = wb_articles_in_action(
                         company.wb_header, detail["id"]
                     )
                     articles_amount = 0
                     if article_action_data:
-                        # Смотрим кол-во артикулов, которые могут участвовать в акции
+                        # Смотрим кол-во артикулов,
+                        # которые могут участвовать в акции
                         articles_amount = len(article_action_data)
                     # Сохраняем новую акцию в базу
                     search_params = {
@@ -97,7 +84,8 @@ def add_article_in_actions_info():
             date_finish__gt=datetime.now(),
         )
         for action_obj in actions:
-            # Получаем инормацию по артикулам, которые могут участвовать в акции
+            # Получаем инормацию по артикулам,
+            # которые могут участвовать в акции
             if action_obj.action_type != "auto":
                 article_action_data = wb_articles_in_action(
                     company.wb_header, action_obj.action_number
