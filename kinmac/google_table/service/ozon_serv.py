@@ -42,7 +42,7 @@ class OzonMarketplaceArticlesData:
         self.weeks_amount = weeks_amount
 
     def only_sales_data(self):
-        end_date = datetime.now()
+        end_date = datetime.now() - timedelta(days=1)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         response_dict = {}
         sales_dict = {}
@@ -149,8 +149,8 @@ class OzonMarketplaceArticlesData:
         return response_dict
 
     def advert_data(self):
-        """Получение данных а цене артикула в акции"""
-        end_date = datetime.now()
+        """Расход на рекламу"""
+        end_date = datetime.now() - timedelta(days=1)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         adv_dict = {}
         adv_data = (
@@ -185,7 +185,7 @@ class OzonMarketplaceArticlesData:
         """
         Входящие данные - количество недель за которые нужно отдать данные
         """
-        end_date = datetime.now()
+        end_date = datetime.now() - timedelta(days=1)
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
