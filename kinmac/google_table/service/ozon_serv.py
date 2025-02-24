@@ -51,8 +51,8 @@ class OzonMarketplaceArticlesData:
             OzonTransaction.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 article__description_category_id__in=OZON_CATEGORY_LIST,
-                order_date__gte=start_date,
-                order_date__lte=end_date,
+                operation_date__gte=start_date,
+                operation_date__lte=end_date,
                 type="orders",
             )
             .order_by("article__seller_article")
