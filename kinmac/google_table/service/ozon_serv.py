@@ -58,8 +58,8 @@ class OzonMarketplaceArticlesData:
             .order_by("article__seller_article")
             .values("article__seller_article")
             .annotate(
-                sales_amount=Count("amount"),
-                sales_sum=Sum("amount"),
+                sales_amount=Count("accruals_for_sale"),
+                sales_sum=Sum("accruals_for_sale"),
             )
         )
 
@@ -189,7 +189,6 @@ class OzonMarketplaceArticlesData:
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
-        logistic_cost = {}
         storage_cost = {}
 
         main_returned_dict = {}

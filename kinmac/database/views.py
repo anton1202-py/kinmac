@@ -10,9 +10,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
-from celery_tasks.tasks import delivery_statistic
 from kinmac.constants_file import BRAND_LIST
-
 from .forms import (
     ArticlesForm,
     LoginUserForm,
@@ -37,7 +35,6 @@ def database_home(request):
     context = {
         "data": data,
     }
-    delivery_statistic()
     if request.method == "POST" and request.FILES["myarticles"]:
         myfile = request.FILES["myarticles"]
         empexceldata = pd.read_excel(myfile)
