@@ -67,10 +67,11 @@ class OzonMarketplaceArticlesData:
             OzonTransaction.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 article__description_category_id__in=OZON_CATEGORY_LIST,
+                article__seller_article="BP01003",
                 operation_date__gte=start_date,
                 operation_date__lte=end_date,
-                type__in=operation_list,
             )
+            .exclude(accruals_for_sale=0)
             .order_by("article__seller_article")
             .values("article__seller_article")
             .annotate(
