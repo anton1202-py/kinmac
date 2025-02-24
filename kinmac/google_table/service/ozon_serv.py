@@ -46,14 +46,14 @@ class OzonMarketplaceArticlesData:
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         response_dict = {}
         sales_dict = {}
-
+        operation_list = ["orders", "returns"]
         sale_data = (
             OzonTransaction.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 article__description_category_id__in=OZON_CATEGORY_LIST,
-                operation_date__gte=start_date,
-                operation_date__lte=end_date,
-                type="orders",
+                order_date__gte=start_date,
+                order_date__lte=end_date,
+                type__in=operation_list,
             )
             .order_by("article__seller_article")
             .values("article__seller_article")
