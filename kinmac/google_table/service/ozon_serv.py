@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Sum, Q, Case, When, IntegerField
 from database.models import (
     Company,
     OzonArticleStorageCost,
@@ -63,6 +63,27 @@ class OzonMarketplaceArticlesData:
             )
         )
 
+        sale_data = (
+            OzonTransaction.objects.filter(
+                company=Company.objects.filter(name="KINMAC").first(),
+                article__description_category_id__in=OZON_CATEGORY_LIST,
+                operation_date__gte=start_date,
+                operation_date__lte=end_date,
+                type__in=operation_list,
+            )
+            .order_by("article__seller_article")
+            .values("article__seller_article")
+            .annotate(
+                sales_amount=Sum(
+                    Case(
+                        When(type="orders", then=1),
+                        When(type="returns", then=-1),
+                        output_field=IntegerField(),
+                    )
+                ),
+                sales_sum=Sum("accruals_for_sale"),
+            )
+        )
         for data in sale_data:
             sales_dict[data["article__seller_article"]] = {
                 "sales_amount": data["sales_amount"],
