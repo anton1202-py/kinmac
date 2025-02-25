@@ -252,7 +252,6 @@ class OzonMarketplaceArticlesData:
             )
             .values("article__seller_article", "total_price")
         )
-
         logistic_data = defaultdict(int)
 
         for i in filtered_transactions:
@@ -266,7 +265,7 @@ class OzonMarketplaceArticlesData:
 
             main_returned_dict[article_obj.seller_article] = {
                 "logistic_cost": (
-                    logistic_data[article_obj.seller_article]
+                    abs(logistic_data[article_obj.seller_article])
                     if article_obj.seller_article in logistic_data
                     else 0
                 ),
