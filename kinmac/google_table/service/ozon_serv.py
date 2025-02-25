@@ -201,7 +201,7 @@ class OzonMarketplaceArticlesData:
         """
         Входящие данные - количество недель за которые нужно отдать данные
         """
-        end_date = datetime.now() - timedelta(days=2)
+        end_date = datetime.now() - timedelta(days=1)
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
