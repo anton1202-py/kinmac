@@ -16,22 +16,23 @@ LOGISTIC_OPERATION_TYPES: list = [
     "MarketplaceNotDeliveredCostItem",
     "MarketplaceReturnAfterDeliveryCostItem",
     "MarketplaceDeliveryCostItem",
-    "ItemAdvertisementForSupplierLogistic",
-    "ItemAdvertisementForSupplierLogisticSeller",
     "MarketplaceServiceItemDelivToCustomer",
     "MarketplaceServiceItemDirectFlowTrans",
-    "MarketplaceServiceItemDropoffFF",
-    "MarketplaceServiceItemDropoffPVZ",
-    "MarketplaceServiceItemDropoffSC",
-    "MarketplaceServiceItemFulfillment",
-    "MarketplaceServiceItemPickup",
-    "MarketplaceServiceItemReturnAfterDelivToCustomer",
     "MarketplaceServiceItemReturnFlowTrans",
-    "MarketplaceServiceItemDeliveryKGT",
     "MarketplaceServiceItemDirectFlowLogistic",
     "MarketplaceServiceItemReturnFlowLogistic",
-    "MarketplaceServiceItemRedistributionReturnsPVZ",
+    "MarketplaceServiceItemReturnNotDelivToCustomer",
+    # "MarketplaceServiceItemDropoffFF",
+    # "MarketplaceServiceItemDropoffPVZ",
+    # "MarketplaceServiceItemDropoffSC",
+    # "MarketplaceServiceItemFulfillment",
+    # "",
+    "MarketplaceServiceItemPickup",
+    "MarketplaceServiceItemDeliveryKGT",
     "MarketplaceServiceItemDirectFlowLogisticVDC",
+    # "",
+    "MarketplaceServiceItemRedistributionReturnsPVZ",
+    "MarketplaceServiceItemReturnAfterDelivToCustomer",
 ]
 
 
@@ -206,7 +207,7 @@ class OzonMarketplaceArticlesData:
         """
         Входящие данные - количество недель за которые нужно отдать данные
         """
-        end_date = datetime.now() - timedelta(days=1)
+        end_date = (datetime.now() - timedelta(days=2)).date()
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
@@ -231,15 +232,12 @@ class OzonMarketplaceArticlesData:
                 data["storage_cost"], 2
             )
 
-        # logistic_data
         filtered_transactions = (
             (
                 (
                     OzonTransaction.objects.filter(
-                        order_date__gte=start_date,
-                        order_date__lte=end_date,
-                        article__isnull=False,
-                        # operation_type__in=LOGISTIC_OPERATION_TYPES,
+                        operation_date__gte=start_date,
+                        operation_date__lte=end_date,
                         article__description_category_id__in=OZON_CATEGORY_LIST,
                     ).order_by("article__seller_article")
                 )
@@ -254,6 +252,7 @@ class OzonMarketplaceArticlesData:
             )
             .values("article__seller_article", "total_price")
         )
+
         logistic_data = defaultdict(int)
 
         for i in filtered_transactions:
