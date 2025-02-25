@@ -22,15 +22,9 @@ LOGISTIC_OPERATION_TYPES: list = [
     "MarketplaceServiceItemDirectFlowLogistic",
     "MarketplaceServiceItemReturnFlowLogistic",
     "MarketplaceServiceItemReturnNotDelivToCustomer",
-    # "MarketplaceServiceItemDropoffFF",
-    # "MarketplaceServiceItemDropoffPVZ",
-    # "MarketplaceServiceItemDropoffSC",
-    # "MarketplaceServiceItemFulfillment",
-    # "",
     "MarketplaceServiceItemPickup",
     "MarketplaceServiceItemDeliveryKGT",
     "MarketplaceServiceItemDirectFlowLogisticVDC",
-    # "",
     "MarketplaceServiceItemRedistributionReturnsPVZ",
     "MarketplaceServiceItemReturnAfterDelivToCustomer",
 ]
@@ -207,7 +201,7 @@ class OzonMarketplaceArticlesData:
         """
         Входящие данные - количество недель за которые нужно отдать данные
         """
-        end_date = (datetime.now() - timedelta(days=2)).date()
+        end_date = datetime.now() - timedelta(days=2)
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
@@ -231,13 +225,13 @@ class OzonMarketplaceArticlesData:
             storage_cost[data["article__seller_article"]] = round(
                 data["storage_cost"], 2
             )
-
         filtered_transactions = (
             (
                 (
                     OzonTransaction.objects.filter(
                         operation_date__gte=start_date,
                         operation_date__lte=end_date,
+                        # article__seller_article__in=art_list,
                         article__description_category_id__in=OZON_CATEGORY_LIST,
                     ).order_by("article__seller_article")
                 )
@@ -250,7 +244,7 @@ class OzonMarketplaceArticlesData:
                     filter=Q(services__name__in=LOGISTIC_OPERATION_TYPES),
                 )
             )
-            .values("article__seller_article", "total_price")
+            .values("article__seller_article", "total_price", "posting_number")
         )
         logistic_data = defaultdict(int)
 
