@@ -670,6 +670,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
         date_from: str,
         date_to: str,
         data_list: list = None,
+        posting_number: str = "",
         limit: int = 1000,
         page: int = 1,
     ) -> list:
@@ -682,7 +683,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
                         "from": f"{date_from}T00:00:00.000Z",
                         "to": f"{date_to}T00:00:00.000Z",
                     },
-                    "operation_type": [],
+                    "posting_number": posting_number,
                     "transaction_type": "all",
                 },
                 "page": page,
@@ -710,8 +711,12 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
                 return data_list
 
     def finance_transaction_list(
-        self, header: dict, date_from: str, date_to: str
-    ) -> list:
+        self,
+        header: dict,
+        date_from: str,
+        date_to: str,
+        posting_number: str = "",
+    ) -> list[dict]:
         """
         Возвращает подробную информацию по всем начислениям.
         Максимальный период, за который можно получить информацию
@@ -723,6 +728,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
             header=header,
             date_from=date_from,
             date_to=date_to,
+            posting_number=posting_number,
         )
 
 

@@ -497,7 +497,10 @@ def ozon_get_transactions_info():
             date_to=date_to,
         )
         handler.transaction_handler(
-            company=company, transactions_info=transactions_info
+            company=company,
+            transactions_info=transactions_info,
+            date_from=date_from,
+            date_to=date_to,
         )
 
 

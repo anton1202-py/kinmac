@@ -2,7 +2,10 @@ from datetime import datetime
 
 from database.service.service import ModelObjectService
 
-from api_requests.ozon_requests import OzonWarehouseApiRequest
+from api_requests.ozon_requests import (
+    OzonReportsApiRequest,
+    OzonWarehouseApiRequest,
+)
 from database.models import (
     Cluster,
     Company,
@@ -172,6 +175,9 @@ class OzonSalesOrdersHandler:
 class OzonReportsHandler:
     """Обрабатывает и сохраняет данные из отчетов Озон"""
 
+    def __init__(self):
+        self.req = OzonReportsApiRequest()
+
     def _get_service_object(
         self, service_name: str, service_price: float
     ) -> TransactionService:
@@ -215,13 +221,45 @@ class OzonReportsHandler:
         )
         ozon_transaction.services.set(transaction.get("services"))
 
+    def find_product_in_transaction_posting(
+        self,
+        company: Company,
+        date_from: str,
+        date_to: str,
+        posting_number: str,
+    ) -> list[dict] | None:
+        """Ищет артикулы в транзакциях с таким же номером отправления"""
+        transactions_info = self.req.finance_transaction_list(
+            header=company.ozon_header,
+            date_from=date_from,
+            date_to=date_to,
+            posting_number=posting_number,
+        )
+        for transaction in transactions_info:
+            skus: list[dict] = transaction.get("items")
+            if skus:
+                return skus
+        return None
+
     def transaction_handler(
-        self, company: Company, transactions_info: list[dict]
+        self,
+        company: Company,
+        transactions_info: list[dict],
+        date_from: str,
+        date_to: str,
     ) -> None:
         """Обрабатывает данные по отчету транзакций"""
         for transaction in transactions_info:
             skus: list[dict] = transaction.get("items")
             article = None
+            posting_number = transaction.get("posting").get("posting_number")
+            if not skus and ("-" in posting_number):
+                skus = self.find_product_in_transaction_posting(
+                    company=company,
+                    date_from=date_from,
+                    date_to=date_to,
+                    posting_number=posting_number,
+                )
             if skus:
                 sku = skus[0].get("sku")
                 article = OzonProduct.objects.filter(
@@ -245,7 +283,7 @@ class OzonReportsHandler:
 
 
 class OzonFrontDataHandler:
-    """Обрабатывает данные с АПи фронта Озон"""
+    """Обрабатывает данные с АПИ фронта Озон"""
 
     def storage_cost_to_db(
         self, company: Company, cost_info: list[dict], cost_date: str
