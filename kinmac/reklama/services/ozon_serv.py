@@ -1,3 +1,5 @@
+from collections import defaultdict
+from datetime import datetime
 from database.models import Articles, Company, OzonProduct
 from database.service.service import ModelObjectService
 from reklama.models import OzonArticleDailyCostToAdv, OzonReklamaCampaign
@@ -63,6 +65,30 @@ class OzonAdvCampaignAndProducts:
                     article=article,
                     cost_date=cost_date,
                     defaults={"cost": float(cost)},
+                )
+
+    def promo_search_article_adv_cost(
+        self, company: Company, statistic: list[dict]
+    ) -> None:
+        """
+        Сохранение расходов на продвижение артикула в поиске Озон
+        """
+        article_cost = defaultdict(lambda: defaultdict(float))
+        for info in statistic:
+            article = OzonProduct.objects.filter(
+                company=company, sku=int(info["sku"])
+            ).first()
+            date_object = datetime.strptime(info["date"], "%d.%m.%Y").date()
+            cost: str = info["moneySpent"]
+            cost: float = float(cost.replace(",", "."))
+            article_cost[article][date_object] += cost
+        for article, cost_data in dict(article_cost).items():
+            for date, cost in cost_data.items():
+                OzonArticleDailyCostToAdv.objects.update_or_create(
+                    article=article,
+                    cost_date=date,
+                    campaign=None,
+                    defaults={"cost": cost},
                 )
 
 

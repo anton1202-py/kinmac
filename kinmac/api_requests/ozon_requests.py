@@ -367,6 +367,11 @@ class OzonAdvertismentApiRequest:
         response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
+        elif response.status_code == 429:
+            time.sleep(65)
+            return self._post_template_req(
+                url=url, header=header, payload=payload
+            )
         else:
             message = (
                 f"Статус код: {response.status_code} "
@@ -606,6 +611,54 @@ class OzonAdvertismentApiRequest:
             f"json?dateFrom={date_from}&dateTo={date_to}"
         )
         return self.get_proxy_auth_get_request(header, perfomance_header, url)
+
+    def search_promo_report(
+        self,
+        header: dict,
+        perfomance_header: dict,
+        date_from: str,
+        date_to: str,
+    ) -> dict:
+        """
+        Отчёт по заказам в продвижении в поиске
+        """
+        method = "/api/client/statistic/orders/generate/json"
+        payload = json.dumps(
+            {"from": f"{date_from}T00:00:00Z", "to": f"{date_to}T00:00:00Z"}
+        )
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, self.main_url + method, payload
+        )
+
+    def check_report_status(
+        self,
+        header: dict,
+        perfomance_header: dict,
+        report_uuid: str,
+    ) -> dict:
+        """
+        Проверить статус формирования отчета
+        """
+        method = f"/api/client/statistics/{report_uuid}"
+
+        return self.get_proxy_auth_get_request(
+            header, perfomance_header, self.main_url + method
+        )
+
+    def get_report(
+        self,
+        header: dict,
+        perfomance_header: dict,
+        report_uuid: str,
+    ) -> dict:
+        """
+        Получить отчёты
+        """
+        method = f"/api/client/statistics/report?UUID={report_uuid}"
+
+        return self.get_proxy_auth_get_request(
+            header, perfomance_header, self.main_url + method
+        )
 
 
 class OzonPriceComissionApiRequest(OzonTemplatesRequest):

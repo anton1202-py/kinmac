@@ -170,4 +170,8 @@ app.conf.beat_schedule = {
         "task": "reklama.periodic_tasks.ozon_cost_adv_articles",
         "schedule": crontab(hour=23, minute=50),
     },
+    "reklama_ozon_cost_adv_articles_promo_search": {
+        "task": "reklama.periodic_tasks.ozon_cost_adv_articles_promo_search",
+        "schedule": crontab(hour=20, minute=50),
+    },
 }
