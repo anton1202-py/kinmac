@@ -6,7 +6,7 @@ from database.models import (
     OzonProduct,
     WarehouseBalance,
 )
-from django.db.models import Sum, Max
+from django.db.models import Sum
 from rest_framework import serializers
 
 

@@ -1,14 +1,11 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Sum, Q, Case, When, IntegerField
 from database.models import (
     Company,
-    Marketplace,
-    MarketplaceOrders,
     OzonArticleStorageCost,
     OzonProduct,
     OzonTransaction,
-    TransactionService,
     WarehouseBalance,
 )
 from reklama.models import OzonArticleDailyCostToAdv
@@ -19,22 +16,17 @@ LOGISTIC_OPERATION_TYPES: list = [
     "MarketplaceNotDeliveredCostItem",
     "MarketplaceReturnAfterDeliveryCostItem",
     "MarketplaceDeliveryCostItem",
-    "ItemAdvertisementForSupplierLogistic",
-    "ItemAdvertisementForSupplierLogisticSeller",
     "MarketplaceServiceItemDelivToCustomer",
     "MarketplaceServiceItemDirectFlowTrans",
-    "MarketplaceServiceItemDropoffFF",
-    "MarketplaceServiceItemDropoffPVZ",
-    "MarketplaceServiceItemDropoffSC",
-    "MarketplaceServiceItemFulfillment",
-    "MarketplaceServiceItemPickup",
-    "MarketplaceServiceItemReturnAfterDelivToCustomer",
     "MarketplaceServiceItemReturnFlowTrans",
-    "MarketplaceServiceItemDeliveryKGT",
     "MarketplaceServiceItemDirectFlowLogistic",
     "MarketplaceServiceItemReturnFlowLogistic",
-    "MarketplaceServiceItemRedistributionReturnsPVZ",
+    "MarketplaceServiceItemReturnNotDelivToCustomer",
+    "MarketplaceServiceItemPickup",
+    "MarketplaceServiceItemDeliveryKGT",
     "MarketplaceServiceItemDirectFlowLogisticVDC",
+    "MarketplaceServiceItemRedistributionReturnsPVZ",
+    "MarketplaceServiceItemReturnAfterDelivToCustomer",
 ]
 
 
@@ -45,27 +37,48 @@ class OzonMarketplaceArticlesData:
         self.weeks_amount = weeks_amount
 
     def only_sales_data(self):
-        end_date = datetime.now() - timedelta(days=8)
+        end_date = datetime.now() - timedelta(days=1)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         response_dict = {}
         sales_dict = {}
+        operation_list = ["orders", "returns"]
+        sale_data = (
+            OzonTransaction.objects.filter(
+                company=Company.objects.filter(name="KINMAC").first(),
+                article__description_category_id__in=OZON_CATEGORY_LIST,
+                operation_date__gte=start_date,
+                operation_date__lte=end_date,
+                type__in=operation_list,
+            )
+            .order_by("article__seller_article")
+            .values("article__seller_article")
+            .annotate(
+                sales_amount=Count("accruals_for_sale"),
+                sales_sum=Sum("accruals_for_sale"),
+            )
+        )
 
         sale_data = (
             OzonTransaction.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 article__description_category_id__in=OZON_CATEGORY_LIST,
-                order_date__gte=start_date,
-                order_date__lte=end_date,
-                type="orders",
+                operation_date__gte=start_date,
+                operation_date__lte=end_date,
             )
+            .exclude(accruals_for_sale=0)
             .order_by("article__seller_article")
             .values("article__seller_article")
             .annotate(
-                sales_amount=Count("amount"),
-                sales_sum=Sum("amount"),
+                sales_amount=Sum(
+                    Case(
+                        When(type="orders", then=1),
+                        When(type="returns", then=-1),
+                        output_field=IntegerField(),
+                    )
+                ),
+                sales_sum=Sum("accruals_for_sale"),
             )
         )
-
         for data in sale_data:
             sales_dict[data["article__seller_article"]] = {
                 "sales_amount": data["sales_amount"],
@@ -105,6 +118,7 @@ class OzonMarketplaceArticlesData:
                 "height": data.height,
                 "length": data.depth,
                 "weight": data.weight,
+                "price": data.price,
                 "marketing_price": data.marketing_price,
                 "with_ozon_card_price": data.with_card_price,
             }
@@ -151,8 +165,8 @@ class OzonMarketplaceArticlesData:
         return response_dict
 
     def advert_data(self):
-        """Получение данных а цене артикула в акции"""
-        end_date = datetime.now() - timedelta(days=8)
+        """Расход на рекламу"""
+        end_date = (datetime.now() - timedelta(days=1)).date()
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         adv_dict = {}
         adv_data = (
@@ -187,11 +201,10 @@ class OzonMarketplaceArticlesData:
         """
         Входящие данные - количество недель за которые нужно отдать данные
         """
-        end_date = datetime.now() - timedelta(days=8)
+        end_date = datetime.now() - timedelta(days=1)
         # Дата начала периода (начало num_weeks назад)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
 
-        logistic_cost = {}
         storage_cost = {}
 
         main_returned_dict = {}
@@ -212,16 +225,13 @@ class OzonMarketplaceArticlesData:
             storage_cost[data["article__seller_article"]] = round(
                 data["storage_cost"], 2
             )
-
-        # logistic_data
         filtered_transactions = (
             (
                 (
                     OzonTransaction.objects.filter(
-                        order_date__gte=start_date,
-                        order_date__lte=end_date,
-                        article__isnull=False,
-                        # operation_type__in=LOGISTIC_OPERATION_TYPES,
+                        operation_date__gte=start_date,
+                        operation_date__lte=end_date,
+                        # article__seller_article__in=art_list,
                         article__description_category_id__in=OZON_CATEGORY_LIST,
                     ).order_by("article__seller_article")
                 )
@@ -234,7 +244,7 @@ class OzonMarketplaceArticlesData:
                     filter=Q(services__name__in=LOGISTIC_OPERATION_TYPES),
                 )
             )
-            .values("article__seller_article", "total_price")
+            .values("article__seller_article", "total_price", "posting_number")
         )
         logistic_data = defaultdict(int)
 
@@ -249,7 +259,7 @@ class OzonMarketplaceArticlesData:
 
             main_returned_dict[article_obj.seller_article] = {
                 "logistic_cost": (
-                    logistic_data[article_obj.seller_article]
+                    abs(logistic_data[article_obj.seller_article])
                     if article_obj.seller_article in logistic_data
                     else 0
                 ),

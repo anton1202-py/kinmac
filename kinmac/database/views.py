@@ -11,7 +11,6 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
-
 from .forms import (
     ArticlesForm,
     LoginUserForm,

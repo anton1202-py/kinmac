@@ -8,7 +8,6 @@
     },
     "python.formatting.provider": "ms-python.black-formatter",
     "python.terminal.activateEnvironment": true,
-    // "python.analysis.inlayHints.variableTypes": true,
     "emmet.includeLanguages": {
         "django-html": "html"
     },

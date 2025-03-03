@@ -8,7 +8,9 @@ class Company(models.Model):
     wb_cookie_token = models.TextField(
         verbose_name="Куки токен ВБ", blank=True, null=True
     )
-
+    wb_authorizev_3 = models.TextField(
+        verbose_name="Токен ВБ для авторизации", blank=True, null=True
+    )
     ozon_token = models.TextField(
         verbose_name="Токен ОЗОН", blank=True, null=True
     )
@@ -51,18 +53,9 @@ class Company(models.Model):
 
     @property
     def wb_cookie_header(self):
-        USER_AGENT = (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/128.0.0.0 YaBrowser/24.10.0.0 "
-            "Safari/537.36"
-        )
         return {
-            "authorizev3": "",
-            "baggage": "",
+            "authorizev3": self.wb_authorizev_3,
             "cookie": self.wb_cookie_token,
-            "sentry-trace": "",
-            "user-agent": USER_AGENT,
             "Content-Type": "application/json",
         }
 
@@ -298,7 +291,7 @@ class OzonProduct(models.Model):
         verbose_name="Массив ссылок на изображения.",
         null=True,
     )
-    marketing_price = models.CharField(
+    marketing_price = models.FloatField(
         verbose_name=(
             "Цена на товар с учётом всех акций. "
             "Это значение будет указано на витрине Ozon."
@@ -306,17 +299,17 @@ class OzonProduct(models.Model):
         max_length=20,
         null=True,
     )
-    with_card_price = models.CharField(
+    with_card_price = models.FloatField(
         verbose_name="Цена товара с картой Озон.",
         max_length=50,
         null=True,
     )
-    min_price = models.CharField(
+    min_price = models.FloatField(
         verbose_name="Минимальная цена товара после применения акций.",
         max_length=50,
         null=True,
     )
-    old_price = models.CharField(
+    old_price = models.FloatField(
         verbose_name=(
             "Цена до учёта скидок. "
             "На карточке товара отображается зачёркнутой."
@@ -324,7 +317,7 @@ class OzonProduct(models.Model):
         max_length=50,
         null=True,
     )
-    price = models.CharField(
+    price = models.FloatField(
         verbose_name=(
             "Цена товара с учётом скидок."
             "Это значение показывается на карточке товара."
@@ -598,12 +591,12 @@ class Deliveries(models.Model):
 
     income_id = models.CharField(
         verbose_name="ID поставки",
-        max_length=15,
+        max_length=100,
         null=True,
     )
     number = models.CharField(
         verbose_name="Номер УПД",
-        max_length=15,
+        max_length=100,
         null=True,
         blank=True,
     )
@@ -621,7 +614,7 @@ class Deliveries(models.Model):
     )
     tech_size = models.CharField(
         verbose_name="Размер товара",
-        max_length=10,
+        max_length=100,
         null=True,
     )
     barcode = models.PositiveBigIntegerField(

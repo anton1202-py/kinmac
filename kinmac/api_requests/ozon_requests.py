@@ -135,7 +135,7 @@ class ArticleDataRequest:
                 return data_list
 
     def ozon_products_list(self, header: dict) -> list:
-        url = f"{self.MAIN_URL}v2/product/list"
+        url = f"{self.MAIN_URL}v3/product/list"
         return self._post_recursion_template_req(url, header)
 
     def ozon_product_info(
@@ -367,6 +367,11 @@ class OzonAdvertismentApiRequest:
         response = requests.post(url, headers=header, data=payload)
         if response.status_code == 200:
             return json.loads(response.text)
+        elif response.status_code == 429:
+            time.sleep(65)
+            return self._post_template_req(
+                url=url, header=header, payload=payload
+            )
         else:
             message = (
                 f"Статус код: {response.status_code} "
@@ -607,6 +612,54 @@ class OzonAdvertismentApiRequest:
         )
         return self.get_proxy_auth_get_request(header, perfomance_header, url)
 
+    def search_promo_report(
+        self,
+        header: dict,
+        perfomance_header: dict,
+        date_from: str,
+        date_to: str,
+    ) -> dict:
+        """
+        Отчёт по заказам в продвижении в поиске
+        """
+        method = "/api/client/statistic/orders/generate/json"
+        payload = json.dumps(
+            {"from": f"{date_from}T00:00:00Z", "to": f"{date_to}T00:00:00Z"}
+        )
+        return self.get_proxy_auth_post_request(
+            header, perfomance_header, self.main_url + method, payload
+        )
+
+    def check_report_status(
+        self,
+        header: dict,
+        perfomance_header: dict,
+        report_uuid: str,
+    ) -> dict:
+        """
+        Проверить статус формирования отчета
+        """
+        method = f"/api/client/statistics/{report_uuid}"
+
+        return self.get_proxy_auth_get_request(
+            header, perfomance_header, self.main_url + method
+        )
+
+    def get_report(
+        self,
+        header: dict,
+        perfomance_header: dict,
+        report_uuid: str,
+    ) -> dict:
+        """
+        Получить отчёты
+        """
+        method = f"/api/client/statistics/report?UUID={report_uuid}"
+
+        return self.get_proxy_auth_get_request(
+            header, perfomance_header, self.main_url + method
+        )
+
 
 class OzonPriceComissionApiRequest(OzonTemplatesRequest):
 
@@ -670,6 +723,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
         date_from: str,
         date_to: str,
         data_list: list = None,
+        posting_number: str = "",
         limit: int = 1000,
         page: int = 1,
     ) -> list:
@@ -682,7 +736,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
                         "from": f"{date_from}T00:00:00.000Z",
                         "to": f"{date_to}T00:00:00.000Z",
                     },
-                    "operation_type": [],
+                    "posting_number": posting_number,
                     "transaction_type": "all",
                 },
                 "page": page,
@@ -710,8 +764,12 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
                 return data_list
 
     def finance_transaction_list(
-        self, header: dict, date_from: str, date_to: str
-    ) -> list:
+        self,
+        header: dict,
+        date_from: str,
+        date_to: str,
+        posting_number: str = "",
+    ) -> list[dict]:
         """
         Возвращает подробную информацию по всем начислениям.
         Максимальный период, за который можно получить информацию
@@ -723,6 +781,7 @@ class OzonReportsApiRequest(OzonTemplatesRequest):
             header=header,
             date_from=date_from,
             date_to=date_to,
+            posting_number=posting_number,
         )
 
 

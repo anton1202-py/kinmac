@@ -197,12 +197,15 @@ def wb_article_price_stock_app_data() -> None:
     articles_data = Articles.objects.all()
 
     for article_obj in articles_data:
+        seller_discount = 0
+        price_without_seller_discount = 0
+        spp = None
+        price_with_seller_discount = None
+        price_on_page = None
+        total_quantity = None
         if article_obj in spp_page_price_data:
             price_on_page = spp_page_price_data[article_obj]["sale_price_u"]
             total_quantity = spp_page_price_data[article_obj]["total_quantity"]
-        else:
-            price_on_page = 0
-            total_quantity = 0
 
         if article_obj in price_discount_data:
             seller_discount = price_discount_data[article_obj]["discount"]
@@ -212,12 +215,8 @@ def wb_article_price_stock_app_data() -> None:
             price_with_seller_discount = price_discount_data[article_obj][
                 "seller_price_with_discount"
             ]
-        else:
-            seller_discount = 0
-            price_without_seller_discount = 0
-            price_with_seller_discount = 0
-        spp = 0
-        if price_with_seller_discount != 0:
+
+        if total_quantity and price_on_page and price_with_seller_discount:
             spp = int(
                 (
                     1
@@ -229,20 +228,20 @@ def wb_article_price_stock_app_data() -> None:
                 )
                 * 100
             )
-        defaults = {
-            "common_stock": total_quantity,
-            "price_in_page": price_on_page,
-            "price_after_seller_disc": price_with_seller_discount,
-            "price_before_seller_disc": price_without_seller_discount,
-            "seller_disc": seller_discount,
-            "spp": spp,
-        }
-        ArticlePriceStock.objects.update_or_create(
-            article=article_obj,
-            marketplace=Marketplace.objects.get(name="Wildberries"),
-            date=datetime.now().date(),
-            defaults=defaults,
-        )
+            defaults = {
+                "common_stock": total_quantity,
+                "price_in_page": price_on_page,
+                "price_after_seller_disc": price_with_seller_discount,
+                "price_before_seller_disc": price_without_seller_discount,
+                "seller_disc": seller_discount,
+                "spp": spp,
+            }
+            ArticlePriceStock.objects.update_or_create(
+                article=article_obj,
+                marketplace=Marketplace.objects.get(name="Wildberries"),
+                date=datetime.now().date(),
+                defaults=defaults,
+            )
 
 
 def split_list(input_list, chunk_size):
@@ -272,6 +271,23 @@ def ozon_update_article_date() -> None:
 
         for product in products_info:
             if product["sources"]:
+                try:
+                    marketing_price = float(product["marketing_price"])
+                except Exception:
+                    marketing_price = 0
+                try:
+                    min_price = float(product["min_price"])
+                except Exception:
+                    min_price = 0
+                try:
+                    old_price = float(product["old_price"])
+                except Exception:
+                    old_price = 0
+                try:
+                    price = float(product["price"])
+                except Exception:
+                    price = 0
+
                 fbo_comission = None
                 fbs_comission = None
                 for data in product["commissions"]:
@@ -294,10 +310,10 @@ def ozon_update_article_date() -> None:
                         ],
                         type_id=product["type_id"],
                         images=product["images"],
-                        marketing_price=product["marketing_price"],
-                        min_price=product["min_price"],
-                        old_price=product["old_price"],
-                        price=product["price"],
+                        marketing_price=marketing_price,
+                        min_price=min_price,
+                        old_price=old_price,
+                        price=price,
                         volume_weight=product["volume_weight"],
                         fbo_comission=fbo_comission,
                         fbs_comission=fbs_comission,
@@ -315,10 +331,10 @@ def ozon_update_article_date() -> None:
                         ],
                         type_id=product["type_id"],
                         images=product["images"],
-                        marketing_price=product["marketing_price"],
-                        min_price=product["min_price"],
-                        old_price=product["old_price"],
-                        price=product["price"],
+                        marketing_price=marketing_price,
+                        min_price=min_price,
+                        old_price=old_price,
+                        price=price,
                         volume_weight=product["volume_weight"],
                         fbo_comission=fbo_comission,
                         fbs_comission=fbs_comission,
@@ -331,7 +347,7 @@ def ozon_update_article_date() -> None:
             ).first()
             if product:
                 # Обновляем атрибуты
-                product.heigh = attribute.get("height", 0) / 10
+                product.height = attribute.get("height", 0) / 10
                 product.depth = attribute.get("depth", 0) / 10
                 product.width = attribute.get("width", 0) / 10
                 product.weight = attribute.get("weight", 0) / 1000
@@ -342,7 +358,7 @@ def ozon_update_article_date() -> None:
             with transaction.atomic():
                 OzonProduct.objects.bulk_update(
                     ozon_products_to_update,
-                    ["heigh", "depth", "width", "weight"],
+                    ["height", "depth", "width", "weight"],
                 )
 
 
@@ -481,7 +497,10 @@ def ozon_get_transactions_info():
             date_to=date_to,
         )
         handler.transaction_handler(
-            company=company, transactions_info=transactions_info
+            company=company,
+            transactions_info=transactions_info,
+            date_from=date_from,
+            date_to=date_to,
         )
 
 
