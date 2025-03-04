@@ -37,26 +37,26 @@ class OzonMarketplaceArticlesData:
         self.weeks_amount = weeks_amount
 
     def only_sales_data(self):
-        end_date = datetime.now() - timedelta(days=1)
+        end_date = datetime.now() - timedelta(days=9)
         start_date = end_date - timedelta(weeks=self.weeks_amount)
         response_dict = {}
         sales_dict = {}
         operation_list = ["orders", "returns"]
-        sale_data = (
-            OzonTransaction.objects.filter(
-                company=Company.objects.filter(name="KINMAC").first(),
-                article__description_category_id__in=OZON_CATEGORY_LIST,
-                operation_date__gte=start_date,
-                operation_date__lte=end_date,
-                type__in=operation_list,
-            )
-            .order_by("article__seller_article")
-            .values("article__seller_article")
-            .annotate(
-                sales_amount=Count("accruals_for_sale"),
-                sales_sum=Sum("accruals_for_sale"),
-            )
-        )
+        # sale_data = (
+        #     OzonTransaction.objects.filter(
+        #         company=Company.objects.filter(name="KINMAC").first(),
+        #         article__description_category_id__in=OZON_CATEGORY_LIST,
+        #         operation_date__date__gte=start_date.date(),
+        #         operation_date__date__lte=end_date.date(),
+        #         type__in=operation_list,
+        #     )
+        #     .order_by("article__seller_article")
+        #     .values("article__seller_article")
+        #     .annotate(
+        #         sales_amount=Count("accruals_for_sale"),
+        #         sales_sum=Sum("accruals_for_sale"),
+        #     )
+        # )
 
         sale_data = (
             OzonTransaction.objects.filter(
@@ -102,6 +102,11 @@ class OzonMarketplaceArticlesData:
                     "sales_amount": 0,
                     "sales_sum": 0,
                 }
+        sales_sum = 0
+        sales_amount = 0
+        for article, data in response_dict.items():
+            sales_sum += data["sales_sum"]
+            sales_amount += data["sales_amount"]
         return response_dict
 
     def common_article_data(self):
