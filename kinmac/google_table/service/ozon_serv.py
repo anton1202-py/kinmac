@@ -172,9 +172,7 @@ class OzonMarketplaceArticlesData:
     def advert_data(self):
         """Расход на рекламу"""
         end_date = (datetime.now() - timedelta(days=9)).date()
-        start_date = (
-            end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
-        )
+        start_date = end_date - timedelta(weeks=self.weeks_amount)
         adv_dict = {}
         adv_data = (
             OzonArticleDailyCostToAdv.objects.filter(
@@ -202,10 +200,6 @@ class OzonMarketplaceArticlesData:
                     else 0
                 ),
             }
-        adv_sum = 0
-        for art, cost in response_dict.items():
-            adv_sum += cost["adv_cost_sum"]
-        print(adv_sum)
         return response_dict
 
     def logistic_storage_cost(self):
