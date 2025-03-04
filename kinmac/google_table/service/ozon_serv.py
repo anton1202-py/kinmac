@@ -172,7 +172,9 @@ class OzonMarketplaceArticlesData:
     def advert_data(self):
         """Расход на рекламу"""
         end_date = (datetime.now() - timedelta(days=9)).date()
-        start_date = end_date - timedelta(weeks=self.weeks_amount)
+        start_date = (
+            end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
+        )
         adv_dict = {}
         adv_data = (
             OzonArticleDailyCostToAdv.objects.filter(
