@@ -37,6 +37,7 @@ from .models import (
     Marketplace,
     MarketplaceCategory,
     MarketplaceChoices,
+    OzonArticleStorageCost,
     OzonProduct,
     Platform,
     StorageCost,
@@ -511,19 +512,30 @@ def ozon_storage_cost():
     req = OzonFrontApiRequests()
     handler = OzonFrontDataHandler()
     companies = Company.objects.filter(ozon_cookie_token__isnull=False)
+    last_date = OzonArticleStorageCost.objects.order_by("date").last().date
 
-    for company in companies:
-        check_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    if last_date != datetime.now().date():
+        delta_time = (datetime.now().date() - last_date).days
 
-        common_cost_info: dict = req.daily_storage_cost(
-            front_header=company.ozon_cookie_header, check_date=check_date
-        )
+        for i in range(delta_time):
 
-        if common_cost_info:
-            cost_info = common_cost_info.get("items")
-            handler.storage_cost_to_db(
-                company=company, cost_info=cost_info, cost_date=check_date
-            )
+            for company in companies:
+                check_date = (datetime.now() - timedelta(days=i)).strftime(
+                    "%Y-%m-%d"
+                )
+
+                common_cost_info: dict = req.daily_storage_cost(
+                    front_header=company.ozon_cookie_header,
+                    check_date=check_date,
+                )
+
+                if common_cost_info:
+                    cost_info = common_cost_info.get("items")
+                    handler.storage_cost_to_db(
+                        company=company,
+                        cost_info=cost_info,
+                        cost_date=check_date,
+                    )
 
 
 @app.task

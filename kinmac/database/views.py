@@ -11,6 +11,10 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
+from database.periodic_tasks import (
+    ozon_price_with_ozon_card,
+    ozon_storage_cost,
+)
 from .forms import (
     ArticlesForm,
     LoginUserForm,

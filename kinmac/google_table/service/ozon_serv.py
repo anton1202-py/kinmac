@@ -38,7 +38,9 @@ class OzonMarketplaceArticlesData:
 
     def only_sales_data(self):
         end_date = datetime.now() - timedelta(days=9)
-        start_date = end_date - timedelta(weeks=self.weeks_amount)
+        start_date = (
+            end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
+        )
         response_dict = {}
         sales_dict = {}
         operation_list = ["orders", "returns"]
@@ -62,8 +64,8 @@ class OzonMarketplaceArticlesData:
             OzonTransaction.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
                 article__description_category_id__in=OZON_CATEGORY_LIST,
-                operation_date__gte=start_date,
-                operation_date__lte=end_date,
+                operation_date__date__gte=start_date.date(),
+                operation_date__date__lte=end_date.date(),
             )
             .exclude(accruals_for_sale=0)
             .order_by("article__seller_article")
@@ -171,7 +173,7 @@ class OzonMarketplaceArticlesData:
 
     def advert_data(self):
         """Расход на рекламу"""
-        end_date = (datetime.now() - timedelta(days=9)).date()
+        end_date = datetime.now() - timedelta(days=9)
         start_date = (
             end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
         )
@@ -179,8 +181,8 @@ class OzonMarketplaceArticlesData:
         adv_data = (
             OzonArticleDailyCostToAdv.objects.filter(
                 article__description_category_id__in=OZON_CATEGORY_LIST,
-                cost_date__gte=start_date,
-                cost_date__lte=end_date,
+                cost_date__gte=start_date.date(),
+                cost_date__lte=end_date.date(),
             )
             .order_by("article__seller_article")
             .values("article__seller_article")
@@ -202,6 +204,10 @@ class OzonMarketplaceArticlesData:
                     else 0
                 ),
             }
+        adv_common_sum = 0
+        for art, data in response_dict.items():
+            adv_common_sum += data["adv_cost_sum"]
+
         return response_dict
 
     def logistic_storage_cost(self):
@@ -210,7 +216,9 @@ class OzonMarketplaceArticlesData:
         """
         end_date = datetime.now() - timedelta(days=9)
         # Дата начала периода (начало num_weeks назад)
-        start_date = end_date - timedelta(weeks=self.weeks_amount)
+        start_date = (
+            end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
+        )
 
         storage_cost = {}
 
@@ -219,8 +227,8 @@ class OzonMarketplaceArticlesData:
         storage_data = (
             OzonArticleStorageCost.objects.filter(
                 company=Company.objects.filter(name="KINMAC").first(),
-                date__gte=start_date,
-                date__lte=end_date,
+                date__gte=start_date.date(),
+                date__lte=end_date.date(),
                 article__description_category_id__in=OZON_CATEGORY_LIST,
             )
             .order_by("article__seller_article")
@@ -232,6 +240,10 @@ class OzonMarketplaceArticlesData:
             storage_cost[data["article__seller_article"]] = round(
                 data["storage_cost"], 2
             )
+        stor_cost = 0
+        for art, data in storage_cost.items():
+            stor_cost += data
+        print(stor_cost)
         filtered_transactions = (
             (
                 (
