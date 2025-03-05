@@ -8,21 +8,40 @@ from api_requests.wb_requests import (
     take_excel_file_data_in_auto_actions,
     wb_action_info_from_front,
 )
-from action.models import ArticleForAction
+from action.models import Action, ArticleForAction
 from database.models import Articles
-from kinmac.constants_file import wb_header_with_lk_cookie
+from kinmac.constants_file import (
+    event_bot,
+    actions_info_users_list,
+    TELEGRAM_ADMIN_CHAT_ID,
+)
 
 
-def add_article_may_be_in_action(article_action_data, action_obj):
+def add_article_may_be_in_action(article_action_data, action_obj: Action):
     """Описывает артикулы, которые могут быть в акции"""
     if article_action_data:
         for_create_list = []
+        if not ArticleForAction.objects.filter(action=action_obj).first():
+            message = f"Появились условия для акции ВБ: {action_obj.name}"
+            for chat_id in actions_info_users_list:
+                try:
+                    if chat_id:
+                        event_bot.send_message(chat_id=chat_id, text=message)
+                except Exception as e:
+                    text = (
+                        f"не удалось отправить сообщение с чатом id: "
+                        f"{chat_id}. Ошибка: {e}"
+                    )
+                    event_bot.send_message(
+                        chat_id=TELEGRAM_ADMIN_CHAT_ID, text=text
+                    )
         for data in article_action_data:
             if Articles.objects.filter(nomenclatura_wb=data["id"]).exists():
                 article_obj = Articles.objects.get(nomenclatura_wb=data["id"])
                 if ArticleForAction.objects.filter(
                     action=action_obj, article=article_obj
                 ).exists():
+
                     ArticleForAction.objects.filter(
                         action=action_obj, article=article_obj
                     ).update(
@@ -47,7 +66,9 @@ def add_article_may_be_in_action(article_action_data, action_obj):
 def get_excel_data_from_front(wb_cookie_header, action_number, action_period):
     """Получаем данные из Excel файла с фронта ВБ"""
     # Запускаем формирование Excel файла с ценами на артикул.
-    create_excel_file_with_article_in_auto_actions(wb_cookie_header, action_period)
+    create_excel_file_with_article_in_auto_actions(
+        wb_cookie_header, action_period
+    )
     # Получаем зашифрованный excel файл
     excel_data = take_excel_file_data_in_auto_actions(
         wb_cookie_header, action_number, action_period
@@ -73,7 +94,9 @@ def get_excel_data_from_front(wb_cookie_header, action_number, action_period):
         current_price_without_discount_list = excel_data[
             "Текущая розничная цена"
         ].to_list()
-        current_discount_list = excel_data["Текущая скидка на сайте, %"].to_list()
+        current_discount_list = excel_data[
+            "Текущая скидка на сайте, %"
+        ].to_list()
         action_discount_list = excel_data[
             "Загружаемая скидка для участия в акции"
         ].to_list()
@@ -86,17 +109,21 @@ def get_excel_data_from_front(wb_cookie_header, action_number, action_period):
                 # article_obj = Articles.objects.filter(
                 #     nomenclatura_wbe=article).first()
                 action_price = action_price_list[i]
-                current_seller_price = current_price_without_discount_list[i] * (
-                    1 - current_discount_list[i] / 100
-                )
+                current_seller_price = current_price_without_discount_list[
+                    i
+                ] * (1 - current_discount_list[i] / 100)
                 action_discount = (
-                    (current_seller_price - action_price) / current_seller_price * 100
+                    (current_seller_price - action_price)
+                    / current_seller_price
+                    * 100
                 )
                 action_discount_from_wb = action_discount_list[i]
                 articles_action_data.append(
                     {
                         "id": article,
-                        "inAction": True if in_action_list[i] == "Да" else False,
+                        "inAction": (
+                            True if in_action_list[i] == "Да" else False
+                        ),
                         "planPrice": action_price_list[i],
                         "price": current_price_without_discount_list[i],
                         "discount": current_discount_list[i],
@@ -114,7 +141,9 @@ def action_data_from_front(wb_cookie_header):
     date_from = (datetime.now() - timedelta(days=15)).strftime("%Y-%m-%d")
     date_to = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
     returned_dict = {}
-    action_data = wb_action_info_from_front(wb_cookie_header, date_from, date_to)
+    action_data = wb_action_info_from_front(
+        wb_cookie_header, date_from, date_to
+    )
     if action_data:
         for data in action_data["data"]:
             returned_dict[data["actionID"]] = data["periodID"]

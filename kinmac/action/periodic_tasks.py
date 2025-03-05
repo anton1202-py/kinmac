@@ -16,6 +16,11 @@ from api_requests.ozon_requests import ActionRequest
 from action.service.ozon_serv import OzonActionHandler
 
 from database.models import Company, Marketplace
+from kinmac.constants_file import (
+    event_bot,
+    actions_info_users_list,
+    TELEGRAM_ADMIN_CHAT_ID,
+)
 
 
 @app.task
@@ -28,6 +33,29 @@ def add_new_actions_wb_to_db():
         if actions_data:
             actions_info = actions_data["data"]["promotions"]
             for action in actions_info:
+                if not Action.objects.filter(
+                    company=company, action_number=action["id"]
+                ).exists():
+                    message = (
+                        f"Появилась новая акция ВБ: "
+                        f"{action['id']}: {action['name']}.\n"
+                        f"Дата начала: {datetime.strptime(action['startDateTime'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d')}.\n"
+                        f"Дата завершения {datetime.strptime(action['endDateTime'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d')}."
+                    )
+                    for chat_id in actions_info_users_list:
+                        try:
+                            if chat_id:
+                                event_bot.send_message(
+                                    chat_id=chat_id, text=message
+                                )
+                        except Exception as e:
+                            text = (
+                                f"не удалось отправить сообщение с чатом id: "
+                                f"{chat_id}. Текстом {message}. Ошибка: {e}"
+                            )
+                            event_bot.send_message(
+                                chat_id=TELEGRAM_ADMIN_CHAT_ID, text=text
+                            )
                 actions_not_exist_str += f"promotionIDs={action['id']}&"
         if actions_not_exist_str:
             # Получаем детальную информацию по новым акциям
