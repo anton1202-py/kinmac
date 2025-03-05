@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
-from django.db.models import Count, Sum, Q, Case, When, IntegerField
+from django.db.models import Sum, Q, Case, When, IntegerField
 from database.models import (
     Company,
     OzonArticleStorageCost,
@@ -37,28 +37,12 @@ class OzonMarketplaceArticlesData:
         self.weeks_amount = weeks_amount
 
     def only_sales_data(self):
-        end_date = datetime.now() - timedelta(days=9)
+        end_date = datetime.now() - timedelta(days=1)
         start_date = (
             end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
         )
         response_dict = {}
         sales_dict = {}
-        operation_list = ["orders", "returns"]
-        # sale_data = (
-        #     OzonTransaction.objects.filter(
-        #         company=Company.objects.filter(name="KINMAC").first(),
-        #         article__description_category_id__in=OZON_CATEGORY_LIST,
-        #         operation_date__date__gte=start_date.date(),
-        #         operation_date__date__lte=end_date.date(),
-        #         type__in=operation_list,
-        #     )
-        #     .order_by("article__seller_article")
-        #     .values("article__seller_article")
-        #     .annotate(
-        #         sales_amount=Count("accruals_for_sale"),
-        #         sales_sum=Sum("accruals_for_sale"),
-        #     )
-        # )
 
         sale_data = (
             OzonTransaction.objects.filter(
@@ -173,7 +157,7 @@ class OzonMarketplaceArticlesData:
 
     def advert_data(self):
         """Расход на рекламу"""
-        end_date = datetime.now() - timedelta(days=9)
+        end_date = datetime.now() - timedelta(days=1)
         start_date = (
             end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
         )
@@ -214,7 +198,7 @@ class OzonMarketplaceArticlesData:
         """
         Входящие данные - количество недель за которые нужно отдать данные
         """
-        end_date = datetime.now() - timedelta(days=9)
+        end_date = datetime.now() - timedelta(days=1)
         # Дата начала периода (начало num_weeks назад)
         start_date = (
             end_date - timedelta(weeks=self.weeks_amount) + timedelta(days=1)
@@ -250,7 +234,6 @@ class OzonMarketplaceArticlesData:
                     OzonTransaction.objects.filter(
                         operation_date__gte=start_date,
                         operation_date__lte=end_date,
-                        # article__seller_article__in=art_list,
                         article__description_category_id__in=OZON_CATEGORY_LIST,
                     ).order_by("article__seller_article")
                 )
