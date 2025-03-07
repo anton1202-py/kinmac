@@ -35,6 +35,8 @@ from .models import (
 def database_home(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
+    # ozon_storage_cost()
+    # ozon_price_with_ozon_card()
     data = Articles.objects.filter(brand__in=BRAND_LIST)
     context = {
         "data": data,
