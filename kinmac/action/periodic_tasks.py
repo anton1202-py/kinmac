@@ -46,7 +46,7 @@ def add_new_actions_wb_to_db():
                         try:
                             if chat_id:
                                 event_bot.send_message(
-                                    chat_id=chat_id, text=message
+                                    chat_id=int(chat_id), text=message
                                 )
                         except Exception as e:
                             text = (

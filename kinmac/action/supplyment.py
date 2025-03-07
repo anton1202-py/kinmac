@@ -26,7 +26,9 @@ def add_article_may_be_in_action(article_action_data, action_obj: Action):
             for chat_id in actions_info_users_list:
                 try:
                     if chat_id:
-                        event_bot.send_message(chat_id=chat_id, text=message)
+                        event_bot.send_message(
+                            chat_id=int(chat_id), text=message
+                        )
                 except Exception as e:
                     text = (
                         f"не удалось отправить сообщение с чатом id: "
