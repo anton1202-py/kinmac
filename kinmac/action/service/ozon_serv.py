@@ -42,9 +42,9 @@ class OzonActionHandler:
                 if created:
                     message = (
                         f"Появилась новая акция Озон: "
-                        f"{action_info["id"]}: {action_info["title"]}.\n"
-                        f"Дата начала: {action_info["date_start"]}.\n"
-                        f"Дата завершения {action_info["date_end"]}."
+                        f"{action_info['id']}: {action_info['title']}.\n"
+                        f"Дата начала: {action_info['date_start']}.\n"
+                        f"Дата завершения {action_info['date_end']}."
                     )
                     for chat_id in actions_info_users_list:
                         try:
@@ -86,10 +86,10 @@ class OzonActionHandler:
                 if created:
                     message = (
                         f"Появилась новая акция Озон Hotsale: "
-                        f"{action_info["hotsale_id"]}: "
-                        f"{action_info["title"]}.\n"
-                        f"Дата начала: {action_info["date_start"]}.\n"
-                        f"Дата завершения {action_info["date_end"]}."
+                        f"{action_info['hotsale_id']}: "
+                        f"{action_info['title']}.\n"
+                        f"Дата начала: {action_info['date_start']}.\n"
+                        f"Дата завершения {action_info['date_end']}."
                     )
                     for chat_id in actions_info_users_list:
                         try:
