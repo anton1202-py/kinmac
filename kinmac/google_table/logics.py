@@ -79,7 +79,7 @@ class WbMarketplaceArticlesData:
         stock_data = ArticlePriceStock.objects.filter(
             marketplace=Marketplace.objects.get(name="Wildberries"),
             article__brand__in=BRAND_LIST,
-        ).order_by("article__common_article")
+        ).order_by("article__common_article", "date")
         response_dict = {}
         for data in stock_data:
             response_dict[data.article.common_article] = {
