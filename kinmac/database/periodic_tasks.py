@@ -15,11 +15,17 @@ from api_requests.ozon_requests import (
     OzonReportsApiRequest,
     OzonSalesRequest,
 )
-from kinmac.constants_file import wb_headers
+from kinmac.constants_file import (
+    wb_headers,
+    BRAND_LIST,
+    bot,
+    TELEGRAM_ADMIN_CHAT_ID,
+)
 from database.supplyment import (
     OzonSalesDataSave,
     get_article_commot_stock_from_front,
     get_price_info_from_ofissial_api,
+    last_seller_discount_wb,
 )
 from database.service.ozon_service import (
     OzonFrontDataHandler,
@@ -196,7 +202,9 @@ def wb_article_price_stock_app_data() -> None:
     price_discount_data = get_price_info_from_ofissial_api()
 
     articles_data = Articles.objects.all()
-
+    # Список артикулов у которых изменилась скидка продавца и стала больше 20%
+    sender_list = {"articles_list": [], "discount": 0}
+    articles_discount = last_seller_discount_wb()
     for article_obj in articles_data:
         seller_discount = 0
         price_without_seller_discount = 0
@@ -210,6 +218,16 @@ def wb_article_price_stock_app_data() -> None:
 
         if article_obj in price_discount_data:
             seller_discount = price_discount_data[article_obj]["discount"]
+            if article_obj in articles_discount:
+                if (
+                    seller_discount > 20
+                    and seller_discount > articles_discount[article_obj]
+                ):
+                    if article_obj.brand in BRAND_LIST:
+                        sender_list["articles_list"].append(
+                            article_obj.common_article
+                        )
+                        sender_list["discount"] = seller_discount
             price_without_seller_discount = price_discount_data[article_obj][
                 "price_without_discount"
             ]
@@ -243,6 +261,14 @@ def wb_article_price_stock_app_data() -> None:
                 date=datetime.now().date(),
                 defaults=defaults,
             )
+    if sender_list["articles_list"]:
+        message = (
+            f"Скидка продавца стала {sender_list['discount']} "
+            f"у артикулов {sender_list['articles_list']} "
+        )
+        bot.send_message(
+            chat_id=TELEGRAM_ADMIN_CHAT_ID, text=str(message)[:4000]
+        )
 
 
 def split_list(input_list, chunk_size):

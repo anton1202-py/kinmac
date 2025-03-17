@@ -11,10 +11,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from kinmac.constants_file import BRAND_LIST
-from database.periodic_tasks import (
-    ozon_price_with_ozon_card,
-    ozon_storage_cost,
-)
+
 from .forms import (
     ArticlesForm,
     LoginUserForm,
@@ -35,8 +32,6 @@ from .models import (
 def database_home(request):
     if str(request.user) == "AnonymousUser":
         return redirect("login")
-    # ozon_storage_cost()
-    # ozon_price_with_ozon_card()
     data = Articles.objects.filter(brand__in=BRAND_LIST)
     context = {
         "data": data,

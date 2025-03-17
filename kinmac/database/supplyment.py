@@ -4,9 +4,11 @@ from api_requests.wb_requests import (
     get_stock_from_webpage_api,
     wb_price_discount_info,
 )
+from django.db.models import Max
 from kinmac.constants_file import wb_headers
 
 from .models import (
+    ArticlePriceStock,
     Articles,
     ArticlesRealizationReportOzon,
     Company,
@@ -83,7 +85,6 @@ def add_data_stock_from_web_api(data):
     """
     Записывает данные по остаткам взятые из неофициального АПИ в базу данных
     """
-    control_date_stock = date.today() - timedelta(days=1)
     if StocksSite.objects.filter(
         pub_date=data["pub_date"],
         nomenclatura_wb=data["nomenclatura_wb"],
@@ -608,3 +609,23 @@ class OzonSalesDataSave:
                 ),
             },
         )
+
+
+def last_seller_discount_wb() -> dict:
+    """
+    Возвращает словарь типа
+    {article.id: seller_discount}
+    """
+    latest_articles = ArticlePriceStock.objects.values("article__id").annotate(
+        latest_date=Max("date")
+    )
+
+    # Теперь получаем seller_disc для каждой записи с самой свежей датой
+    result = {}
+    for article in latest_articles:
+        latest_record = ArticlePriceStock.objects.filter(
+            article__id=article["article__id"], date=article["latest_date"]
+        ).first()  # Берем только первую запись, если их несколько
+        result[latest_record.article] = latest_record.seller_disc
+
+    return result
