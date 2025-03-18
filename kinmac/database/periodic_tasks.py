@@ -20,6 +20,8 @@ from kinmac.constants_file import (
     BRAND_LIST,
     bot,
     TELEGRAM_ADMIN_CHAT_ID,
+    event_bot,
+    actions_info_users_list,
 )
 from database.supplyment import (
     OzonSalesDataSave,
@@ -263,12 +265,11 @@ def wb_article_price_stock_app_data() -> None:
             )
     if sender_list["articles_list"]:
         message = (
-            f"Скидка продавца стала {sender_list['discount']} "
+            f"Скидка продавца стала {sender_list['discount']}% "
             f"у артикулов {sender_list['articles_list']} "
         )
-        bot.send_message(
-            chat_id=TELEGRAM_ADMIN_CHAT_ID, text=str(message)[:4000]
-        )
+        for chat_id in actions_info_users_list:
+            event_bot.send_message(chat_id=chat_id, text=str(message)[:4000])
 
 
 def split_list(input_list, chunk_size):
