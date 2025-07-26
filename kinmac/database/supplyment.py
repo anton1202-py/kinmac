@@ -411,22 +411,28 @@ def get_article_commot_stock_from_front() -> dict:
             helper += str(i.nomenclatura_wb) + ";"
 
         data = get_stock_from_webpage_api(str(helper))
-        main_data = data["data"]["products"]
+        main_data = data["products"]
         for i, j in enumerate(main_data):
-            if "priceU" in j:
-                price_u = int(j["priceU"]) / 100
-                sale_price_u = int(j["salePriceU"]) / 100
-                total_quantity = j["totalQuantity"]
+            # price_u = 0
+            # sale_price_u = 0
+            # total_quantity = 0
+            if "sizes" in j:
+                if len(j["sizes"]) and "price" in j["sizes"][0]:
+                    price_u = int(j["sizes"][0]["price"]["basic"]) // 100
+                    sale_price_u = (
+                        int(j["sizes"][0]["price"]["product"]) // 100
+                    )
+                    total_quantity = j["totalQuantity"]
 
-                article_obj = Articles.objects.filter(
-                    nomenclatura_wb=j["id"]
-                ).first()
-                if price_u and sale_price_u and total_quantity:
-                    returned_dict[article_obj] = {
-                        "price_u": price_u,
-                        "sale_price_u": sale_price_u,
-                        "total_quantity": total_quantity,
-                    }
+                    article_obj = Articles.objects.filter(
+                        nomenclatura_wb=j["id"]
+                    ).first()
+                    if price_u and sale_price_u and total_quantity:
+                        returned_dict[article_obj] = {
+                            "price_u": price_u,
+                            "sale_price_u": sale_price_u,
+                            "total_quantity": total_quantity,
+                        }
     return returned_dict
 
 

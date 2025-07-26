@@ -103,7 +103,8 @@ def get_stock_from_webpage_api(nom_id):
     Остатки товаров на складах WB. Из неофициального АПИ
     """
     url = (
-        f"https://card.wb.ru/cards/detail?appType=0&dest=-2133464&nm={nom_id}"
+        f"https://card.wb.ru/cards"
+        f"/v4/detail?appType=0&dest=-2133464&nm={nom_id}"
     )
     response = requests.get(url)
     return json.loads(response.text)
